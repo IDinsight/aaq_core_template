@@ -1,0 +1,5 @@
+PG_PORT : 5432
+PG_DATABASE : praekeltmcpytestdb
+PG_USERNAME: flask
+MODEL_PORT : 9902
+MODEL_PROTOCOL : http

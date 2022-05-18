@@ -1,0 +1,3 @@
+google_news_pretrained:
+  filename: GoogleNews-vectors-negative300-prenorm.bin
+  folder: pretrained_wv_models

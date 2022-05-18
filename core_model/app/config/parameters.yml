@@ -1,0 +1,14 @@
+preprocessing:
+  min_dashed_words_to_parse_text_from_url: 4
+  scoring_function_args:
+    k: 10
+    floor: 1
+  reincluded_stop_words:
+    - how
+    - what
+    - who
+    - in
+    - where
+    - can
+faq_match:
+  n_top_matches: 3
