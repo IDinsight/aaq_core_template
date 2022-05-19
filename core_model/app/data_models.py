@@ -10,8 +10,7 @@ class Inbound(db.Model):
     SQLAlchemy data model for Inbound API calls (with model and return metadata)
     """
 
-    __table_args__ = {"schema": "mc"}
-    __tablename__ = "praekelt_idinsight_mcfaq_inbounds"
+    __tablename__ = "inbounds"
 
     inbound_id = db.Column(db.Integer(), primary_key=True)
     feedback_secret_key = db.Column(db.String())
@@ -35,8 +34,7 @@ class FAQModel(db.Model):
     SQLAlchemy data model for FAQ
     """
 
-    __table_args__ = {"schema": "mc"}
-    __tablename__ = "praekelt_idinsight_mcfaq_faqmatches"
+    __tablename__ = "faqmatches"
 
     faq_id = db.Column(db.Integer, primary_key=True)
     faq_added_utc = db.Column(db.DateTime())

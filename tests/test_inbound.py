@@ -7,7 +7,7 @@ from sqlalchemy import text
 class TestInboundMessage:
 
     insert_faq = (
-        "INSERT INTO mc.praekelt_idinsight_mcfaq_faqmatches ("
+        "INSERT INTO faqmatches ("
         "faq_tags, faq_author, faq_title, faq_content_to_send, "
         "faq_added_utc, faq_thresholds) "
         "VALUES (:faq_tags, :author, :title, :content, :added_utc, :threshold)"
@@ -42,10 +42,7 @@ class TestInboundMessage:
         client.get("/internal/refresh-faqs", headers=headers)
         yield
         with db_engine.connect() as db_connection:
-            t = text(
-                "DELETE FROM mc.praekelt_idinsight_mcfaq_faqmatches "
-                "WHERE faq_author='Pytest author'"
-            )
+            t = text("DELETE FROM faqmatches " "WHERE faq_author='Pytest author'")
             db_connection.execute(t)
         client.get("/internal/refresh-faqs", headers=headers)
 
@@ -79,7 +76,7 @@ class TestInboundMessage:
 @pytest.mark.slow
 class TestInboundFeedback:
     insert_inbound = (
-        "INSERT INTO mc.praekelt_idinsight_mcfaq_inbounds ("
+        "INSERT INTO inbounds ("
         "inbound_text, feedback_secret_key, inbound_metadata, "
         "inbound_utc, model_scoring, returned_content, returned_utc) "
         "VALUES ('i am 12. Can i get the vaccine?', :secret_key, :metadata, :utc, :score, :content, :r_utc)"
@@ -101,15 +98,13 @@ class TestInboundFeedback:
 
         yield
         with db_engine.connect() as db_connection:
-            t = text("DELETE FROM mc.praekelt_idinsight_mcfaq_inbounds")
+            t = text("DELETE FROM inbounds")
             db_connection.execute(t)
 
     @pytest.fixture(scope="class")
     def inbound_id(self, inbounds, db_engine):
         with db_engine.connect() as db_connection:
-            get_inbound_id_sql = text(
-                "SELECT MAX(inbound_id) FROM mc.praekelt_idinsight_mcfaq_inbounds"
-            )
+            get_inbound_id_sql = text("SELECT MAX(inbound_id) FROM inbounds")
             results = db_connection.execute(get_inbound_id_sql)
             inbound_id = next(results)["max"]
 

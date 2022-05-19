@@ -6,7 +6,7 @@ import yaml
 from sqlalchemy import text
 
 insert_faq = (
-    "INSERT INTO mc.praekelt_idinsight_mcfaq_faqmatches ("
+    "INSERT INTO faqmatches ("
     "faq_tags, faq_author, faq_title, faq_content_to_send, "
     "faq_added_utc, faq_thresholds) "
     "VALUES (:faq_tags, :faq_author, :faq_title, :faq_content_to_send, "
@@ -41,10 +41,7 @@ def load_faq_data(client, db_engine, sample_faq_data):
             )
     yield
     with db_engine.connect() as db_connection:
-        t = text(
-            "DELETE FROM mc.praekelt_idinsight_mcfaq_faqmatches "
-            "WHERE faq_author='Pytest refresh'"
-        )
+        t = text("DELETE FROM faqmatches " "WHERE faq_author='Pytest refresh'")
         db_connection.execute(t)
     client.get("/internal/refresh-faqs", headers=headers)
 

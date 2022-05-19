@@ -45,7 +45,7 @@ def healthcheck():
 
     engine = sa.create_engine(current_app.config["SQLALCHEMY_DATABASE_URI"])
     insp = sa.inspect(engine)
-    if not insp.has_table("praekelt_idinsight_mcfaq_inbounds", schema="mc"):
+    if not insp.has_table("inbounds"):
         return "Inbounds table doesn't exist", 500
 
     return "Healthy - all checks complete", 200

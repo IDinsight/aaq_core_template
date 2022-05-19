@@ -1,11 +1,9 @@
-# DESCRIPTION: Dockerfile for praekelt_nlp_core (model core)
+# DESCRIPTION: Dockerfile for  
 # BUILD: "make image" or "make image NAME={PROJECT_NAME} PORT={PORT}"
 
 FROM praekeltfoundation/python-base:3.9.6
 LABEL maintainer="IDinsight"
-LABEL org.opencontainers.image.source="https://github.com/IDinsight/praekelt_mc_core"
 
-ARG TOKEN_MACHINE_USER
 ARG NAME
 ARG PORT
 ARG TOKEN_MACHINE_USER

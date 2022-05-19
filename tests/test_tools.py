@@ -1,8 +1,5 @@
 import os
 
-import pytest
-from sqlalchemy import text
-
 
 class TestNewTagTool:
     def test_check_new_tags(self, client):

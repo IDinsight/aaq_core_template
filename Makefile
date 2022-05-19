@@ -1,13 +1,12 @@
 #!make
 
-$(eval NAME=praekelt_mc_core)
+# Load project config
+include ./project_config.cfg
+export
+
+$(eval NAME=$(PROJECT_NAME))
 $(eval PORT=9902)
 $(eval VERSION=dev)
-
-$(eval TEST_SET_FILENAME="01_preprocessed/mturk_pilot_labeled.csv")
-$(eval FAQ_FILENAME="00_raw/faqs_pilot_20210505.csv")
-$(eval TEST_SET_TRUE_LABEL_COLUMN_NAME="true_topic")
-$(eval TEST_SET_QUERY_COLUMN_NAME="answer")
 
 # Need to specify bash in order for conda activate to work.
 SHELL=/bin/bash
@@ -23,9 +22,6 @@ SENTRY_CONFIG = SENTRY_DSN SENTRY_ENVIRONMENT SENTRY_TRACES_SAMPLE_RATE
 
 PGPASSFILE = .pgpass
 
-# Load project config
-include ./project_config.cfg
-export
 
 # Load db details
 ifneq (,./secrets/database_secrets.env)
@@ -33,6 +29,8 @@ ifneq (,./secrets/database_secrets.env)
     export
 endif
 
+sample:
+	echo $(NAME)
 
 cmd-exists-%:
 	@hash $(*) > /dev/null 2>&1 || \
@@ -41,11 +39,15 @@ guard-%:
 	@if [ -z '${${*}}' ]; then echo 'ERROR: environment variable $* not set' && exit 1; fi
 
 
+setup-db-all: setup-db init-db-tables
+
+setup-dev: setup-local setup-secrets
+	
 setup-db: cmd-exists-psql cmd-exists-createdb guard-PG_ENDPOINT guard-PG_PORT guard-PG_USERNAME guard-PG_PASSWORD guard-PG_DATABASE
 	echo "Creating Role: $(PG_USERNAME)"
-	#@psql -U postgres -h $(PG_ENDPOINT) -c "CREATE ROLE $(PG_USERNAME) WITH CREATEDB LOGIN PASSWORD '$(PG_PASSWORD)';"
+	@psql -U postgres -h $(PG_ENDPOINT) -c "CREATE ROLE $(PG_USERNAME) WITH CREATEDB LOGIN PASSWORD '$(PG_PASSWORD)';"
 	echo "Creating Role: $(PG_USERNAME)_test"
-	#@psql -U postgres -h $(PG_ENDPOINT) -c "CREATE ROLE $(PG_USERNAME)_test WITH CREATEDB LOGIN PASSWORD '$(PG_PASSWORD)';"
+	@psql -U postgres -h $(PG_ENDPOINT) -c "CREATE ROLE $(PG_USERNAME)_test WITH CREATEDB LOGIN PASSWORD '$(PG_PASSWORD)';"
 	@echo $(PG_ENDPOINT):$(PG_PORT):*:$(PG_USERNAME):$(PG_PASSWORD) > .pgpass
 	@echo $(PG_ENDPOINT):$(PG_PORT):*:$(PG_USERNAME)_test:$(PG_PASSWORD) >> .pgpass
 	@chmod 0600 .pgpass
@@ -60,14 +62,15 @@ setup-db: cmd-exists-psql cmd-exists-createdb guard-PG_ENDPOINT guard-PG_PORT gu
 	@rm .pgpass
 
 # Setup postgres tables
-init-db-dev: cmd-exists-psql guard-PG_ENDPOINT guard-PG_PORT guard-PG_USERNAME guard-PG_PASSWORD guard-PG_DATABASE
+init-db-tables: cmd-exists-psql guard-PG_ENDPOINT guard-PG_PORT guard-PG_USERNAME guard-PG_PASSWORD guard-PG_DATABASE
 	@echo $(PG_ENDPOINT):$(PG_PORT):$(PG_DATABASE):$(PG_USERNAME):$(PG_PASSWORD) > .pgpass
+	@echo $(PG_ENDPOINT):$(PG_PORT):$(PG_DATABASE)-test:$(PG_USERNAME)_test:$(PG_PASSWORD) > .pgpass
 	@chmod 0600 .pgpass
-	@psql -h $(PG_ENDPOINT) -U $(PG_USERNAME) -d $(PG_DATABASE) -a -c "SELECT current_schema();"
-	@psql -h $(PG_ENDPOINT) -U $(PG_USERNAME) -d $(PG_DATABASE) -a -f ./scripts/core_tables.sql #./scripts/core_tables.sql
+	@psql -h $(PG_ENDPOINT) -U $(PG_USERNAME) -d $(PG_DATABASE) -a -f ./scripts/core_tables.sql 
+	@psql -h $(PG_ENDPOINT) -U $(PG_USERNAME)_test -d $(PG_DATABASE)-test -a -f ./scripts/core_tables.sql 
 	@rm .pgpass
 
-setup-dev: guard-PROJECT_CONDA_ENV cmd-exists-conda
+setup-env: guard-PROJECT_CONDA_ENV cmd-exists-conda
 	conda create --name $(PROJECT_CONDA_ENV) python==3.9 -y
 	$(CONDA_ACTIVATE) $(PROJECT_CONDA_ENV); pip install --upgrade pip
 	$(CONDA_ACTIVATE) $(PROJECT_CONDA_ENV); pip install -r requirements.txt --ignore-installed 
@@ -101,10 +104,6 @@ test:
 
 test-all:
 	pytest tests
-
-validate:
-	python3 validation/wrapper.py $(TEST_SET_FILENAME) $(FAQ_FILENAME) \
-		$(TEST_SET_TRUE_LABEL_COLUMN_NAME) $(TEST_SET_QUERY_COLUMN_NAME)
 
 image:
 	# Build docker image
