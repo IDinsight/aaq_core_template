@@ -17,11 +17,30 @@ This module is the core application that receives inbound messages in json, matc
 
 ### Copy this code
 
-Clone or fork this repository. If you clone this, please setup a new repository for future commits and add this repository as another remote - possibly called `upstream`. This will allow you to pull in new changes made to this template.
+Clone or fork this repository.
+
+If you clone this, please setup a new repository for future commits and add this repository as another remote - possibly called `template`. This will allow you to pull in new changes made to this template.
+
+1. Clone this repo
+```
+git clone git@github.com:IDinsight/aaq_core_template.git <project_name>
+```
+
+2. Change remote name to `template`
+```
+git remote rename origin Template
+```
+
+3. Create a new new repo in Github
+4. Add it as remote for local repo
+
+```
+git remote add origin git@github.com:IDinsight/<project_name>.git
+```
 
 ### Configure project details
 
-The `project_config.cfg` in the root directory should be updated with your project details
+The `project_config.cfg` in the root directory should be updated with your project details.
 
 ### Initialise
 
@@ -44,7 +63,7 @@ This command does the following:
 
 You should edit each of the files in `./secrets` and set the correct parameters.
 
--   `database_secrets.env` is the most important one to complete right now as these details will be used to create tables in the next step. You can set whatever username and password you prefer. These details will be used to create the role.
+-   `database_secrets.env` is the most important one to complete right now as these details will be used to create tables in the next step. You can set whatever username (usually `flask`) and password you prefer. These details will be used to create the role. 
 
 -   `tests/config.yaml` should also be updated. This file is used by `pytest` and is required to run tests locally.
 
@@ -79,8 +98,8 @@ Copy (or symlink) the pre-trained Google News model to `data/pretrained_wv_model
 1. Setup `coveralls`
 2. Setup auto deployment on EC2 (using webhooks or other)
 3. Update this file!
-  1. Remove irrelevant content (all the template text)
-  1. Update the badges at the top of this file
+  - Remove irrelevant content (all the template text)
+  - Update the badges at the top of this file
 6. Setup application monitoring
 7. Setup other apps as necessary,
 

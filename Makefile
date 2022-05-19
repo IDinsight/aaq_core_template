@@ -25,7 +25,7 @@ PGPASSFILE = .pgpass
 
 # Load db details
 ifneq (,./secrets/database_secrets.env)
-    include ./secrets/database_secrets.env
+    -include ./secrets/database_secrets.env
     export
 endif
 
@@ -44,18 +44,18 @@ setup-db-all: setup-db init-db-tables
 setup-dev: setup-local setup-secrets
 	
 setup-db: cmd-exists-psql cmd-exists-createdb guard-PG_ENDPOINT guard-PG_PORT guard-PG_USERNAME guard-PG_PASSWORD guard-PG_DATABASE
-	echo "Creating Role: $(PG_USERNAME)"
+	@echo "Creating Role: $(PG_USERNAME)"
 	@psql -U postgres -h $(PG_ENDPOINT) -c "CREATE ROLE $(PG_USERNAME) WITH CREATEDB LOGIN PASSWORD '$(PG_PASSWORD)';"
-	echo "Creating Role: $(PG_USERNAME)_test"
+	@echo "Creating Role: $(PG_USERNAME)_test"
 	@psql -U postgres -h $(PG_ENDPOINT) -c "CREATE ROLE $(PG_USERNAME)_test WITH CREATEDB LOGIN PASSWORD '$(PG_PASSWORD)';"
 	@echo $(PG_ENDPOINT):$(PG_PORT):*:$(PG_USERNAME):$(PG_PASSWORD) > .pgpass
 	@echo $(PG_ENDPOINT):$(PG_PORT):*:$(PG_USERNAME)_test:$(PG_PASSWORD) >> .pgpass
 	@chmod 0600 .pgpass
-	echo "Creating Db: $(PG_DATABASE)"
+	@echo "Creating Db: $(PG_DATABASE)"
 	@createdb -h $(PG_ENDPOINT) -p $(PG_PORT) -U $(PG_USERNAME) -O $(PG_USERNAME) $(PG_DATABASE)
 	@psql -h $(PG_ENDPOINT) -p $(PG_PORT) -U $(PG_USERNAME) -d $(PG_DATABASE) \
 		-c "CREATE SCHEMA $(PROJECT_SHORT_NAME) AUTHORIZATION $(PG_USERNAME); ALTER ROLE $(PG_USERNAME) SET search_path TO $(PROJECT_SHORT_NAME);"
-	echo "Creating Db: $(PG_DATABASE)-test"
+	@echo "Creating Db: $(PG_DATABASE)-test"
 	@createdb -h $(PG_ENDPOINT) -p $(PG_PORT) -U $(PG_USERNAME)_test -O $(PG_USERNAME)_test $(PG_DATABASE)-test
 	@psql -h $(PG_ENDPOINT) -p $(PG_PORT) -U $(PG_USERNAME)_test -d $(PG_DATABASE)-test \
 		-c "CREATE SCHEMA $(PROJECT_SHORT_NAME) AUTHORIZATION $(PG_USERNAME)_test; ALTER ROLE $(PG_USERNAME)_test SET search_path TO $(PROJECT_SHORT_NAME);"
@@ -64,7 +64,7 @@ setup-db: cmd-exists-psql cmd-exists-createdb guard-PG_ENDPOINT guard-PG_PORT gu
 # Setup postgres tables
 init-db-tables: cmd-exists-psql guard-PG_ENDPOINT guard-PG_PORT guard-PG_USERNAME guard-PG_PASSWORD guard-PG_DATABASE
 	@echo $(PG_ENDPOINT):$(PG_PORT):$(PG_DATABASE):$(PG_USERNAME):$(PG_PASSWORD) > .pgpass
-	@echo $(PG_ENDPOINT):$(PG_PORT):$(PG_DATABASE)-test:$(PG_USERNAME)_test:$(PG_PASSWORD) > .pgpass
+	@echo $(PG_ENDPOINT):$(PG_PORT):$(PG_DATABASE)-test:$(PG_USERNAME)_test:$(PG_PASSWORD) >> .pgpass
 	@chmod 0600 .pgpass
 	@psql -h $(PG_ENDPOINT) -U $(PG_USERNAME) -d $(PG_DATABASE) -a -f ./scripts/core_tables.sql 
 	@psql -h $(PG_ENDPOINT) -U $(PG_USERNAME)_test -d $(PG_DATABASE)-test -a -f ./scripts/core_tables.sql 
