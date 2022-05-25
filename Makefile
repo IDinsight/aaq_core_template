@@ -29,9 +29,6 @@ ifneq (,./secrets/database_secrets.env)
     export
 endif
 
-sample:
-	echo $(NAME)
-
 cmd-exists-%:
 	@hash $(*) > /dev/null 2>&1 || \
 		(echo "ERROR: '$(*)' must be installed and available on your PATH."; exit 1)
@@ -41,7 +38,7 @@ guard-%:
 
 setup-db-all: setup-db init-db-tables
 
-setup-dev: setup-local setup-secrets
+setup-dev: setup-env setup-secrets
 	
 setup-db: cmd-exists-psql cmd-exists-createdb guard-PG_ENDPOINT guard-PG_PORT guard-PG_USERNAME guard-PG_PASSWORD guard-PG_DATABASE
 	@echo "Creating Role: $(PG_USERNAME)"
@@ -107,8 +104,6 @@ test-all:
 
 image:
 	# Build docker image
-	# Note that these files are copied in at build time
-
 	cp ./requirements.txt ./core_model/requirements.txt
 
 	@docker build --rm \
