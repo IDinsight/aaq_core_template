@@ -1,9 +1,9 @@
 [![Coverage Status](https://coveralls.io/repos/github/IDinsight/[your-project]/badge.svg?t=[code])](https://coveralls.io/github/IDinsight/[your-project])
 ![Unit Tests](https://github.com/IDinsight/[your-project]/actions/workflows/validation-test.yml/badge.svg)
 
-# Ask A Question (AAQ) Template Repository
+# Ask A Question (AAQ) Core Template Repository
 
-This is the readme for the AAQ Template repository. To start development on a new AAQ solution, cloning or forking this and follow the setup instructions below.
+This is the readme for the AAQ Template Core App repository. To start development on a new AAQ solution, clone or fork this and follow the setup instructions below.
 
 Ensure to pull in new features from this repository regularly.
 
@@ -19,7 +19,7 @@ This module is the core application that receives inbound messages in json, matc
 
 Clone or fork this repository.
 
-If you clone this, please setup a new repository for future commits and add this repository as another remote - possibly called `template`. This will allow you to pull in new changes made to this template.
+If you clone this, please setup a new repository for future commits and add this repository as another remote -  called `template`. This will allow you to pull in new changes made to this template. Here are the instructions on how to do this:
 
 1. Clone this repo
 ```
@@ -28,10 +28,10 @@ git clone git@github.com:IDinsight/aaq_core_template.git <project_name>
 
 2. Change remote name to `template`
 ```
-git remote rename origin Template
+git remote rename origin template
 ```
 
-3. Create a new new repo in Github
+3. Create a [new repo](https://github.com/organizations/IDinsight/repositories/new) in Github
 4. Add it as remote for local repo
 
 ```
@@ -63,7 +63,7 @@ This command does the following:
 
 You should edit each of the files in `./secrets` and set the correct parameters.
 
--   `database_secrets.env` is the most important one to complete right now as these details will be used to create tables in the next step. You can set whatever username (usually `flask`) and password you prefer. These details will be used to create the role. 
+-   `database_secrets.env` is the most important one to complete right now as these details will be used to create tables in the next step. You can set whatever username (usually `flask`) and password you prefer. These details will be used to create the role.
 
 -   `tests/config.yaml` should also be updated. This file is used by `pytest` and is required to run tests locally.
 
