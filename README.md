@@ -37,6 +37,11 @@ git remote rename origin template
 ```
 git remote add origin git@github.com:IDinsight/<project_name>.git
 ```
+5. Set local to track that remote
+
+```
+git push -u origin main
+```
 
 ### Configure project details
 
