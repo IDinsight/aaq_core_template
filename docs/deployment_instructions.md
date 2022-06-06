@@ -12,12 +12,12 @@ This is the deployment instructions for the **AAQ Core App**. It does not cover 
 1. Save GoogleNews pretrained model binary, to be mounted onto the containers. Download from https://www.dropbox.com/s/0ah0kslf7ac199g/GoogleNews-vectors-negative300-prenorm.bin?dl=0, and un-zip (so file is ``.bin`).
     - You could also have this `.bin` in S3, so that whenever cluster instances are launched, they copy from S3 and then mount into the container.
 
-2. Setup DB tables using the attached script `setup_mc_core_db_tables.sql`.
+2. Setup DB tables using `scripts/core_tables.sql`.
 
 # Images
 
 The Docker image for the core model server is hosted on GHCR at
-`ghcr.io/idinsight/praekelt_mc_core:v1.0.0`
+`ghcr.io/idinsight/aaq_core_template:v1.0.0`
 
 You'll need a token to access the image. Please contact IDinsight for this token.
 
@@ -46,13 +46,13 @@ The following environment variables are required:
 - `INBOUND_CHECK_TOKEN`: Bearer token. Requests to `/inbound/check` and `/auth-healthcheck` must be authenticated with this bearer token in the header. We recommended an alphanumeric string of your choice.
 - `DEPLOYMENT_ENV`
     - For production, this should be set to `DEPLOYMENT_ENV=PRODUCTION`. This disables the **tag check** and **tag validation** endpoints for stability.
-    - Note that other admin apps (`praekelt_mc_demo` and `praekelt_mc_dbui`) depend on **tag check** and **tag validation** endpoints. Thus, the admin apps should always point to a non-production instance of the core AAQ model app.
+    - Note that the admin app (based on `aaq_admin_template`) depends on **tag check** and **tag validation** endpoints. Thus, the admin app should always point to a non-production instance of the core AAQ model app.
 - `ENABLE_FAQ_REFRESH_CRON`: Only set to "true" if you'd like to run a cron job within the containers to periodically refresh FAQs.
 - `PROMETHEUS_MULTIPROC_DIR`: Directory to save prometheus metrics collected by multiple processes. It should be a directory that is cleared regularly (e.g. `/tmp`)
 
 ### Jobs
 
-* Setup job in kubernetes to call `/internal/refresh-faqs` everyday
+* Setup job in kubernetes to call `/internal/refresh-faqs` every day. (You may want to set `ENABLE_FAQ_REFRESH_CRON=false`.)
 
 # Monitoring
 You can configure your existing Prometheus server, UptimeRobot, and Grafana as follows to monitor the core app. See the diagram at the top to see how the different components interact with each other.
