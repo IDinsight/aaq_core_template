@@ -11,6 +11,7 @@ from ..data_models import TemporaryModel
 from ..prometheus_metrics import metrics
 from . import main
 from .auth import auth
+from ..src import utils
 
 
 def active_only_non_prod(func):
@@ -75,7 +76,14 @@ def check_new_tags():
 
     for query_to_check in req_json["queries_to_check"]:
         processed_message = current_app.text_preprocessor(query_to_check)
-        matches, scoring, _ = current_app.faqt_model.score(processed_message)
+
+        word_vector_scores, spell_corrected = current_app.faqt_model.score(
+            processed_message
+        )
+
+        scoring = utils.get_faq_scores_for_message(
+            processed_message, current_app.faqs, word_vector_scores
+        )
 
         matched_faq_titles = set()
         top_matches = []
