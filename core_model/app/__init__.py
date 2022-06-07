@@ -120,7 +120,7 @@ def create_faqt_model():
         tags_guiding_typos=tags_guiding_typos,
         n_top_matches=n_top_matches,
         scoring_function=cs_nearest_k_percent_average,
-        **scoring_function_args,
+        scoring_function_args=scoring_function_args,
     )
 
 
