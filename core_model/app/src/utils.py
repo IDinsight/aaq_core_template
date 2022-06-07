@@ -223,7 +223,7 @@ def get_faq_scores_for_message(inbound_vectors, faqs, scores):
     """
 
     scoring = {}
-    for faq in faqs:
+    for faq, faq_score in zip(faqs, scores):
         scoring[faq.faq_id] = {}
         scoring[faq.faq_id]["faq_title"] = faq.faq_title
         scoring[faq.faq_id]["faq_content_to_send"] = faq.faq_content_to_send
