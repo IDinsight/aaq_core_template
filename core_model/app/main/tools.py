@@ -68,7 +68,7 @@ def check_new_tags():
     original_faqs = current_app.faqs
     with_temp_faqs = original_faqs + [temp_faq]
 
-    current_app.faqt_model.set_tags(with_temp_faqs)
+    current_app.faqt_model.set_tags([faq.faq_tags for faq in with_temp_faqs])
 
     json_return = {}
     json_return["top_matches_for_each_query"] = []
@@ -98,7 +98,7 @@ def check_new_tags():
 
         json_return["top_matches_for_each_query"].append(top_matches)
 
-    current_app.faqt_model.set_tags(original_faqs)
+    current_app.faqt_model.set_tags([faq.faq_tags for faq in original_faqs])
 
     # Flask automatically calls jsonify
     return json_return
