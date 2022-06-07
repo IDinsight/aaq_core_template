@@ -13,7 +13,7 @@ from ..database_sqlalchemy import db
 from ..prometheus_metrics import metrics
 from . import main
 from .auth import auth
-from .src import utils
+from ..src import utils
 
 
 @main.route("/inbound/check", methods=["POST"])
