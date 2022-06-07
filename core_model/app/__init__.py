@@ -4,7 +4,7 @@ Create and initialise the app. Uses Blueprints to define view.
 import os
 from functools import partial
 
-from faqt.model import FAQScorer
+from faqt.model import KeyedVectorsScorer
 from faqt.preprocessing import preprocess_text_for_word_embedding
 from faqt.scoring_functions import cs_nearest_k_percent_average
 from flask import Flask
@@ -113,7 +113,7 @@ def create_faqt_model():
     scoring_function_args = pp_params["scoring_function_args"]
     n_top_matches = faqs_params["n_top_matches"]
 
-    return FAQScorer(
+    return KeyedVectorsScorer(
         w2v_model,
         glossary=custom_wvs,
         hunspell=hunspell,
@@ -159,6 +159,6 @@ def refresh_faqs(app):
         faqs = FAQModel.query.all()
     faqs.sort(key=lambda x: x.faq_id)
     app.faqs = faqs
-    app.faqt_model.set_tags(faqs)
+    app.faqt_model.set_tags([faq.faq_tags for faq in faqs])
 
     return len(faqs)

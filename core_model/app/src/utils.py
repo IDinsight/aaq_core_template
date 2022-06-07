@@ -8,6 +8,7 @@ from pathlib import Path
 import pandas as pd
 import yaml
 from gensim.models import KeyedVectors
+import numpy as np
 
 
 def load_wv_pretrained_bin(folder, filename):
@@ -202,3 +203,63 @@ class DefaultEnvDict(UserDict):
         if value is None:
             raise KeyError(f"{key} not found in dict or environment variables")
         return os.getenv(key)
+
+
+def get_faq_scores_for_message(inbound_vectors, faqs, scores):
+    """
+    Returns scores for the inbound vectors against each faq
+    Parameters
+    ----------
+    inbound_vectors: List[Array]
+        List of inbound tokens as word vectors
+    faqs: List[FAQ]
+        A list of faq-like objects. Each FAQ object must contain word vectors for
+        each tags as a dictionary under `FAQ.tags_wvs`
+    Returns
+    -------
+    Dict[int, Dict]
+        A Dictionary with `faq_id` as key. Values: faq details including scores
+        for each tag and an `overall_score`
+    """
+
+    scoring = {}
+    for faq in faqs:
+        scoring[faq.faq_id] = {}
+        scoring[faq.faq_id]["faq_title"] = faq.faq_title
+        scoring[faq.faq_id]["faq_content_to_send"] = faq.faq_content_to_send
+        scoring[faq.faq_id]["tag_cs"] = scores
+
+        cs_values = list(scoring[faq.faq_id]["tag_cs"].values())
+        scoring[faq.faq_id]["overall_score"] = (min(cs_values) + np.mean(cs_values)) / 2
+
+    return scoring
+
+
+def get_top_n_matches(scoring, n_top_matches):
+    """
+    Gives a list of scores for each FAQ, return the top `n_top_matches` FAQs
+    Parameters
+    ----------
+    scoring: Dict[int, Dict]
+        Dict with faq_id as key and faq details and scores as values.
+        See return value of `get_faq_scores_for_message`.
+    n_top_matches: int
+        the number of top matches to return
+    Returns
+    -------
+    List[Tuple(int, str)]
+        A list of tuples of (faq_id, faq_content_to_send)._
+    """
+    matched_faq_titles = set()
+    # Sort and copy over top matches
+    top_matches_list = []
+    for id in sorted(scoring, key=lambda x: scoring[x]["overall_score"], reverse=True):
+        if scoring[id]["faq_title"] not in matched_faq_titles:
+            top_matches_list.append(
+                (scoring[id]["faq_title"], scoring[id]["faq_content_to_send"])
+            )
+            matched_faq_titles.add(scoring[id]["faq_title"])
+
+        if len(matched_faq_titles) == n_top_matches:
+            break
+    return top_matches_list

@@ -13,6 +13,7 @@ from ..database_sqlalchemy import db
 from ..prometheus_metrics import metrics
 from . import main
 from .auth import auth
+from .src import utils
 
 
 @main.route("/inbound/check", methods=["POST"])
@@ -63,8 +64,16 @@ def inbound_check():
 
     processed_message = current_app.text_preprocessor(incoming["text_to_match"])
 
-    top_matches_list, scoring_output, spell_corrected = current_app.faqt_model.score(
+    word_vector_scores, spell_corrected = current_app.faqt_model.score(
         processed_message
+    )
+
+    scoring_output = utils.get_faq_scores_for_message(
+        processed_message, current_app.faqs, word_vector_scores
+    )
+
+    top_matches_list = utils.get_top_n_matches(
+        scoring_output, current_app.faqt_model.n_top_matches
     )
 
     # Convert scoring to have string values (to save in DB as JSON)
