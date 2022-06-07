@@ -227,7 +227,9 @@ def get_faq_scores_for_message(inbound_vectors, faqs, scores):
         scoring[faq.faq_id] = {}
         scoring[faq.faq_id]["faq_title"] = faq.faq_title
         scoring[faq.faq_id]["faq_content_to_send"] = faq.faq_content_to_send
-        scoring[faq.faq_id]["tag_cs"] = scores
+        scoring[faq.faq_id]["tag_cs"] = faq_score
+
+        print(scoring[faq.faq_id]["tag_cs"])
 
         cs_values = list(scoring[faq.faq_id]["tag_cs"].values())
         scoring[faq.faq_id]["overall_score"] = (min(cs_values) + np.mean(cs_values)) / 2
