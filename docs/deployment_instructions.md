@@ -3,7 +3,7 @@ June 2, 2022
 CURRENT VERSION: aaq_core_template:v1.0.0
 # Deploying the AAQ Core App
 
-This is the deployment instructions for the **AAQ Core App**. It does not cover deployment of the admin app.
+This is the deployment instructions for the **AAQ Core App**. It does not cover deployment of the Admin app (from `aaq_admin_template`) or the UD app (`aaq_ud_template`).
 
 ![image](images/app_template-Architecture_core.png)
 
