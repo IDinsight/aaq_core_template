@@ -27,7 +27,7 @@ jobs:
           nltk.download('punkt')
           EOF`
           python -c "$nltkdownload"
-          pip install git+https://${{ secrets.TOKEN_MACHINE_USER }}@github.com/IDinsight/faqt.git
+          pip install git+https://${{ secrets.TOKEN_MACHINE_USER }}@github.com/IDinsight/faqt.git@v0.1.0
       - name: Configure AWS credentials
         id: creds
         uses: aws-actions/configure-aws-credentials@v1

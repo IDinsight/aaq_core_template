@@ -1,4 +1,4 @@
-[![Coverage Status](https://coveralls.io/repos/github/IDinsight/[your-project]/badge.svg?t=[code])](https://coveralls.io/github/IDinsight/[your-project])
+![Coverage Status](https://coveralls.io/repos/github/IDinsight/[your-project]/badge.svg?t=[code])](https://coveralls.io/github/IDinsight/[your-project])
 ![Unit Tests](https://github.com/IDinsight/[your-project]/actions/workflows/validation-test.yml/badge.svg)
 
 # Ask A Question (AAQ) Core Template Repository
@@ -19,14 +19,16 @@ This module is the core application that receives inbound messages in json, matc
 
 Clone or fork this repository.
 
-If you clone this, please setup a new repository for future commits and add this repository as another remote -  called `template`. This will allow you to pull in new changes made to this template. Here are the instructions on how to do this:
+If you clone this, please setup a new repository for future commits and add this repository as another remote - called `template`. This will allow you to pull in new changes made to this template. Here are the instructions on how to do this:
 
 1. Clone this repo
+
 ```
 git clone git@github.com:IDinsight/aaq_core_template.git <project_name>
 ```
 
-2. Change remote name to `template`
+2. Switch to <project_name> folder and change remote name to `template`
+
 ```
 git remote rename origin template
 ```
@@ -37,10 +39,28 @@ git remote rename origin template
 ```
 git remote add origin git@github.com:IDinsight/<project_name>.git
 ```
+
 5. Set local to track that remote
 
 ```
 git push -u origin main
+```
+
+6. You may also wish to [set your environment variables](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#setting-environment-variables) for the conda environment. This will allow you to run and test locally. Here are the variables you should set
+
+```
+export PG_ENDPOINT=
+export PG_PORT=
+export PG_DATABASE=
+export PG_USERNAME=
+export PG_PASSWORD=
+
+export INBOUND_CHECK_TOKEN=Jgu7tjQpEYzAU5KniPSegN1nRPqtpM
+
+export FAQ_READONLY_PASSWORD=
+export FAQ_FULLACCESS_PASSWORD=
+export TOKEN_MACHINE_USER=
+
 ```
 
 ### Configure project details
@@ -103,8 +123,10 @@ Copy (or symlink) the pre-trained Google News model to `data/pretrained_wv_model
 1. Setup `coveralls`
 2. Setup auto deployment on EC2 (using webhooks or other)
 3. Update this file!
-  - Remove irrelevant content (all the template text)
-  - Update the badges at the top of this file
+
+-   Remove irrelevant content (all the template text)
+-   Update the badges at the top of this file
+
 6. Setup application monitoring
 7. Setup other apps as necessary,
 
