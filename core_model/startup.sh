@@ -11,7 +11,7 @@
 if [[ $ENABLE_FAQ_REFRESH_CRON == "true" ]]; then
     echo "Enabling cron job for FAQ refresh"
     service cron start
-    echo '0 * * * * curl http://127.0.0.1:'$PORT'/internal/refresh-faqs -H "Authorization: Bearer '$INBOUND_CHECK_TOKEN'"\n' > cronfaqs
+    echo '*/5 * * * * curl http://127.0.0.1:'$PORT'/internal/refresh-faqs -H "Authorization: Bearer '$INBOUND_CHECK_TOKEN'"' > cronfaqs
     crontab cronfaqs
 else
     echo "Cron job not enabled within container. Set ENABLE_FAQ_REFRESH_CRON to 'true' to run"

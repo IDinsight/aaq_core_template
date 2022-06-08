@@ -1,0 +1,19 @@
+version: '3'
+services:
+  core:
+    image: 678681925278.dkr.ecr.af-south-1.amazonaws.com/aaq_solution/aaq_core_template:dev
+    ports:
+      - "9902:9902"
+    logging:
+      driver: awslogs
+      options: 
+        awslogs-group: aaq_solution
+        awslogs-region: ap-south-1
+        awslogs-stream-prefix: core
+    env_file:
+      - ../secrets/app_secrets.env
+      - ../secrets/database_secrets.env
+      - ../secrets/sentry_config.env
+    volumes:
+      - /home/ec2-user/data/GoogleNews-vectors-negative300-prenorm.bin:/usr/src/data/pretrained_wv_models/GoogleNews-vectors-negative300-prenorm.bin
+
