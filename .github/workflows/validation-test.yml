@@ -70,9 +70,15 @@ jobs:
         run: |
           coverage run -m pytest tests
           coverage lcov --include="core_model/*"
+      - name: Run Validation Tests
+        env:
+          VALIDATION_DATA_LOCATION: ${{secrets.VALIDATION_DATA_LOCATION}}
+        if: "${{env.VALIDATION_DATA_LOCATION != ''}}"
+        run: |
+          # for testing
+          python validation/commit_comparison.py ${{env.VALIDATION_DATA_LOCATION}} ${{steps.vars.outputs.branch}} ${{github.repository}}
       - name: Coveralls Test Coverage
         uses: coverallsapp/github-action@master
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           path-to-lcov: coverage.lcov
-
