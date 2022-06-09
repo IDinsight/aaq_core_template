@@ -11,6 +11,7 @@ from ..data_models import TemporaryModel
 from ..prometheus_metrics import metrics
 from . import main
 from .auth import auth
+from ..src import utils
 
 
 def active_only_non_prod(func):
@@ -68,14 +69,21 @@ def check_new_tags():
     original_faqs = current_app.faqs
     with_temp_faqs = original_faqs + [temp_faq]
 
-    current_app.faqt_model.set_tags(with_temp_faqs)
+    current_app.faqt_model.set_tags([faq.faq_tags for faq in with_temp_faqs])
 
     json_return = {}
     json_return["top_matches_for_each_query"] = []
 
     for query_to_check in req_json["queries_to_check"]:
         processed_message = current_app.text_preprocessor(query_to_check)
-        matches, scoring, _ = current_app.faqt_model.score(processed_message)
+
+        word_vector_scores, spell_corrected = current_app.faqt_model.score(
+            processed_message
+        )
+
+        scoring = utils.get_faq_scores_for_message(
+            processed_message, current_app.faqs, word_vector_scores
+        )
 
         matched_faq_titles = set()
         top_matches = []
@@ -98,7 +106,7 @@ def check_new_tags():
 
         json_return["top_matches_for_each_query"].append(top_matches)
 
-    current_app.faqt_model.set_tags(original_faqs)
+    current_app.faqt_model.set_tags([faq.faq_tags for faq in original_faqs])
 
     # Flask automatically calls jsonify
     return json_return
