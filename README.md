@@ -94,7 +94,7 @@ You should edit each of the files in `./secrets` and set the correct parameters.
 
 -   Other files should be updated before you can test the instance.
 
-#### `make setup-db-all`
+#### Run `make setup-db-all`
 
 This command does the following:
 
@@ -102,6 +102,10 @@ This command does the following:
 2. Creates the dev and test databases
 3. Creates a new schema (based on `$PROJECT_SHORT_NAME`) and sets as default
 4. Creates the tables needed for the app
+
+#### Run `make setup-ecr`
+
+This creates the ECR repository for the project to store docker images.
 
 #### Setup Github secrets
 

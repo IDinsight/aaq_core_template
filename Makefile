@@ -64,8 +64,6 @@ setup-ecr: cmd-exists-aws
 		--repository-name aaq_solution/$(NAME) \
 		--region af-south-1
 
-setup-ecs:
-
 # Setup postgres tables
 init-db-tables: cmd-exists-psql guard-PG_ENDPOINT guard-PG_PORT guard-PG_USERNAME guard-PG_PASSWORD guard-PG_DATABASE
 	@echo $(PG_ENDPOINT):$(PG_PORT):$(PG_DATABASE):$(PG_USERNAME):$(PG_PASSWORD) > .pgpass
@@ -136,7 +134,7 @@ container:
 push-image: image cmd-exists-aws
 	aws ecr --profile=praekelt-user get-login-password --region af-south-1 \
 		| docker login --username AWS --password-stdin 678681925278.dkr.ecr.af-south-1.amazonaws.com
-	docker $(NAME):$(VERSION) 57dcd 678681925278.dkr.ecr.af-south-1.amazonaws.com/aaq_solution/$(NAME):$(VERSION)
+	docker tag $(NAME):$(VERSION) 678681925278.dkr.ecr.af-south-1.amazonaws.com/aaq_solution/$(NAME):$(VERSION)
 	docker push 678681925278.dkr.ecr.af-south-1.amazonaws.com/aaq_solution/$(NAME):$(VERSION)
 
 prometheus:
