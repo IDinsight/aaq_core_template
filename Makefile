@@ -133,9 +133,9 @@ container:
 
 push-image: image cmd-exists-aws
 	aws ecr --profile=praekelt-user get-login-password --region af-south-1 \
-		| docker login --username AWS --password-stdin 678681925278.dkr.ecr.af-south-1.amazonaws.com
-	docker tag $(NAME):$(VERSION) 678681925278.dkr.ecr.af-south-1.amazonaws.com/aaq_solution/$(NAME):$(VERSION)
-	docker push 678681925278.dkr.ecr.af-south-1.amazonaws.com/aaq_solution/$(NAME):$(VERSION)
+		| docker login --username AWS --password-stdin $(AWS_ACCOUNT_ID).dkr.ecr.af-south-1.amazonaws.com
+	docker tag $(NAME):$(VERSION) $(AWS_ACCOUNT_ID).dkr.ecr.af-south-1.amazonaws.com/aaq_solution/$(NAME):$(VERSION)
+	docker push $(AWS_ACCOUNT_ID).dkr.ecr.af-south-1.amazonaws.com/aaq_solution/$(NAME):$(VERSION)
 
 prometheus:
 	@docker container ls -a --filter name=prometheus --format "{{.ID}}" | xargs -r docker stop

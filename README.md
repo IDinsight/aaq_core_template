@@ -33,7 +33,7 @@ git clone git@github.com:IDinsight/aaq_core_template.git <project_name>
 git remote rename origin template
 ```
 
-3. Create a [new repo](https://github.com/organizations/IDinsight/repositories/new) in Github
+3. Create a new repo in Github
 4. Add it as remote for local repo
 
 ```
