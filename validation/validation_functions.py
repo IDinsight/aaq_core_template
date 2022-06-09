@@ -6,7 +6,7 @@ import sys
 from datetime import datetime
 
 import pandas as pd
-from app.src.utils import (
+from core_model.app.src.utils import (
     load_custom_wvs,
     load_pairwise_entities,
     load_tags_guiding_typos,
