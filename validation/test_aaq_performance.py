@@ -215,14 +215,14 @@ class TestPerformance:
 
         prefix = self.bucket + os.environ["VALIDATION_DATA_PREFIX"]
 
-        validation_data = self.s3_handler.load_dataframe(prefix)
+        validation_data = self.s3_handler.load_dataframe_from_object(prefix)
 
         return validation_data
 
     def get_validation_faqs(self):
 
         prefix = self.bucket + os.environ["VALIDATION_FAQ_PREFIX"]
-        faq_df = self.s3_handler.load_dataframe(prefix)
+        faq_df = self.s3_handler.load_dataframe_from_object(prefix)
 
         return faq_df
 

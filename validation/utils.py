@@ -22,6 +22,10 @@ class S3_Handler:
             yaml_config = yaml_config[key]
         return yaml_config
 
+    def load_dataframe_from_object(self, key):
+
+        return self.s3.get_object(Bucket=self.bucket, Key=key)
+
     def load_dataframe(self, prefix, table=[], token1="", regex=r"."):
 
         if token1 == "":
