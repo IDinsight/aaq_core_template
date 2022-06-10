@@ -200,7 +200,7 @@ class TestPerformance:
 
     s3 = boto3.client("s3")
     s3r = boto3.resource("s3")
-    bucket = os.os.getenv("VALIDATION_BUCKET")
+    bucket = os.getenv("VALIDATION_BUCKET")
 
     s3_handler = S3_Handler(s3, s3r, bucket)
 

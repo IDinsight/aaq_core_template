@@ -1,5 +1,5 @@
 import re
-
+import json
 import yaml
 import pandas as pd
 
@@ -24,7 +24,11 @@ class S3_Handler:
 
     def load_dataframe_from_object(self, key):
 
-        return self.s3.get_object(Bucket=self.bucket, Key=key)
+        data_object = self.s3.get_object(Bucket=self.bucket, Key=key)
+
+        dataframe = pd.read_csv(data_object.get("Body"))
+
+        return dataframe
 
     def load_dataframe(self, prefix, table=[], token1="", regex=r"."):
 
