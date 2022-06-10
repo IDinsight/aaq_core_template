@@ -200,7 +200,8 @@ class TestPerformance:
 
     s3 = boto3.client("s3")
     s3r = boto3.resource("s3")
-    bucket = os.getenv("VALIDATION_BUCKET")
+    # bucket = os.getenv("VALIDATION_BUCKET")
+    bucket = "praekelt-static-resources/"
 
     s3_handler = S3_Handler(s3, s3r, bucket)
 
@@ -213,7 +214,8 @@ class TestPerformance:
 
     def get_validation_data(self):
 
-        prefix = self.bucket + os.getenv("VALIDATION_DATA_PREFIX")
+        # prefix = self.bucket + os.getenv("VALIDATION_DATA_PREFIX")
+        prefix = self.bucket + "validation_aaq/validation_khumo_labelled_aaq.csv"
 
         validation_data = self.s3_handler.load_dataframe_from_object(prefix)
 
@@ -221,8 +223,9 @@ class TestPerformance:
 
     def get_validation_faqs(self):
 
-        prefix = self.bucket + os.getenv("VALIDATION_FAQ_PREFIX")
-        print(prefix)
+        # prefix = self.bucket + os.getenv("VALIDATION_FAQ_PREFIX")
+        prefix = self.bucket + "validation_aaq/praekelt_mc_faqs.csv"
+        # print(prefix)
         faq_df = self.s3_handler.load_dataframe_from_object(prefix)
 
         return faq_df
