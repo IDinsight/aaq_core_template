@@ -60,13 +60,13 @@ jobs:
           echo "The repository is $REPOSITORY"
           echo "The environment is $ENVIRONMENT"
           echo "The branch is $BRANCH"
-      # - name: Run Unit Tests
-      #   env:
-      #     PG_ENDPOINT: ${{secrets.GA_PG_ENDPOINT}}
-      #     PG_PASSWORD: ${{secrets.GA_PG_PASSWORD}}
-      #     INBOUND_CHECK_TOKEN: ${{secrets.GA_INBOUND_CHECK_TOKEN}}
-      #     WORD2VEC_BINARY_BUCKET: ${{secrets.WORD2VEC_BINARY_BUCKET}}
-      #     PROMETHEUS_MULTIPROC_DIR: /tmp
+      - name: Run Unit Tests
+        env:
+          PG_ENDPOINT: ${{secrets.GA_PG_ENDPOINT}}
+          PG_PASSWORD: ${{secrets.GA_PG_PASSWORD}}
+          INBOUND_CHECK_TOKEN: ${{secrets.GA_INBOUND_CHECK_TOKEN}}
+          WORD2VEC_BINARY_BUCKET: ${{secrets.WORD2VEC_BINARY_BUCKET}}
+          PROMETHEUS_MULTIPROC_DIR: /tmp
       #   run: |
       #     coverage run -m pytest tests
       #     coverage lcov --include="core_model/*"
