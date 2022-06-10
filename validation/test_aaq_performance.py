@@ -265,7 +265,7 @@ class TestPerformance:
             }
             headers = {"Authorization": "Bearer %s" % os.getenv("INBOUND_CHECK_TOKEN")}
             response = client.post("/inbound/check", json=request_data, headers=headers)
-            top_faq_names = [x[0] for x in response.json()["top_responses"]]
+            top_faq_names = [x[0] for x in response.get_json()["top_responses"]]
             validation_df.loc[idx, "in_top"] = row["FAQ Name"] in top_faq_names
 
         top_k_accuracy = validation_df["in_top"].mean()
