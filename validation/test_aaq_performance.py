@@ -222,6 +222,7 @@ class TestPerformance:
     def get_validation_faqs(self):
 
         prefix = self.bucket + os.environ["VALIDATION_FAQ_PREFIX"]
+        print(prefix)
         faq_df = self.s3_handler.load_dataframe_from_object(prefix)
 
         return faq_df
