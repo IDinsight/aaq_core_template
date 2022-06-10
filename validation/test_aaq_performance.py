@@ -262,5 +262,6 @@ class TestPerformance:
             validation_df.loc[idx, "in_top"] = row["FAQ Name"] in top_faq_names
 
         top_k_accuracy = validation_df["in_top"].mean()
+        print(top_k_accuracy)
 
         return top_k_accuracy
