@@ -222,12 +222,15 @@ class TestPerformance:
     def get_validation_faqs(self):
 
         prefix = self.bucket + os.environ["VALIDATION_FAQ_PREFIX"]
-        self.faq_df = self.s3_handler.load_dataframe(prefix)
+        faq_df = self.s3_handler.load_dataframe(prefix)
 
-        return 0
+        return faq_df
 
     @pytest.fixture
     def faq_data(self, client, db_engine):
+
+        self.faq_df = self.get_validation_faqs()
+
         headers = {"Authorization": "Bearer %s" % os.getenv("INBOUND_CHECK_TOKEN")}
         with db_engine.connect() as db_connection:
             inbound_sql = text(self.insert_faq)
