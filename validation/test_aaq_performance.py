@@ -200,7 +200,7 @@ class TestPerformance:
 
     s3 = boto3.client("s3")
     s3r = boto3.resource("s3")
-    bucket = os.environ["VALIDATION_BUCKET"]
+    bucket = os.os.getenv("VALIDATION_BUCKET")
 
     s3_handler = S3_Handler(s3, s3r, bucket)
 
@@ -213,7 +213,7 @@ class TestPerformance:
 
     def get_validation_data(self):
 
-        prefix = self.bucket + os.environ["VALIDATION_DATA_PREFIX"]
+        prefix = self.bucket + os.getenv("VALIDATION_DATA_PREFIX")
 
         validation_data = self.s3_handler.load_dataframe_from_object(prefix)
 
@@ -221,7 +221,7 @@ class TestPerformance:
 
     def get_validation_faqs(self):
 
-        prefix = self.bucket + os.environ["VALIDATION_FAQ_PREFIX"]
+        prefix = self.bucket + os.getenv("VALIDATION_FAQ_PREFIX")
         print(prefix)
         faq_df = self.s3_handler.load_dataframe_from_object(prefix)
 
