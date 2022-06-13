@@ -145,7 +145,7 @@ class TestPerformance:
         client.get("/internal/refresh-faqs", headers=headers)
 
     def test_top_3_performance(self, client, faq_data, test_params):
-        validation_df = self.get_validation_data().sample(500)
+        validation_df = self.get_validation_data()
 
         with concurrent.futures.ThreadPoolExecutor() as executor:
             responses = executor.map(
