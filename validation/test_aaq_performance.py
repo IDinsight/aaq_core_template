@@ -35,6 +35,7 @@ def generate_message(result, threshold_criteria):
             commit_message=ref,
             branch=current_branch,
             repo_name=repo_name,
+            threshold_criteria=threshold_criteria,
         )
 
     message = """
