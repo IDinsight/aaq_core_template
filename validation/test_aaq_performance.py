@@ -200,8 +200,8 @@ class TestPerformance:
 
     s3 = boto3.client("s3")
     s3r = boto3.resource("s3")
-    # bucket = os.getenv("VALIDATION_BUCKET")
-    bucket = "praekelt-static-resources"
+    bucket = os.getenv("VALIDATION_BUCKET")
+    # bucket = "praekelt-static-resources"
 
     s3_handler = S3_Handler(s3, s3r, bucket)
 
@@ -214,8 +214,7 @@ class TestPerformance:
 
     def get_validation_data(self):
 
-        # prefix = self.bucket + os.getenv("VALIDATION_DATA_PREFIX")
-        prefix = "validation_aaq/validation_khumo_labelled_aaq.csv"
+        prefix = self.bucket + os.getenv("VALIDATION_DATA_PREFIX")
 
         validation_data = self.s3_handler.load_dataframe_from_object(prefix)
 
@@ -223,9 +222,8 @@ class TestPerformance:
 
     def get_validation_faqs(self):
 
-        # prefix = self.bucket + os.getenv("VALIDATION_FAQ_PREFIX")
-        prefix = "validation_aaq/praekelt_mc_faqs.csv"
-        # print(prefix)
+        prefix = self.bucket + os.getenv("VALIDATION_FAQ_PREFIX")
+
         faq_df = self.s3_handler.load_dataframe_from_object(prefix)
 
         return faq_df
@@ -256,7 +254,7 @@ class TestPerformance:
         client.get("/internal/refresh-faqs", headers=headers)
 
     def test_top_3_performance(self, client, faq_data):
-        validation_df = self.get_validation_data().sample(10)
+        validation_df = self.get_validation_data().sample(100)
 
         for idx, row in validation_df.iterrows():
             request_data = {
