@@ -88,7 +88,6 @@ jobs:
         run: |
           # for testing
           python -m pytest validation
-          # python validation/commit_comparison.py ${{env.VALIDATION_DATA_LOCATION}} ${{steps.vars.outputs.branch}} ${{github.repository}}
       # - name: Coveralls Test Coverage
       #   uses: coverallsapp/github-action@master
       #   with:

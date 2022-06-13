@@ -12,10 +12,9 @@ from sqlalchemy import text
 
 import concurrent.futures
 
-from nltk.corpus import wordnet as wn
+from nltk.corpus import stopwords
 
-print(wn.__class__)
-wn.ensure_loaded()
+stopwords.ensure_loaded()
 
 
 def generate_message(result, threshold_criteria):
