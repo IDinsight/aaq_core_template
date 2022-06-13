@@ -214,7 +214,7 @@ class TestPerformance:
 
     def get_validation_data(self):
 
-        prefix = self.bucket + os.getenv("VALIDATION_DATA_PREFIX")
+        prefix = os.getenv("VALIDATION_DATA_PREFIX")
 
         validation_data = self.s3_handler.load_dataframe_from_object(prefix)
 
@@ -222,7 +222,7 @@ class TestPerformance:
 
     def get_validation_faqs(self):
 
-        prefix = self.bucket + os.getenv("VALIDATION_FAQ_PREFIX")
+        prefix = os.getenv("VALIDATION_FAQ_PREFIX")
 
         faq_df = self.s3_handler.load_dataframe_from_object(prefix)
 
