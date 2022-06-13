@@ -108,16 +108,29 @@ class TestPerformance:
         headers = {"Authorization": "Bearer %s" % os.getenv("INBOUND_CHECK_TOKEN")}
         with db_engine.connect() as db_connection:
             inbound_sql = text(self.insert_faq)
-            for i, row in self.faq_df.iterrows():
-                db_connection.execute(
-                    inbound_sql,
-                    title=row["faq_title"],
-                    faq_tags=row["faq_tags"],
-                    added_utc="2022-04-14",
-                    author="Pytest author",
-                    content="{}",
-                    threshold="{0.1, 0.1, 0.1, 0.1}",
-                )
+            inserts = [
+                {
+                    "title": row["faq_title"],
+                    "faq_tags": row["faq_tags"],
+                    "added_utc": "2022-04-14",
+                    "author": "Pytest author",
+                    "content": "{}",
+                    "threshold": "{0.1, 0.1, 0.1, 0.1}",
+                }
+                for row in self.faq_df
+            ]
+            db_connection.execute(inbound_sql, inserts)
+            # for i, row in self.faq_df.iterrows():
+
+            #     db_connection.execute(
+            #         inbound_sql,
+            #         title=row["faq_title"],
+            #         faq_tags=row["faq_tags"],
+            #         added_utc="2022-04-14",
+            #         author="Pytest author",
+            #         content="{}",
+            #         threshold="{0.1, 0.1, 0.1, 0.1}",
+            #     )
         client.get("/internal/refresh-faqs", headers=headers)
         yield
         with db_engine.connect() as db_connection:
