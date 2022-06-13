@@ -47,7 +47,7 @@ def generate_message(result, threshold_criteria):
         -----------------------------------
 
         """.format(
-        " .\n".join(val_message)
+        val_message
     )
     return message
 
@@ -121,17 +121,6 @@ class TestPerformance:
                 for idx, row in self.faq_df.iterrows()
             ]
             db_connection.execute(inbound_sql, inserts)
-            # for i, row in self.faq_df.iterrows():
-
-            #     db_connection.execute(
-            #         inbound_sql,
-            #         title=row["faq_title"],
-            #         faq_tags=row["faq_tags"],
-            #         added_utc="2022-04-14",
-            #         author="Pytest author",
-            #         content="{}",
-            #         threshold="{0.1, 0.1, 0.1, 0.1}",
-            #     )
         client.get("/internal/refresh-faqs", headers=headers)
         yield
         with db_engine.connect() as db_connection:
@@ -142,6 +131,7 @@ class TestPerformance:
     def test_top_3_performance(self, client, faq_data, test_params):
         validation_df = self.get_validation_data().sample(100)
 
+        # TODO: use multithreading (vectorising won't help bc it's io blocked)
         for idx, row in validation_df.iterrows():
             request_data = {
                 "text_to_match": str(row["Question"]),
