@@ -116,13 +116,13 @@ class TestPerformance:
         Single request to /inbound/check
         """
         request_data = {
-            "text_to_match": str(row["Question"]),
+            "text_to_match": str(row[test_params["QUERY_COL"]]),
             "return_scoring": "true",
         }
         headers = {"Authorization": "Bearer %s" % os.getenv("INBOUND_CHECK_TOKEN")}
         response = client.post("/inbound/check", json=request_data, headers=headers)
         top_faq_names = [x[0] for x in response.get_json()["top_responses"]]
-        return row["FAQ Name"] in top_faq_names
+        return row[test_params["TRUE_FAQ_COL"]] in top_faq_names
 
     @pytest.fixture
     def faq_data(self, client, db_engine):
