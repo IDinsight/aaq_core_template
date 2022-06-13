@@ -256,7 +256,7 @@ class TestPerformance:
         client.get("/internal/refresh-faqs", headers=headers)
 
     def test_top_3_performance(self, client, faq_data):
-        validation_df = self.get_validation_data()
+        validation_df = self.get_validation_data().sample(10)
 
         for idx, row in validation_df.iterrows():
             request_data = {
