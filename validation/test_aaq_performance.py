@@ -14,6 +14,7 @@ import concurrent.futures
 
 from nltk.corpus import stopwords
 
+# This is required to allow multithreading to work
 stopwords.ensure_loaded()
 
 
@@ -89,6 +90,9 @@ class TestPerformance:
     )
 
     def get_validation_data(self):
+        """
+        Download validation data from s3
+        """
 
         prefix = os.getenv("VALIDATION_DATA_PREFIX")
 
@@ -97,6 +101,9 @@ class TestPerformance:
         return validation_data
 
     def get_validation_faqs(self):
+        """
+        Download faq data from s3
+        """
 
         prefix = os.getenv("VALIDATION_FAQ_PREFIX")
 
@@ -105,6 +112,9 @@ class TestPerformance:
         return faq_df
 
     def submit_one_inbound(self, row, client, faq_data, test_params):
+        """
+        Single request to /inbound/check
+        """
         request_data = {
             "text_to_match": str(row["Question"]),
             "return_scoring": "true",
@@ -133,6 +143,7 @@ class TestPerformance:
                 }
                 for idx, row in self.faq_df.iterrows()
             ]
+            # We do a bulk insert to be more efficient
             db_connection.execute(inbound_sql, inserts)
         client.get("/internal/refresh-faqs", headers=headers)
         yield
@@ -141,9 +152,13 @@ class TestPerformance:
             db_connection.execute(t)
         client.get("/internal/refresh-faqs", headers=headers)
 
-    def test_top_3_performance(self, client, faq_data, test_params):
+    def test_top_k_performance(self, client, faq_data, test_params):
+        """
+        Test if top k faqs contain the true FAQ
+        """
         validation_df = self.get_validation_data()
 
+        # we use multithreading. this is I/O bound and very inefficient if we loop
         with concurrent.futures.ThreadPoolExecutor() as executor:
             responses = executor.map(
                 lambda x: self.submit_one_inbound(x, client, faq_data, test_params),
