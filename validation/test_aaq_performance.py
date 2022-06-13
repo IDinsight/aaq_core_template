@@ -155,7 +155,7 @@ class TestPerformance:
         #     validation_df.loc[idx, "in_top"] = row["FAQ Name"] in top_faq_names
         with concurrent.futures.ThreadPoolExecutor() as executor:
             responses = executor.map(
-                lambda x: self.submit_one_inbound(x),
+                lambda x: self.submit_one_inbound(x, client, faq_data, test_params),
                 [row for idx, row in validation_df.iterrows()],
             )
 
