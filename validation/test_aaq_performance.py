@@ -117,7 +117,7 @@ class TestPerformance:
                     "content": "{}",
                     "threshold": "{0.1, 0.1, 0.1, 0.1}",
                 }
-                for row in self.faq_df
+                for idx, row in self.faq_df.iterrows()
             ]
             db_connection.execute(inbound_sql, inserts)
             # for i, row in self.faq_df.iterrows():
