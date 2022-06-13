@@ -65,9 +65,6 @@ def send_notification(
     """
     Function to send notification
     """
-    # TODO this is dev only. find out notification norms
-    import boto3
-
     sns = boto3.client("sns", region_name="ap-south-1")
     sns.publish(
         TopicArn=topic,
