@@ -12,6 +12,11 @@ from sqlalchemy import text
 
 import concurrent.futures
 
+from nltk.corpus import wordnet as wn
+
+print(wn.__class__)
+wn.ensure_loaded()
+
 
 def generate_message(result, threshold_criteria):
     """Generate messages for validation results
