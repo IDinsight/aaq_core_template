@@ -145,18 +145,8 @@ class TestPerformance:
         client.get("/internal/refresh-faqs", headers=headers)
 
     def test_top_3_performance(self, client, faq_data, test_params):
-        validation_df = self.get_validation_data().sample(100)
+        validation_df = self.get_validation_data().sample(500)
 
-        # TODO: use multithreading (vectorising won't help bc it's io blocked)
-        # for idx, row in validation_df.iterrows():
-        #     request_data = {
-        #         "text_to_match": str(row["Question"]),
-        #         "return_scoring": "true",
-        #     }
-        #     headers = {"Authorization": "Bearer %s" % os.getenv("INBOUND_CHECK_TOKEN")}
-        #     response = client.post("/inbound/check", json=request_data, headers=headers)
-        #     top_faq_names = [x[0] for x in response.get_json()["top_responses"]]
-        #     validation_df.loc[idx, "in_top"] = row["FAQ Name"] in top_faq_names
         with concurrent.futures.ThreadPoolExecutor() as executor:
             responses = executor.map(
                 lambda x: self.submit_one_inbound(x, client, faq_data, test_params),
