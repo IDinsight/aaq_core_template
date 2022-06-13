@@ -9,8 +9,6 @@ from sqlalchemy import text
 import boto3
 from .utils import S3_Handler
 from datetime import datetime
-from enum import Enum
-import sys
 
 
 def generate_message(result, threshold_criteria):
@@ -76,7 +74,6 @@ class TestPerformance:
     s3 = boto3.client("s3")
     s3r = boto3.resource("s3")
     bucket = os.getenv("VALIDATION_BUCKET")
-    # bucket = "praekelt-static-resources"
 
     s3_handler = S3_Handler(s3, s3r, bucket)
 
