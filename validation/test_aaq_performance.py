@@ -1,14 +1,16 @@
 """
 Validation scripts
 """
+from .utils import S3_Handler
+
 import os
+import boto3
+from datetime import datetime
 
 import pytest
 from sqlalchemy import text
 
-import boto3
-from .utils import S3_Handler
-from datetime import datetime
+import concurrent.futures
 
 
 def generate_message(result, threshold_criteria):
@@ -101,6 +103,16 @@ class TestPerformance:
 
         return faq_df
 
+    def submit_one_inbound(self, row, client, faq_data, test_params):
+        request_data = {
+            "text_to_match": str(row["Question"]),
+            "return_scoring": "true",
+        }
+        headers = {"Authorization": "Bearer %s" % os.getenv("INBOUND_CHECK_TOKEN")}
+        response = client.post("/inbound/check", json=request_data, headers=headers)
+        top_faq_names = [x[0] for x in response.get_json()["top_responses"]]
+        return row["FAQ Name"] in top_faq_names
+
     @pytest.fixture
     def faq_data(self, client, db_engine):
 
@@ -132,17 +144,23 @@ class TestPerformance:
         validation_df = self.get_validation_data().sample(100)
 
         # TODO: use multithreading (vectorising won't help bc it's io blocked)
-        for idx, row in validation_df.iterrows():
-            request_data = {
-                "text_to_match": str(row["Question"]),
-                "return_scoring": "true",
-            }
-            headers = {"Authorization": "Bearer %s" % os.getenv("INBOUND_CHECK_TOKEN")}
-            response = client.post("/inbound/check", json=request_data, headers=headers)
-            top_faq_names = [x[0] for x in response.get_json()["top_responses"]]
-            validation_df.loc[idx, "in_top"] = row["FAQ Name"] in top_faq_names
+        # for idx, row in validation_df.iterrows():
+        #     request_data = {
+        #         "text_to_match": str(row["Question"]),
+        #         "return_scoring": "true",
+        #     }
+        #     headers = {"Authorization": "Bearer %s" % os.getenv("INBOUND_CHECK_TOKEN")}
+        #     response = client.post("/inbound/check", json=request_data, headers=headers)
+        #     top_faq_names = [x[0] for x in response.get_json()["top_responses"]]
+        #     validation_df.loc[idx, "in_top"] = row["FAQ Name"] in top_faq_names
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            responses = executor.map(
+                lambda x: self.submit_one_inbound(x),
+                [row for idx, row in validation_df.iterrows()],
+            )
 
-        top_k_accuracy = validation_df["in_top"].mean()
+        results = list(responses)
+        top_k_accuracy = sum(results) / len(results)
         send_notification(
             content=generate_message(top_k_accuracy, test_params["THRESHOLD_CRITERIA"])
         )
