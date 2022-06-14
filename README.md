@@ -124,10 +124,8 @@ Copy (or symlink) the pre-trained Google News model to `data/pretrained_wv_model
 1. Setup `coveralls`
 2. Setup auto deployment on EC2 (using webhooks or other)
 3. Update this file!
-
--   Remove irrelevant content (all the template text)
--   Update the badges at the top of this file
-
+  - Remove irrelevant content (all the template text)
+  - Update the badges at the top of this file
 6. Setup application monitoring
 7. Setup other apps as necessary,
 

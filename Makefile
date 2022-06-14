@@ -62,7 +62,7 @@ setup-db: cmd-exists-psql cmd-exists-createdb guard-PG_ENDPOINT guard-PG_PORT gu
 setup-ecr: cmd-exists-aws
 	aws ecr create-repository \
 		--repository-name aaq_solution/$(NAME) \
-		--region af-south-1
+		--region $(AWS_REGION)
 
 # Setup postgres tables
 init-db-tables: cmd-exists-psql guard-PG_ENDPOINT guard-PG_PORT guard-PG_USERNAME guard-PG_PASSWORD guard-PG_DATABASE
