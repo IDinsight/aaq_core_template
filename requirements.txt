@@ -11,6 +11,6 @@ pandas==1.2.3
 psycopg2-binary==2.8.6
 pyyaml==5.4.1
 scipy==1.8.0
-sentry-sdk[flask]==1.00
+sentry-sdk[flask]==1.5.12
 itsdangerous==2.0.1
 prometheus-flask-exporter==0.20.1

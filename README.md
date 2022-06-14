@@ -1,4 +1,4 @@
-[![Coverage Status](https://coveralls.io/repos/github/IDinsight/[your-project]/badge.svg?t=[code])](https://coveralls.io/github/IDinsight/[your-project])
+![Coverage Status](https://coveralls.io/repos/github/IDinsight/[your-project]/badge.svg?t=[code])](https://coveralls.io/github/IDinsight/[your-project])
 ![Unit Tests](https://github.com/IDinsight/[your-project]/actions/workflows/validation-test.yml/badge.svg)
 
 # Ask A Question (AAQ) Core Template Repository
@@ -19,23 +19,45 @@ This module is the core application that receives inbound messages in json, matc
 
 Clone or fork this repository.
 
-If you clone this, please setup a new repository for future commits and add this repository as another remote -  called `template`. This will allow you to pull in new changes made to this template. Here are the instructions on how to do this:
+If you clone this, please setup a new repository for future commits and add this repository as another remote - called `template`. This will allow you to pull in new changes made to this template. Here are the instructions on how to do this:
 
 1. Clone this repo
+
 ```
 git clone git@github.com:IDinsight/aaq_core_template.git <project_name>
 ```
 
-2. Change remote name to `template`
+2. Switch to <project_name> folder and change remote name to `template`
+
 ```
 git remote rename origin template
 ```
 
-3. Create a [new repo](https://github.com/organizations/IDinsight/repositories/new) in Github
+3. Create a new repo in Github
 4. Add it as remote for local repo
 
 ```
 git remote add origin git@github.com:IDinsight/<project_name>.git
+```
+
+5. Set local to track that remote
+
+```
+git push -u origin main
+```
+
+6. You may also wish to [set your environment variables](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#setting-environment-variables) for the conda environment. This will allow you to run and test locally. Here are the variables you should set
+
+```
+export PG_ENDPOINT=
+export PG_PORT=
+export PG_DATABASE=
+export PG_USERNAME=
+export PG_PASSWORD=
+
+export INBOUND_CHECK_TOKEN=
+export TOKEN_MACHINE_USER=
+
 ```
 
 ### Configure project details
@@ -69,7 +91,7 @@ You should edit each of the files in `./secrets` and set the correct parameters.
 
 -   Other files should be updated before you can test the instance.
 
-#### `make setup-db-all`
+#### Run `make setup-db-all`
 
 This command does the following:
 
@@ -77,6 +99,10 @@ This command does the following:
 2. Creates the dev and test databases
 3. Creates a new schema (based on `$PROJECT_SHORT_NAME`) and sets as default
 4. Creates the tables needed for the app
+
+#### Run `make setup-ecr`
+
+This creates the ECR repository for the project to store docker images.
 
 #### Setup Github secrets
 
