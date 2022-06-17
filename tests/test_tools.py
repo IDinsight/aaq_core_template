@@ -17,6 +17,14 @@ class TestNewTagTool:
         json_data = response.get_json()
         assert "top_matches_for_each_query" in json_data
         assert len(json_data["top_matches_for_each_query"]) == 2
+        assert (
+            json_data["top_matches_for_each_query"][0][0][0]
+            == "*** NEW TAGS MATCHED ***"
+        )
+        assert (
+            json_data["top_matches_for_each_query"][1][0][0]
+            == "*** NEW TAGS MATCHED ***"
+        )
 
     def test_validate_tags(self, client):
         request_data = {"tags_to_check": ["banana", "health", "fruit"]}

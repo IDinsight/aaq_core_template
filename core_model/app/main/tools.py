@@ -9,9 +9,9 @@ from flask import abort, current_app, jsonify, request
 
 from ..data_models import TemporaryModel
 from ..prometheus_metrics import metrics
+from ..src import utils
 from . import main
 from .auth import auth
-from ..src import utils
 
 
 def active_only_non_prod(func):
@@ -82,7 +82,7 @@ def check_new_tags():
         )
 
         scoring = utils.get_faq_scores_for_message(
-            processed_message, current_app.faqs, word_vector_scores
+            processed_message, with_temp_faqs, word_vector_scores
         )
 
         matched_faq_titles = set()
