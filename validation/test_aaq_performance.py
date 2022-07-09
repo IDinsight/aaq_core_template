@@ -1,18 +1,16 @@
 """
 Validation scripts
 """
-from .utils import S3_Handler
-
 import os
-import boto3
 from datetime import datetime
 
+import boto3
 import pytest
+from core_model.app.database_sqlalchemy import db
+from nltk.corpus import stopwords
 from sqlalchemy import text
 
-import concurrent.futures
-
-from nltk.corpus import stopwords
+from .utils import S3_Handler
 
 # This is required to allow multithreading to work
 stopwords.ensure_loaded()
@@ -28,10 +26,10 @@ def generate_message(result, threshold_criteria):
     threshold_criteria : float, 0-1
         Accuracy cut-off for warnings
     """
-    current_branch = os.environ["BRANCH"]
-    repo_name = os.environ["REPO"]
-    commit = os.environ["HASH"]
-    ref = os.environ["REF"]
+    current_branch = os.environ.get("BRANCH")
+    repo_name = os.environ.get("REPO")
+    commit = os.environ.get("HASH")
+    ref = os.environ.get("REF")
 
     if result < threshold_criteria:
         val_message = """
@@ -124,7 +122,7 @@ class TestPerformance:
         top_faq_names = [x[0] for x in response.get_json()["top_responses"]]
         return row[test_params["TRUE_FAQ_COL"]] in top_faq_names
 
-    @pytest.fixture
+    @pytest.fixture(scope="class")
     def faq_data(self, client, db_engine):
 
         self.faq_df = self.get_validation_faqs()
@@ -137,38 +135,43 @@ class TestPerformance:
                     "title": row["faq_title"],
                     "faq_tags": row["faq_tags"],
                     "added_utc": "2022-04-14",
-                    "author": "Pytest author",
+                    "author": "Validation author",
                     "content": "{}",
                     "threshold": "{0.1, 0.1, 0.1, 0.1}",
                 }
                 for idx, row in self.faq_df.iterrows()
             ]
             # We do a bulk insert to be more efficient
-            db_connection.execute(inbound_sql, inserts)
+            with db_connection.begin():
+                db_connection.execute(inbound_sql, inserts)
         client.get("/internal/refresh-faqs", headers=headers)
         yield
         with db_engine.connect() as db_connection:
-            t = text("DELETE FROM faqmatches " "WHERE faq_author='Pytest author'")
-            db_connection.execute(t)
+            t = text("DELETE FROM faqmatches WHERE faq_author='Validation author'")
+            t2 = text("DELETE * FROM inbounds")
+            with db_connection.begin():
+                db_connection.execute(t)
+            with db_connection.begin():
+                db_connection.execute(t2)
+
         client.get("/internal/refresh-faqs", headers=headers)
 
-    def test_top_k_performance(self, client, faq_data, test_params):
+    def test_top_k_performance(self, monkeypatch, client, faq_data, test_params):
         """
         Test if top k faqs contain the true FAQ
         """
+        monkeypatch.setattr(db.session, "add", lambda x: None)
+
         validation_df = self.get_validation_data()
-
-        # we use multithreading. this is I/O bound and very inefficient if we loop
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-            responses = executor.map(
-                lambda x: self.submit_one_inbound(x, client, faq_data, test_params),
-                [row for idx, row in validation_df.iterrows()],
-            )
-
+        responses = [
+            self.submit_one_inbound(x, client, faq_data, test_params)
+            for _, x in validation_df.iterrows()
+        ]
         results = list(responses)
         top_k_accuracy = sum(results) / len(results)
-        send_notification(
-            content=generate_message(top_k_accuracy, test_params["THRESHOLD_CRITERIA"])
-        )
-
+        content = generate_message(top_k_accuracy, test_params["THRESHOLD_CRITERIA"])
+        if os.environ.get("GITHUB_ACTIONS") is True:
+            send_notification(content)
+        else:
+            print(content)
         return top_k_accuracy
