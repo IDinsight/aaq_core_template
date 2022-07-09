@@ -148,7 +148,7 @@ class TestPerformance:
         yield
         with db_engine.connect() as db_connection:
             t = text("DELETE FROM faqmatches WHERE faq_author='Validation author'")
-            t2 = text("DELETE * FROM inbounds")
+            t2 = text("DELETE FROM inbounds")
             with db_connection.begin():
                 db_connection.execute(t)
             with db_connection.begin():
