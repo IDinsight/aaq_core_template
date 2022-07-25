@@ -30,12 +30,30 @@ def generate_message(result, threshold_criteria):
     repo_name = os.environ.get("REPO")
     commit = os.environ.get("HASH")
     ref = os.environ.get("REF")
+    dataset = os.environ.get("VALIDATION_DATA_PREFIX")
 
     if result < threshold_criteria:
-        val_message = """
-        [Alert] Accuracy was {accuracy} for {commit_tag} with {commit_message} on branch {branch} of repo {repo_name} below threshold of {threshold_criteria}
-         """.format(
+        val_message = (
+            "[Alert] Accuracy using dataset {dataset} was {accuracy} for {commit_tag} "
+            "with {commit_message} on branch {branch} of repo {repo_name} BELOW "
+            "threshold of {threshold_criteria}"
+        ).format(
             accuracy=result,
+            dataset=dataset,
+            commit_tag=commit,
+            commit_message=ref,
+            branch=current_branch,
+            repo_name=repo_name,
+            threshold_criteria=threshold_criteria,
+        )
+    else:
+        val_message = (
+            "[Alert] Accuracy using dataset {dataset} was {accuracy} for {commit_tag} "
+            "with {commit_message} on branch {branch} of repo {repo_name} ABOVE "
+            "threshold of {threshold_criteria}"
+        ).format(
+            accuracy=result,
+            dataset=dataset,
             commit_tag=commit,
             commit_message=ref,
             branch=current_branch,
