@@ -6,6 +6,7 @@ CREATE TABLE faqmatches (
 	faq_content_to_send text NOT NULL,
 	faq_tags text [] NOT NULL,
 	faq_thresholds real [] NOT NULL,
+    faq_weight integer DEFAULT 1 NOT NULL,
 	PRIMARY KEY (faq_id)
 );
 

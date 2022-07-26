@@ -43,6 +43,7 @@ class FAQModel(db.Model):
     faq_content_to_send = db.Column(db.String())
     faq_tags = db.Column(db.ARRAY(db.String()))
     faq_thresholds = db.Column(db.ARRAY(db.Float()))
+    faq_weight = db.Column(db.Integer())
 
     def __repr__(self):
         """Pretty print"""

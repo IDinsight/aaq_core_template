@@ -11,9 +11,9 @@ from sqlalchemy.orm.attributes import flag_modified
 from ..data_models import Inbound
 from ..database_sqlalchemy import db
 from ..prometheus_metrics import metrics
+from ..src import scoring_functions
 from . import main
 from .auth import auth
-from ..src import utils
 
 
 @main.route("/inbound/check", methods=["POST"])
@@ -68,11 +68,15 @@ def inbound_check():
         processed_message
     )
 
-    scoring_output = utils.get_faq_scores_for_message(
-        processed_message, current_app.faqs, word_vector_scores
+    scoring_output = scoring_functions.get_faq_scores_for_message(
+        processed_message,
+        current_app.faqs,
+        word_vector_scores,
+        current_app.config["reduction_function"],
+        **current_app.config["reduction_function_args"]
     )
 
-    top_matches_list = utils.get_top_n_matches(
+    top_matches_list = scoring_functions.get_top_n_matches(
         scoring_output, current_app.faqt_model.n_top_matches
     )
 

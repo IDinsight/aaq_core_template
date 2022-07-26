@@ -12,3 +12,7 @@ preprocessing:
     - can
 faq_match:
   n_top_matches: 3
+score_reduction:
+  reduction_function: simple_mean
+  reduction_function_args:
+    N: 5
