@@ -15,8 +15,13 @@ def test_params():
 
 
 @pytest.fixture(scope="session")
-def client(test_params):
+def app(test_params):
     app = create_app(test_params)
+    return app
+
+
+@pytest.fixture(scope="session")
+def client(app):
     with app.test_client() as client:
         yield client
 
