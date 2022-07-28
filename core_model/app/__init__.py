@@ -3,7 +3,6 @@ Create and initialise the app. Uses Blueprints to define view.
 """
 import os
 from functools import partial
-from pathlib import Path
 
 from faqt.model import KeyedVectorsScorer
 from faqt.preprocessing import preprocess_text_for_word_embedding
@@ -87,9 +86,7 @@ def get_config_data(params):
     config = DefaultEnvDict()
     app_config = load_parameters("score_reduction")
     config.update(app_config)
-
     config.update(params)
-
     config["SQLALCHEMY_DATABASE_URI"] = get_postgres_uri(
         config["PG_ENDPOINT"],
         config["PG_PORT"],

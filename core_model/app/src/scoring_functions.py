@@ -59,7 +59,7 @@ def get_faq_scores_for_message(
 
         cs_values = list(scoring[faq.faq_id]["tag_cs"].values())
         scoring[faq.faq_id]["overall_score"] = scoring_method(
-            cs_values, faq.faq_weight_share, **reduction_func_arg
+            cs_values, weight=faq.faq_weight_share, **reduction_func_arg
         )
 
     return scoring
@@ -104,17 +104,18 @@ def score_reduction_func(scoring_func):
 
 
 @score_reduction_func
-def avg_min_mean(cs_values, weight=None):
+def avg_min_mean(cs_values, **kwargs):
     """Original scoring: mean of avg and min"""
     return (np.mean(cs_values) + np.min(cs_values)) / 2
 
 
 @score_reduction_func
-def simple_mean(cs_values, weight=None):
+def simple_mean(cs_values, **kwargs):
     """Simple mean of cs values"""
     return np.mean(cs_values)
 
 
 @score_reduction_func
-def mean_plus_weight(cs_values, weight, N):
+def mean_plus_weight(cs_values, weight, N, **kwargs):
+    """Simple mean plus N * weights"""
     return (simple_mean(cs_values) + N * weight) / (N + 1)

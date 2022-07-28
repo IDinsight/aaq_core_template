@@ -26,6 +26,13 @@ def client(app):
         yield client
 
 
+@pytest.fixture(scope="session")
+def client_weight(app):
+    app.config["REDUCTION_FUNCTION"] = "mean_plus_weight"
+    with app.test_client() as client:
+        yield client
+
+
 @pytest.fixture(scope="class")
 def db_engine(test_params):
     config = get_config_data(test_params)

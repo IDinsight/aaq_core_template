@@ -58,7 +58,7 @@ class TestFaqWeights:
 
     @pytest.fixture
     def faq_weights(self):
-        return [4, 3, 2, 1, 5, 2]
+        return [1, 3, 3, 1, 1, 1]
 
     @pytest.fixture
     def faq_data_w_weights(self, client, db_engine, faq_weights):
@@ -96,3 +96,44 @@ class TestFaqWeights:
         assert weights == faq_weights
         assert np.isclose(sum(weight_shares), 1)
         assert np.allclose(np.array(weight_shares), np.array(weights) / sum(weights))
+
+    def test_simple_mean_is_used(self, client, faq_data_w_weights, faq_weights):
+        request_data = {
+            "text_to_match": "I love the outdoors. What should I pack for lunch?",
+            "return_scoring": "true",
+        }
+        headers = {"Authorization": "Bearer %s" % os.getenv("INBOUND_CHECK_TOKEN")}
+        response = client.post("/inbound/check", json=request_data, headers=headers)
+        json_data = response.get_json()
+
+        scores = []
+        for faq_id, details in json_data["scoring"].items():
+            if isinstance(details, dict):
+                scores.append(float(details["overall_score"]))
+
+        score_ranks = np.argsort(scores)
+
+        assert np.argwhere(score_ranks == 1).squeeze() == 5
+        assert np.argwhere(score_ranks == 2).squeeze() != 4
+
+    def test_mean_plus_weight_is_used(
+        self, client_weight, faq_data_w_weights, faq_weights
+    ):
+        request_data = {
+            "text_to_match": "I love the outdoors. What should I pack for lunch?",
+            "return_scoring": "true",
+        }
+        headers = {"Authorization": "Bearer %s" % os.getenv("INBOUND_CHECK_TOKEN")}
+        response = client_weight.post(
+            "/inbound/check", json=request_data, headers=headers
+        )
+        json_data = response.get_json()
+
+        scores = []
+        for faq_id, details in json_data["scoring"].items():
+            if isinstance(details, dict):
+                scores.append(float(details["overall_score"]))
+
+        score_ranks = np.argsort(scores)
+        assert np.argwhere(score_ranks == 1).squeeze() == 5
+        assert np.argwhere(score_ranks == 2).squeeze() == 4

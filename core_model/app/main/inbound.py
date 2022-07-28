@@ -72,8 +72,8 @@ def inbound_check():
         processed_message,
         current_app.faqs,
         word_vector_scores,
-        current_app.config["reduction_function"],
-        **current_app.config["reduction_function_args"]
+        current_app.config["REDUCTION_FUNCTION"],
+        **current_app.config["REDUCTION_FUNCTION_ARGS"]
     )
 
     top_matches_list = scoring_functions.get_top_n_matches(
