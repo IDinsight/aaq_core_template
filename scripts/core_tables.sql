@@ -1,6 +1,7 @@
 CREATE TABLE faqmatches (
     faq_id serial NOT NULL,
     faq_added_utc timestamp without time zone NOT NULL,
+	faq_updated_utc timestamp without time zone NOT NULL,
     faq_author text NOT NULL,
     faq_title text NOT NULL,
     faq_content_to_send text NOT NULL,
