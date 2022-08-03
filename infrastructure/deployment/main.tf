@@ -16,8 +16,11 @@ module "deployment" {
     billing_code = var.billing_code
     region = var.region
     keypair_name = var.keypair_name
+
+    dev_ec2_instance_type = var.dev_ec2_instance_type
+    dev_db_instance_type = var.dev_db_instance_type
     ec2_instance_type = var.ec2_instance_type
     db_instance_type = var.db_instance_type
-    db_username = var.db_username
+    
     aws_profile_name = var.aws_profile_name
 }

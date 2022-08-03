@@ -38,6 +38,16 @@ variable "keypair_name" {
   }
 }
 
+variable "dev_ec2_instance_type" {
+    type = string
+    default = "r5.large"
+}
+
+variable "dev_db_instance_type" {
+    type = string
+    default = "db.t3.medium"
+}
+
 variable "ec2_instance_type" {
     type = string
     default = "r5.large"
@@ -46,11 +56,6 @@ variable "ec2_instance_type" {
 variable "db_instance_type" {
     type = string
     default = "db.t3.medium"
-}
-
-variable "db_username" {
-    type = string
-    default = "admin_user"
 }
 
 variable "aws_profile_name" {
