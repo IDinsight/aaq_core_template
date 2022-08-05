@@ -3,3 +3,4 @@ dropbox==11.24.0
 GitPython==3.1.24
 pytest==6.2.2
 coverage==6.3.2
+fsspec[s3]==2022.3.0

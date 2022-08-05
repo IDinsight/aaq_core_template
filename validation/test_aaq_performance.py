@@ -5,17 +5,17 @@ import os
 from datetime import datetime
 
 import boto3
+import pandas as pd
 import pytest
 from core_model.app.database_sqlalchemy import db
 from nltk.corpus import stopwords
 from sqlalchemy import text
-import pandas as pd
 
 # This is required to allow multithreading to work
 stopwords.ensure_loaded()
 
 
-def generate_message(result, threshold_criteria, test_params):
+def generate_message(result, test_params):
     """Generate messages for validation results
     Warning is set to threshold criteria
     Parameters
@@ -26,7 +26,8 @@ def generate_message(result, threshold_criteria, test_params):
         Accuracy cut-off for warnings
     """
 
-    dataset = test_params["DATA_PREFIX"]
+    threshold_criteria = test_params["THRESHOLD_CRITERIA"]
+    dataset = test_params["VALIDATION_DATA_PREFIX"]
 
     if (os.environ.get("GITHUB_ACTIONS") == "true") & (result < threshold_criteria):
 
@@ -37,10 +38,10 @@ def generate_message(result, threshold_criteria, test_params):
         val_message = (
             "[Alert] Accuracy using dataset {dataset} was:\n\n"
             "{accuracy}\n\n"
-            "For commit tag = {commit_tag}"
+            "For commit tag = {commit_tag}\n"
             "On branch {branch}\n"
             "Repo {repo_name}\n\n"
-            "Accuracy was BELOW threshold of {threshold_criteria}"
+            "The threshold criteria was {threshold_criteria}"
         ).format(
             accuracy=result,
             dataset=dataset,
@@ -57,9 +58,6 @@ def generate_message(result, threshold_criteria, test_params):
         ).format(
             accuracy=result,
             dataset=dataset,
-            commit_tag=commit,
-            branch=current_branch,
-            repo_name=repo_name,
             threshold_criteria=threshold_criteria,
         )
 
@@ -192,7 +190,7 @@ class TestPerformance:
         ]
         results = list(responses)
         top_k_accuracy = sum(results) / len(results)
-        content = generate_message(top_k_accuracy, test_params["THRESHOLD_CRITERIA"])
+        content = generate_message(top_k_accuracy, test_params)
 
         if (os.environ.get("GITHUB_ACTIONS") == "true") & (
             top_k_accuracy < test_params["THRESHOLD_CRITERIA"]
