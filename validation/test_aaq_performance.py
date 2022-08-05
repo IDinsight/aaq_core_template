@@ -139,9 +139,9 @@ class TestPerformance:
         return row[test_params["TRUE_FAQ_COL"]] in top_faq_names
 
     @pytest.fixture(scope="class")
-    def faq_data(self, client, db_engine):
+    def faq_data(self, client, db_engine, test_params):
 
-        self.faq_df = self.get_validation_faqs()
+        self.faq_df = self.get_validation_faqs(test_params)
 
         headers = {"Authorization": "Bearer %s" % os.getenv("INBOUND_CHECK_TOKEN")}
         with db_engine.connect() as db_connection:
@@ -185,7 +185,7 @@ class TestPerformance:
         """
         monkeypatch.setattr(db.session, "add", lambda x: None)
 
-        validation_df = self.get_validation_data()
+        validation_df = self.get_validation_data(test_params)
         responses = [
             self.submit_one_inbound(x, client, faq_data, test_params)
             for _, x in validation_df.iterrows()
