@@ -41,6 +41,7 @@ resource "aws_db_instance" "db" {
     password                    = random_password.db_password.result
     port                        = 5432
     publicly_accessible         = true
+    skip_final_snapshot         = true
     tags = {
         BillingCode = var.billing_code
         Name = "${var.project_name}-db-server"

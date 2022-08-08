@@ -40,9 +40,12 @@ data "aws_ami" "amazon_linux_2" {
 
 }
 
-# Get the EC2 instance user data
+# Get the EC2 instance user data for ECS connection
 data "template_file" "user_data" {
   template = file("${path.module}/bootstrap.tpl")
+  vars = {
+    account_id = data.aws_caller_identity.current.account_id
+  }
 }
 
 # Security group for the EC2 instance
@@ -106,7 +109,7 @@ resource "aws_instance" "ec2_server" {
   user_data                   = base64encode(data.template_file.user_data.rendered)
   tags = {
     BillingCode = var.billing_code
-    Name = "${var.project_name}-server"
+    Name = "${var.project_name}-dev-server"
     Project = var.project_name
   }
   lifecycle {
