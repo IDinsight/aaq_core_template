@@ -208,6 +208,7 @@ class DefaultEnvDict(UserDict):
 def get_faq_scores_for_message(inbound_vectors, faqs, scores):
     """
     Returns scores for the inbound vectors against each faq
+
     Parameters
     ----------
     inbound_vectors: List[Array]
@@ -215,6 +216,7 @@ def get_faq_scores_for_message(inbound_vectors, faqs, scores):
     faqs: List[FAQ]
         A list of faq-like objects. Each FAQ object must contain word vectors for
         each tags as a dictionary under `FAQ.tags_wvs`
+
     Returns
     -------
     Dict[int, Dict]
@@ -235,16 +237,20 @@ def get_faq_scores_for_message(inbound_vectors, faqs, scores):
     return scoring
 
 
-def get_top_n_matches(scoring, n_top_matches):
+def get_top_n_matches(scoring, n_top_matches, start_idx=0):
     """
     Gives a list of scores for each FAQ, return the top `n_top_matches` FAQs
+
     Parameters
     ----------
     scoring: Dict[int, Dict]
         Dict with faq_id as key and faq details and scores as values.
-        See return value of `get_faq_scores_for_message`.
+        See return value of `get_faq_scores_for_message`. Assumes that `scoring`
+        is sorted from highest score to lowest score.
     n_top_matches: int
         the number of top matches to return
+    start_idx: int, optional
+        takes the `n_top_matches` starting the `start_idx`
 
     Returns
     -------
@@ -254,9 +260,10 @@ def get_top_n_matches(scoring, n_top_matches):
     matched_faq_titles = set()
     # Sort and copy over top matches
     top_matches_list = []
-    for id in sorted(
+    sorted_scoring = sorted(
         scoring, key=lambda x: float(scoring[x]["overall_score"]), reverse=True
-    ):
+    )
+    for id in sorted_scoring[start_idx:]:
         if scoring[id]["faq_title"] not in matched_faq_titles:
             top_matches_list.append(
                 (scoring[id]["faq_title"], scoring[id]["faq_content_to_send"])

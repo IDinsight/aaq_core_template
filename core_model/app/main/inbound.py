@@ -80,9 +80,8 @@ def inbound_check():
 
     secret_keys = generate_secret_keys()
     scoring_output = prepare_scoring_as_json(scoring_output)
-    scoring_output, json_return = prepare_return_json(
-        scoring_output, secret_keys, return_scoring, spell_corrected
-    )
+    json_return = prepare_return_json(scoring_output, secret_keys, return_scoring, 1)
+    scoring_output["spell_corrected"] = " ".join(spell_corrected)
     inbound_id = save_inbound_to_db(incoming, scoring_output, json_return, secret_keys)
     json_return = finalise_return_json(json_return, inbound_id, current_page=1)
 
@@ -196,15 +195,35 @@ def generate_secret_keys():
     return request_keys
 
 
-def prepare_return_json(scoring_output, keys, return_scoring, spell_corrected):
+def prepare_return_json(scoring_output, keys, return_scoring, page_number):
     """
     Prepare the json to be returned. Note that it also has the side effect of
     updating `scoring_output`.
+
+    Parameters
+    ----------
+    scoring_output: Dict
+        the processed scoring results dict that can be saved as a JSON
+    keys: Dict
+        A dictionary of secret keys
+    return_scoring: bool
+        If scoring should be send back in the JSON response
+    page_number: Int
+        The page number to return
+
+    Returns
+    -------
+    scoring_output: Dict
+        With spell_correct
     """
-    top_matches_list = utils.get_top_n_matches(
-        scoring_output, current_app.faqt_model.n_top_matches
-    )
-    scoring_output["spell_corrected"] = " ".join(spell_corrected)
+    items_per_page = current_app.faqt_model.n_top_matches
+
+    if page_number < 1:
+        top_matches_list = []
+    else:
+        top_matches_list = utils.get_top_n_matches(
+            scoring_output, items_per_page, (page_number - 1) * items_per_page
+        )
 
     json_return = {}
     json_return["top_responses"] = top_matches_list
@@ -213,7 +232,7 @@ def prepare_return_json(scoring_output, keys, return_scoring, spell_corrected):
     if return_scoring:
         json_return["scoring"] = scoring_output
 
-    return scoring_output, json_return
+    return json_return
 
 
 def prepare_scoring_as_json(scoring_output):
@@ -245,10 +264,18 @@ def inbound_results_page(inbound_id, page_number):
     elif orig_inbound.inbound_secret_key != secret_key:
         return "Incorrect Inbound Secret Key", 403
 
-    # get data from db <-- cache this
-    orig_inbound
+    scoring_output = orig_inbound.model_scoring
+    _ = scoring_output.pop("spell_corrected")
 
-    # create return json <-- common with inbound/check
+    keys = {
+        "feedback_secret_key": orig_inbound.feedback_secret_key,
+        "inbound_secret_key": orig_inbound.inbound_secret_key,
+    }
+
+    scoring_output, json_return = prepare_return_json(
+        scoring_output, keys, False, page_number
+    )
+    json_return = finalise_return_json(json_return, inbound_id, page_number)
 
     pass
 
