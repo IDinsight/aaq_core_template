@@ -12,14 +12,15 @@ CREATE TABLE faqmatches (
 );
 
 CREATE TABLE inbounds (
-    inbound_id serial NOT NULL,
-    feedback_secret_key text NOT NULL,
-    inbound_text text NOT NULL,
-    inbound_metadata json,
-    inbound_utc timestamp without time zone NOT NULL,
-    model_scoring json NOT NULL,
-    returned_content json NOT NULL,
-    returned_utc timestamp without time zone NOT NULL,
-    returned_feedback json,
-    PRIMARY KEY (inbound_id)
+	inbound_id serial NOT NULL,
+	feedback_secret_key text NOT NULL,
+    inbound_secret_key text NOT NULL,
+	inbound_text text NOT NULL,
+	inbound_metadata json,
+	inbound_utc timestamp without time zone NOT NULL,
+	model_scoring json NOT NULL,
+	returned_content json NOT NULL,
+	returned_utc timestamp without time zone NOT NULL,
+	returned_feedback json,
+	PRIMARY KEY (inbound_id)
 );

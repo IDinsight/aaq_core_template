@@ -13,6 +13,7 @@ class Inbound(db.Model):
     __tablename__ = "inbounds"
 
     inbound_id = db.Column(db.Integer(), primary_key=True)
+    inbound_secret_key = db.Column(db.String())
     feedback_secret_key = db.Column(db.String())
     inbound_text = db.Column(db.String())
     inbound_metadata = db.Column(db.JSON())

@@ -245,6 +245,7 @@ def get_top_n_matches(scoring, n_top_matches):
         See return value of `get_faq_scores_for_message`.
     n_top_matches: int
         the number of top matches to return
+
     Returns
     -------
     List[Tuple(int, str)]
@@ -253,7 +254,9 @@ def get_top_n_matches(scoring, n_top_matches):
     matched_faq_titles = set()
     # Sort and copy over top matches
     top_matches_list = []
-    for id in sorted(scoring, key=lambda x: scoring[x]["overall_score"], reverse=True):
+    for id in sorted(
+        scoring, key=lambda x: float(scoring[x]["overall_score"]), reverse=True
+    ):
         if scoring[id]["faq_title"] not in matched_faq_titles:
             top_matches_list.append(
                 (scoring[id]["faq_title"], scoring[id]["faq_content_to_send"])
