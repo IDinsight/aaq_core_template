@@ -181,7 +181,7 @@ class TestPerformance:
         """
         Test if top k faqs contain the true FAQ
         """
-        monkeypatch.setattr(inbound, "save_inbound_to_db", lambda x: 123)
+        monkeypatch.setattr(inbound, "save_inbound_to_db", lambda *x, **y: 123)
 
         validation_df = self.get_validation_data(test_params)
         responses = [
