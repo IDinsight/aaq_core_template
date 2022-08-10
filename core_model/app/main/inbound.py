@@ -4,6 +4,7 @@
 import os
 from base64 import b64encode
 from datetime import datetime
+from math import ceil
 
 from flask import current_app, request, url_for
 from sqlalchemy.orm.attributes import flag_modified
@@ -33,9 +34,10 @@ def inbound_check():
     """
     Handles inbound queries, matching messages to FAQs in database.
 
-    Note: `scoring_output` and `json_return` and saving the Inbound to Db are very tightly
-    coupled. It needs a significant change in what is saved and returned in order to
-    decouple them. Parking it for now in order to not introduce breaking changes.
+    Note: `scoring_output` and `json_return` and saving the Inbound to Db are very
+    tightly coupled. It needs a significant change in what is saved and returned in
+    order to decouple them. Parking it for now in order to not introduce
+    breaking changes.
 
     Parameters
     ----------
@@ -77,62 +79,44 @@ def inbound_check():
         current_app.config["REDUCTION_FUNCTION"],
         **current_app.config["REDUCTION_FUNCTION_ARGS"],
     )
+    max_pages = ceil(len(scoring_output) / current_app.faqt_model.n_top_matches)
 
     secret_keys = generate_secret_keys()
     scoring_output = prepare_scoring_as_json(scoring_output)
     json_return = prepare_return_json(scoring_output, secret_keys, return_scoring, 1)
     scoring_output["spell_corrected"] = " ".join(spell_corrected)
     inbound_id = save_inbound_to_db(incoming, scoring_output, json_return, secret_keys)
-    json_return = finalise_return_json(json_return, inbound_id, current_page=1)
+    json_return = finalise_return_json(json_return, inbound_id, 1, max_pages)
 
     return json_return
 
 
-def finalise_return_json(json_return, inbound_id, current_page):
+def generate_secret_keys():
     """
-    Create additional items in JSON returned. This also includes pagination links
-    to previous and next page.
-
-    Parameters
-    ----------
-    json_return: Dict
-        The dictionary to update. This will be turned into a JSON by flask when the
-        endpoint returns
-    inbound_id: int
-        The id for the Db row created
-    current_page: int
-        Page number that is being returned. Used to calculate previous and next page
-        links
-
-    Returns
-    -------
-    json_return: Dict
-        updated dictionary to be returned as response
-
-    Returns
-    -------
-
+    Generate any secret keys needed
     """
-    if current_page <= 1:
-        prev_page = 0
-    else:
-        prev_page = 1
+    request_keys = {}
 
-    json_return["inbound_id"] = inbound_id
-    json_return["next_page_results"] = url_for(
-        "main.inbound_results_page",
-        inbound_id=inbound_id,
-        page_number=(current_page + 1),
-        values=json_return["inbound_secret_key"],
-    )
-    json_return["prev_page_results"] = url_for(
-        "main.inbound_results_page",
-        inbound_id=inbound_id,
-        page_number=prev_page,
-        values=json_return["inbound_secret_key"],
-    )
+    request_keys["feedback_secret_key"] = b64encode(os.urandom(32)).decode("utf-8")
+    request_keys["inbound_secret_key"] = b64encode(os.urandom(32)).decode("utf-8")
 
-    return json_return
+    return request_keys
+
+
+def prepare_scoring_as_json(scoring_output):
+    """
+    Convert scoring so it can be saved as JSON in Db. Also save spell corrected
+    terms.
+    """
+    for id in scoring_output:
+        scoring_output[id]["overall_score"] = str(scoring_output[id]["overall_score"])
+
+        # Convert scoring[faq.faq_id] to have string values (to save in DB as JSON)
+        scoring_output[id]["tag_cs"] = {
+            key: str(val) for key, val in scoring_output[id]["tag_cs"].items()
+        }
+
+    return scoring_output
 
 
 def save_inbound_to_db(incoming, scoring_output, json_return, secret_keys):
@@ -183,18 +167,6 @@ def save_inbound_to_db(incoming, scoring_output, json_return, secret_keys):
     return new_inbound_query.inbound_id
 
 
-def generate_secret_keys():
-    """
-    Generate any secret keys needed
-    """
-    request_keys = {}
-
-    request_keys["feedback_secret_key"] = b64encode(os.urandom(32)).decode("utf-8")
-    request_keys["inbound_secret_key"] = b64encode(os.urandom(32)).decode("utf-8")
-
-    return request_keys
-
-
 def prepare_return_json(scoring_output, keys, return_scoring, page_number):
     """
     Prepare the json to be returned. Note that it also has the side effect of
@@ -217,7 +189,6 @@ def prepare_return_json(scoring_output, keys, return_scoring, page_number):
         With spell_correct
     """
     items_per_page = current_app.faqt_model.n_top_matches
-
     if page_number < 1:
         top_matches_list = []
     else:
@@ -235,30 +206,77 @@ def prepare_return_json(scoring_output, keys, return_scoring, page_number):
     return json_return
 
 
-def prepare_scoring_as_json(scoring_output):
+def finalise_return_json(json_return, inbound_id, current_page, max_pages):
     """
-    Convert scoring so it can be saved as JSON in Db. Also save spell corrected
-    terms.
+    Create additional items in JSON returned. This also includes pagination links
+    to previous and next page.
+
+    Parameters
+    ----------
+    json_return: Dict
+        The dictionary to update. This will be turned into a JSON by flask when the
+        endpoint returns
+    inbound_id: int
+        The id for the Db row created
+    current_page: int
+        Page number that is being returned. Used to calculate previous and next page
+        links
+    max_pages: int
+        The maximum number of pages possible
+
+    Returns
+    -------
+    json_return: Dict
+        updated dictionary to be returned as response
+
+    Returns
+    -------
+
     """
-    for id in scoring_output:
-        scoring_output[id]["overall_score"] = str(scoring_output[id]["overall_score"])
 
-        # Convert scoring[faq.faq_id] to have string values (to save in DB as JSON)
-        scoring_output[id]["tag_cs"] = {
-            key: str(val) for key, val in scoring_output[id]["tag_cs"].items()
-        }
+    json_return["inbound_id"] = str(inbound_id)
+    if current_page < max_pages:
+        json_return["next_page_url"] = url_for(
+            "main.inbound_results_page",
+            inbound_id=inbound_id,
+            page_number=(current_page + 1),
+            inbound_secret_key=json_return["inbound_secret_key"],
+        )
+    if current_page > 1:
+        json_return["prev_page_url"] = url_for(
+            "main.inbound_results_page",
+            inbound_id=inbound_id,
+            page_number=(current_page - 1),
+            inbound_secret_key=json_return["inbound_secret_key"],
+        )
 
-    return scoring_output
+    return json_return
 
 
 @main.route("/inbound/<inbound_id>/<page_number>", methods=["GET"])
 @auth.login_required
 def inbound_results_page(inbound_id, page_number):
-    """ """
+    """
+    Handles getting different pages for requests that have already been processed.
+
+    Parameters
+    ----------
+    inbound_id: Int
+        The id of an existing inbound
+    page_number; Int
+        The page number to return
+
+    Returns
+    -------
+    JSON
+        See `inbound_check` for output format.
+    """
 
     # check inbound key
     orig_inbound = Inbound.query.filter_by(inbound_id=inbound_id).first()
     secret_key = request.args["inbound_secret_key"]
+    page_number = int(page_number)
+
     if orig_inbound is None:
         return f"No inbound message with `id` {inbound_id} found", 404
     elif orig_inbound.inbound_secret_key != secret_key:
@@ -266,18 +284,17 @@ def inbound_results_page(inbound_id, page_number):
 
     scoring_output = orig_inbound.model_scoring
     _ = scoring_output.pop("spell_corrected")
+    max_pages = ceil(len(scoring_output) / current_app.faqt_model.n_top_matches)
 
     keys = {
         "feedback_secret_key": orig_inbound.feedback_secret_key,
         "inbound_secret_key": orig_inbound.inbound_secret_key,
     }
 
-    scoring_output, json_return = prepare_return_json(
-        scoring_output, keys, False, page_number
-    )
-    json_return = finalise_return_json(json_return, inbound_id, page_number)
+    json_return = prepare_return_json(scoring_output, keys, False, page_number)
+    json_return = finalise_return_json(json_return, inbound_id, page_number, max_pages)
 
-    pass
+    return json_return
 
 
 @main.route("/inbound/feedback", methods=["PUT"])
