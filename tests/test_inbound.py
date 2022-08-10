@@ -176,6 +176,11 @@ class TestInboundPagination:
         assert page_response.status_code == 200
         assert inbound_response_json["inbound_id"] == response_json["inbound_id"]
 
+        top_results_page1 = {x[0] for x in inbound_response_json["top_responses"]}
+        top_results_page2 = {x[0] for x in response_json["top_responses"]}
+
+        assert len(top_results_page1.intersection(top_results_page2)) == 0
+
     def test_accessing_valid_prev_page(self, client, inbound_response_json):
         headers = {"Authorization": "Bearer %s" % os.getenv("INBOUND_CHECK_TOKEN")}
 
