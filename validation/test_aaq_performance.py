@@ -7,7 +7,7 @@ from datetime import datetime
 import boto3
 import pandas as pd
 import pytest
-from core_model.app.database_sqlalchemy import db
+from core_model.app.main import inbound
 from nltk.corpus import stopwords
 from sqlalchemy import text
 
@@ -181,7 +181,9 @@ class TestPerformance:
         """
         Test if top k faqs contain the true FAQ
         """
-        monkeypatch.setattr(db.session, "add", lambda x: None)
+        monkeypatch.setattr(
+            inbound.save_inbound_to_db, "save_inbound_to_db", lambda x: 123
+        )
 
         validation_df = self.get_validation_data(test_params)
         responses = [
