@@ -97,7 +97,7 @@ def get_top_n_matches(scoring, n_top_matches):
 
 def score_reduction_func(scoring_func):
     """
-    Decorator to register imputation functions
+    Decorator to register scoring functions
     """
     SCORE_REDUCTION_METHODS[scoring_func.__name__] = scoring_func
     return scoring_func
