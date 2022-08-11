@@ -336,6 +336,8 @@ def inbound_feedback():
         return "No Matches", 404
     elif orig_inbound.feedback_secret_key != feedback_request["feedback_secret_key"]:
         return "Incorrect Feedback Secret Key", 403
+    elif bad_feedback_schema(feedback_request["feedback"]):
+        return "Malformed Feedback JSON", 400
 
     if orig_inbound.returned_feedback:
         # BACKWARDS COMPATIBILITY
@@ -355,3 +357,20 @@ def inbound_feedback():
     db.session.add(orig_inbound)
     db.session.commit()
     return "Success", 200
+
+
+def bad_feedback_schema(feedback_json):
+    """
+    Check if the feedback JSON is well formed.
+    """
+
+    if "feedback_type" not in feedback_json:
+        return True
+    if feedback_json["feedback_type"] == "positive":
+        if "faq_id" not in feedback_json:
+            return True
+    if feedback_json["feedback_type"] == "negative":
+        if ("faq_id" not in feedback_json) and ("page_number" not in feedback_json):
+            return True
+
+    return False
