@@ -15,8 +15,20 @@ def test_params():
 
 
 @pytest.fixture(scope="session")
-def client(test_params):
+def app(test_params):
     app = create_app(test_params)
+    return app
+
+
+@pytest.fixture(scope="session")
+def client(app):
+    with app.test_client() as client:
+        yield client
+
+
+@pytest.fixture(scope="session")
+def client_weight(app):
+    app.config["REDUCTION_FUNCTION"] = "mean_plus_weight"
     with app.test_client() as client:
         yield client
 
