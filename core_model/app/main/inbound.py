@@ -192,7 +192,7 @@ def prepare_return_json(scoring_output, keys, return_scoring, page_number):
     if page_number < 1:
         top_matches_list = []
     else:
-        top_matches_list = utils.get_top_n_matches(
+        top_matches_list = scoring_functions.get_top_n_matches(
             scoring_output, items_per_page, (page_number - 1) * items_per_page
         )
 
