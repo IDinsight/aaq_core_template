@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 import yaml
 from gensim.models import KeyedVectors
-from gensim.models.fasttext import load_facebook_vectors
+from gensim.models.fasttext import load_facebook_model
 
 
 def load_wv_pretrained_bin(folder, filename, model_type="w2v"):
@@ -23,10 +23,10 @@ def load_wv_pretrained_bin(folder, filename, model_type="w2v"):
     if model_type == "fasttext":
         if os.getenv("GITHUB_ACTIONS") == "true":
             bucket = os.getenv("WORD2VEC_BINARY_BUCKET")
-            model = load_facebook_vectors(f"s3://{bucket}/{filename}")
+            model = load_facebook_model(f"s3://{bucket}/{filename}").wv
         else:
             full_path = Path(__file__).parents[3] / "data" / folder / filename
-            model = load_facebook_vectors(full_path)
+            model = load_facebook_model(full_path).wv
     elif model_type == "w2v":
         if os.getenv("GITHUB_ACTIONS") == "true":
             bucket = os.getenv("WORD2VEC_BINARY_BUCKET")
