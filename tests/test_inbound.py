@@ -46,7 +46,7 @@ class TestInboundMessage:
             db_connection.execute(t)
         client.get("/internal/refresh-faqs", headers=headers)
 
-    def test_inbound_returns_3_faqs(self, client, faq_data):
+    def test_inbound_returns_6_faqs(self, client, faq_data):
         request_data = {
             "text_to_match": "I love going hiking. What should I pack for lunch?",
             "return_scoring": "true",
@@ -55,7 +55,7 @@ class TestInboundMessage:
         response = client.post("/inbound/check", json=request_data, headers=headers)
         json_data = response.get_json()
 
-        assert len(json_data["top_responses"]) == 3
+        assert len(json_data["top_responses"]) == 6
 
     def test_inbound_endpoint_works(self, client):
         request_data = {
