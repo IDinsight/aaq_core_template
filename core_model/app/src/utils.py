@@ -9,9 +9,10 @@ import numpy as np
 import pandas as pd
 import yaml
 from gensim.models import KeyedVectors
+from gensim.models.fasttext import load_facebook_vectors
 
 
-def load_wv_pretrained_bin(folder, filename):
+def load_wv_pretrained_bin(folder, filename, model_type="w2v"):
     """
     Load pretrained word2vec model from either local mount or S3
     based on environment var.
@@ -19,18 +20,27 @@ def load_wv_pretrained_bin(folder, filename):
     TODO: make into a pure function and take ENV as input
     """
 
-    if os.getenv("GITHUB_ACTIONS") == "true":
-        bucket = os.getenv("WORD2VEC_BINARY_BUCKET")
-        model = KeyedVectors.load_word2vec_format(
-            f"s3://{bucket}/{filename}", binary=True
-        )
-
+    if model_type == "fasttext":
+        if os.getenv("GITHUB_ACTIONS") == "true":
+            bucket = os.getenv("WORD2VEC_BINARY_BUCKET")
+            model = load_facebook_vectors(f"s3://{bucket}/{filename}")
+        else:
+            full_path = Path(__file__).parents[3] / "data" / folder / filename
+            model = load_facebook_vectors(full_path)
+    elif model_type == "w2v":
+        if os.getenv("GITHUB_ACTIONS") == "true":
+            bucket = os.getenv("WORD2VEC_BINARY_BUCKET")
+            model = KeyedVectors.load_word2vec_format(
+                f"s3://{bucket}/{filename}", binary=True
+            )
+        else:
+            full_path = Path(__file__).parents[3] / "data" / folder / filename
+            model = KeyedVectors.load_word2vec_format(
+                full_path,
+                binary=True,
+            )
     else:
-        full_path = Path(__file__).parents[3] / "data" / folder / filename
-        model = KeyedVectors.load_word2vec_format(
-            full_path,
-            binary=True,
-        )
+        raise ValueError('model_type should be either "fasttext" or "w2v"')
 
     return model
 

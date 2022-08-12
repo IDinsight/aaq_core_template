@@ -102,12 +102,17 @@ def create_faqt_model():
     """
     Create a new instance of the faqt class.
     """
+    params = load_parameters()
     data_sources = load_data_sources()
+    model_to_use_name = params["matching_model"]["model"]
+
     w2v_model = load_wv_pretrained_bin(
-        data_sources["google_news_pretrained"]["folder"],
-        data_sources["google_news_pretrained"]["filename"],
+        data_sources[model_to_use_name]["folder"],
+        data_sources[model_to_use_name]["filename"],
+        params["matching_model"]["type"],
     )
-    pp_params = load_parameters("preprocessing")
+
+    pp_params = params["preprocessing"]
     faqs_params = load_parameters("faq_match")
     custom_wvs = load_custom_wvs()
     tags_guiding_typos = load_tags_guiding_typos()

@@ -16,3 +16,8 @@ score_reduction:
   REDUCTION_FUNCTION: simple_mean
   REDUCTION_FUNCTION_ARGS:
     N: 5
+# Params related model. Any model from data_sources
+# Set type as either "fasttext" or "w2v"
+matching_model:
+  model: simple_fasttext_with_faq
+  type: fasttext
