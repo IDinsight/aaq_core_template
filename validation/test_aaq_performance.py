@@ -133,7 +133,7 @@ class TestPerformance:
         }
         headers = {"Authorization": "Bearer %s" % os.getenv("INBOUND_CHECK_TOKEN")}
         response = client.post("/inbound/check", json=request_data, headers=headers)
-        top_faq_names = [x[5] for x in response.get_json()["top_responses"]]
+        top_faq_names = [x[:5] for x in response.get_json()["top_responses"]]
         return row[test_params["TRUE_FAQ_COL"]] in top_faq_names
 
     @pytest.fixture(scope="class")
