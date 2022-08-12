@@ -25,7 +25,6 @@ def load_wv_pretrained_bin(folder, filename, model_type="w2v"):
     if model_type == "fasttext":
         if os.getenv("GITHUB_ACTIONS") == "true":
             bucket = os.getenv("WORD2VEC_BINARY_BUCKET")
-
             s3 = boto3.resource("s3")
             with tempfile.NamedTemporaryFile() as tf:
                 s3.Bucket(bucket).download_file(filename, tf.name)

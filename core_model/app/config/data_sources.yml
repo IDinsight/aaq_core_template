@@ -1,18 +1,18 @@
 google_news_pretrained:
   filename: GoogleNews-vectors-negative300-prenorm.bin
   folder: pretrained_wv_models
-# faqt_w2v_with_faq:
-#   filename: faqt_w2v_with_faq.bin
-#   folder: pretrained_wv_models
-# simple_w2v:
-#   filename: simple_w2v.bin
-#   folder: pretrained_wv_models
-# faqt_w2v:
-#   filename: faqt_w2v.bin
-#   folder: pretrained_wv_models
-# simple_w2v_with_faq:
-#   filename: simple_w2v_with_faq.bin
-#   folder: pretrained_wv_models
+faqt_w2v_with_faq:
+  filename: faqt_w2v_with_faq.bin
+  folder: pretrained_wv_models
+simple_w2v:
+  filename: simple_w2v.bin
+  folder: pretrained_wv_models
+faqt_w2v:
+  filename: faqt_w2v.bin
+  folder: pretrained_wv_models
+simple_w2v_with_faq:
+  filename: simple_w2v_with_faq.bin
+  folder: pretrained_wv_models
 simple_fasttext_with_faq:
   filename: simple_fasttext_with_faq.bin
   folder: pretrained_wv_models
