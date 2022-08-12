@@ -54,7 +54,7 @@ def generate_message(result, test_params):
         val_message = (
             "[Alert] Accuracy using dataset {dataset} was:\n\n"
             "{accuracy}\n\n"
-            "Accuracy was ABOVE threshold of {threshold_criteria}"
+            "The test threshold was {threshold_criteria}"
         ).format(
             accuracy=result,
             dataset=dataset,
