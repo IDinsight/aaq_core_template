@@ -6,33 +6,33 @@
 #   ...
 # All root words to handle should be lowercase
 
-heart_burn:
-  acid_reflux: 1
+# heart_burn:
+#   acid_reflux: 1
   
-side_effects:
-  adverse_effects: 1
+# side_effects:
+#   adverse_effects: 1
 
-deliver:
-  birth: 1
+# deliver:
+#   birth: 1
 
-labor:
-  pregnant: 0.2
-  pain: 0.4
-  birth: 0.4
+# labor:
+#   pregnant: 0.2
+#   pain: 0.4
+#   birth: 0.4
 
-pain_killer:
-  aspirin: 0.5
-  panadol: 0.5
+# pain_killer:
+#   aspirin: 0.5
+#   panadol: 0.5
 
-cord:
-  umbilical_cord: 1
+# cord:
+#   umbilical_cord: 1
 
-spotting:
-  bleeding: 0.5
-  vaginal: 0.5
+# spotting:
+#   bleeding: 0.5
+#   vaginal: 0.5
 
-c_section:
-  cesarean_delivery: 1
+# c_section:
+#   cesarean_delivery: 1
 
 # ---- covid vocab
 #
