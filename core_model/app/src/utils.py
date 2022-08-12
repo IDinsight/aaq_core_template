@@ -2,14 +2,16 @@
 General utility functions
 """
 import os
+import tempfile
 from collections import UserDict
 from pathlib import Path
 
+import boto3
 import numpy as np
 import pandas as pd
 import yaml
 from gensim.models import KeyedVectors
-from gensim.models.fasttext import load_facebook_model
+from gensim.models.fasttext import load_facebook_vectors
 
 
 def load_wv_pretrained_bin(folder, filename, model_type="w2v"):
@@ -23,10 +25,14 @@ def load_wv_pretrained_bin(folder, filename, model_type="w2v"):
     if model_type == "fasttext":
         if os.getenv("GITHUB_ACTIONS") == "true":
             bucket = os.getenv("WORD2VEC_BINARY_BUCKET")
-            model = load_facebook_model(f"s3://{bucket}/{filename}").wv
+
+            s3 = boto3.resource("s3")
+            with tempfile.NamedTemporaryFile() as tf:
+                s3.Bucket(bucket).download_file(filename, tf.name)
+                model = load_facebook_vectors(tf.name)
         else:
             full_path = Path(__file__).parents[3] / "data" / folder / filename
-            model = load_facebook_model(full_path).wv
+            model = load_facebook_vectors(full_path)
     elif model_type == "w2v":
         if os.getenv("GITHUB_ACTIONS") == "true":
             bucket = os.getenv("WORD2VEC_BINARY_BUCKET")
