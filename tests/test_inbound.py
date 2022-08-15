@@ -46,11 +46,10 @@ def faq_data(client, db_engine):
 
 
 class TestInboundMessage:
-    def test_inbound_returns_6_faqs(self, client, faq_data):
-        """Since we insert only up to 6 messages in this test and the top_n_matches
-        is set to 10 in app config, the response will only return 6 faq names.
-
-        TODO: parametrize the test based on top_n_matches"""
+    def test_inbound_returns_3_faqs(self, client, faq_data):
+        """
+        TODO: parametrize the test based on top_n_matches
+        """
         request_data = {
             "text_to_match": "I love going hiking. What should I pack for lunch?",
             "return_scoring": "true",
@@ -59,7 +58,7 @@ class TestInboundMessage:
         response = client.post("/inbound/check", json=request_data, headers=headers)
         json_data = response.get_json()
 
-        assert len(json_data["top_responses"]) == 6
+        assert len(json_data["top_responses"]) == 3
 
     def test_inbound_endpoint_works(self, client):
         request_data = {

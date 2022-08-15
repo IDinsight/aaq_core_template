@@ -11,7 +11,7 @@ preprocessing:
     - where
     - can
 faq_match:
-  n_top_matches: 10
+  n_top_matches: 3
 score_reduction:
   REDUCTION_FUNCTION: simple_mean
   REDUCTION_FUNCTION_ARGS:
