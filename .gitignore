@@ -148,3 +148,10 @@ dmypy.json
 # Temporarily copied for Docker build
 core_model/config/contextualization/
 core_model/requirements.txt
+
+# Terraform
+*.hcl
+*.tfstate
+*.tfstate.*
+*.terraform/
+!delete_secrets.py
