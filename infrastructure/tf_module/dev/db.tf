@@ -20,7 +20,7 @@ variable "db_username" {
 
 variable "dev_user" {
   type = string
-  default = "flask_dev"
+  default = "flask"
 }
 
 variable "test_user" {
@@ -79,7 +79,7 @@ resource "null_resource" "db_setup" {
   depends_on = [aws_db_instance.db, aws_security_group.db_security_group]
 
     provisioner "local-exec" {
-      command = "psql -v u1=\"${var.dev_user}\" -v p1=\"'${random_password.dev_password.result}'\" -v u2=\"${var.test_user}\" -v p2=\"'${random_password.test_password.result}'\" -h \"${aws_db_instance.db.address}\" -p ${aws_db_instance.db.port} -U \"${var.db_username}\" -d \"postgres\" -f \"${path.module}/db_init.sql\" "
+      command = "psql -v u1=\"${var.dev_user}\" -v p1=\"'${random_password.dev_password.result}'\" -v d1=\"${var.project_name}_dev\" -v u2=\"${var.test_user}\" -v p2=\"'${random_password.test_password.result}'\" -v d2=\"${var.project_name}_test\" -h \"${aws_db_instance.db.address}\" -p ${aws_db_instance.db.port} -U \"${var.db_username}\" -d \"postgres\" -f \"${path.module}/db_init.sql\" "
       
       environment = {
         PGPASSWORD = random_password.admin_password.result

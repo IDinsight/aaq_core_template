@@ -19,7 +19,7 @@
 	<br/>
 	This sets up all the AWS components needed: 
 	1. VPC, subnets and security groups 
-	2. EC2, RDS with development and testing database and secrets with the DB credentials for admin user, flask_dev and flask_test user
+	2. EC2, RDS with development and testing database and secrets with the DB credentials for admin user, flask and flask_test user
 	2. EC2, RDS and ECS cluster for staging environment
 	To add/remove any resources, update the code in `infrastructure/tf_module` before deployment. 
 
