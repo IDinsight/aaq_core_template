@@ -55,7 +55,7 @@ module "stg" {
   db_instance_type = var.db_instance_type
   aws_profile_name = var.aws_profile_name
 
-  db_name = "staging"
+  db_name = var.project_name
   db_username = "flask"
 }
 

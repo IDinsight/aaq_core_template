@@ -10,6 +10,7 @@ export
 $(eval NAME=$(PROJECT_NAME))
 $(eval PORT=9902)
 $(eval VERSION=dev)
+$(eval AWS_BILLING_CODE=Praekelt NLP)
 
 # Need to specify bash in order for conda activate to work.
 SHELL=/bin/bash
@@ -199,4 +200,48 @@ uptime-exporter:
 		-e UPTIMEROBOT_API_KEY=$(UPTIMEROBOT_API_KEY) \
 		-p 9705:9705 --read-only lekpamartin/uptimerobot_exporter
 
+tf-backend-apply:
+	@terraform -chdir="./infrastructure/tf_backend" init
 
+	@terraform -chdir="./infrastructure/tf_backend" apply \
+	-var 'project_name=${SOLUTION_NAME}' \
+	-var 'billing_code=${AWS_BILLING_CODE}' \
+	-var 'region=${AWS_REGION}' 
+
+tf-backend-destroy:
+	@terraform -chdir="./infrastructure/tf_backend" init
+
+	@terraform -chdir="./infrastructure/tf_backend" destroy \
+	-var 'project_name=${SOLUTION_NAME}' \
+	-var 'billing_code=${AWS_BILLING_CODE}' \
+	-var 'region=${AWS_REGION}' 
+
+tf-apply:
+	@terraform -chdir="./infrastructure/deployment" init \
+	-backend-config="bucket=${SOLUTION_NAME}-terraform-state" \
+	-backend-config="key=terraform.tfstate" \
+	-backend-config="region=${AWS_REGION}" \
+	-backend-config="dynamodb_table=${SOLUTION_NAME}-terraform-state-locks" \
+	-backend-config="encrypt=true" \
+
+	@terraform -chdir="./infrastructure/deployment" apply \
+	-var 'project_name=${SOLUTION_NAME}' \
+	-var 'billing_code=${AWS_BILLING_CODE}' \
+	-var 'region=${AWS_REGION}' \
+	-var 'keypair_name=${SSH_KEYPAIR}' 
+
+tf-destroy:
+	@terraform -chdir="./infrastructure/deployment" init \
+	-backend-config="bucket=${SOLUTION_NAME}-terraform-state" \
+	-backend-config="key=terraform.tfstate" \
+	-backend-config="region=${AWS_REGION}" \
+	-backend-config="dynamodb_table=${SOLUTION_NAME}-terraform-state-locks" \
+	-backend-config="encrypt=true" \
+
+	@terraform -chdir="./infrastructure/deployment" destroy \
+	-var 'project_name=${SOLUTION_NAME}' \
+	-var 'billing_code=${AWS_BILLING_CODE}' \
+	-var 'region=${AWS_REGION}' \
+	-var 'keypair_name=${SSH_KEYPAIR}' 
+
+	@python ./infrastructure/delete_secrets.py ${SOLUTION_NAME} ${AWS_REGION}
