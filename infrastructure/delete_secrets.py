@@ -18,4 +18,3 @@ client.delete_secret(
 
 client.delete_secret(
     SecretId=f"{project_name}-db-flask-test", ForceDeleteWithoutRecovery=True
-)

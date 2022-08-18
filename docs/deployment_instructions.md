@@ -1,4 +1,4 @@
-June 2, 2022
+July 28, 2022
 
 CURRENT VERSION: aaq_core_template:v1.0.0
 # Deploying the AAQ Core App
@@ -9,7 +9,7 @@ This is the deployment instructions for the **AAQ Core App**. It does not cover 
 
 # Initial setup
 
-1. Save GoogleNews pretrained model binary, to be mounted onto the containers. Download from https://www.dropbox.com/s/0ah0kslf7ac199g/GoogleNews-vectors-negative300-prenorm.bin?dl=0, and un-zip (so file is ``.bin`).
+1. Save GoogleNews pretrained model binary, to be mounted onto the containers. Download from https://www.dropbox.com/s/0ah0kslf7ac199g/GoogleNews-vectors-negative300-prenorm.bin?dl=0, and un-zip (so file is `.bin`).
     - You could also have this `.bin` in S3, so that whenever cluster instances are launched, they copy from S3 and then mount into the container.
 
 2. Setup DB tables using `scripts/core_tables.sql`.
@@ -17,7 +17,7 @@ This is the deployment instructions for the **AAQ Core App**. It does not cover 
 # Images
 
 The Docker image for the core model server is hosted on AWS ECR at
-`[AWS_ACCOUNT_ID].dks.ecr.af-south-1.amazonaws.com/aaq_solution/aaq_core_template:v1.0.0`
+`[AWS_ACCOUNT_ID].dkr.ecr.af-south-1.amazonaws.com/aaq_solution/aaq_core_template:v1.0.0`
 
 Your AWS user will need access to this resource. Please contact IDinsight for access.
 
@@ -45,7 +45,7 @@ The following environment variables are required:
   - `SENTRY_TRANSACTIONS_SAMPLE_RATE=1.0`
 - `INBOUND_CHECK_TOKEN`: Bearer token. Requests to `/inbound/check` and `/auth-healthcheck` must be authenticated with this bearer token in the header. We recommended an alphanumeric string of your choice.
 - `DEPLOYMENT_ENV`
-    - For production, this should be set to `DEPLOYMENT_ENV=PRODUCTION`. This disables the **tag check** and **tag validation** endpoints for stability.
+    - For production, this should be set to `DEPLOYMENT_ENV=PRODUCTION`. This disables the endpoints `/tools/check-new-tags` and `/tools/validate-tags` for stability.
     - Note that the admin app (based on `aaq_admin_template`) depends on **tag check** and **tag validation** endpoints. Thus, the admin app should always point to a non-production instance of the core AAQ model app.
 - `ENABLE_FAQ_REFRESH_CRON`: Only set to "true" if you'd like to run a cron job within the containers to periodically refresh FAQs.
 - `PROMETHEUS_MULTIPROC_DIR`: Directory to save prometheus metrics collected by multiple processes. It should be a directory that is cleared regularly (e.g. `/tmp`)

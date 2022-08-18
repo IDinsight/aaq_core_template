@@ -13,6 +13,7 @@ from hunspell import Hunspell
 from .data_models import FAQModel
 from .database_sqlalchemy import db
 from .prometheus_metrics import metrics
+from .src.faq_weights import add_faq_weight_share
 from .src.utils import (
     DefaultEnvDict,
     get_postgres_uri,
@@ -83,8 +84,9 @@ def get_config_data(params):
     """
 
     config = DefaultEnvDict()
+    app_config = load_parameters("score_reduction")
+    config.update(app_config)
     config.update(params)
-
     config["SQLALCHEMY_DATABASE_URI"] = get_postgres_uri(
         config["PG_ENDPOINT"],
         config["PG_PORT"],
@@ -159,7 +161,7 @@ def refresh_faqs(app):
     with app.app_context():
         faqs = FAQModel.query.all()
     faqs.sort(key=lambda x: x.faq_id)
-    app.faqs = faqs
+    app.faqs = add_faq_weight_share(faqs)
     app.faqt_model.set_tags([faq.faq_tags for faq in faqs])
 
     return len(faqs)

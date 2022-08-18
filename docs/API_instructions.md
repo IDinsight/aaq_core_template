@@ -1,4 +1,4 @@
-June 6, 2022
+July 28, 2022
 
 CURRENT VERSION: aaq_core_template:v1.0.0
 # API Instructions for AAQ Core App (Template)
@@ -85,15 +85,15 @@ Use this endpoint to append feedback to an inbound message. You can continuously
 #### Response
 Response is one of the following pairs of (message, HTTP status)
   * `"Success", 200`: Successfully added feedback
-  * `"No Matches", 404`: Did not match any previous inbound query
-  * `"Incorrect Feedback Secret Key", 403`: Matched previous inbound query, but feedback secret key incorrect
+  * `"No Matches", 404`: Did not match any previous inbound query by `inbound_id`
+  * `"Incorrect Feedback Secret Key", 403`: Matched previous inbound query by `inbound_id`, but `feedback_secret_key` is incorrect
 
 ### Check combinations of new tags: `POST /tools/check-new-tags`
+⚠️ This endpoint is disabled when `DEPLOYMENT_ENV=PRODUCTION`.
+
 The model will score each query message against each existing FAQ AND the new FAQ (defined by the tags in `tags_to_check`), and return the top N FAQs matched for each query.
 
 This endpoint is used by the Admin app's "Check New FAQ Tags" tool.
-
-This endpoint is disabled when `DEPLOYMENT_ENV=PRODUCTION`.
 
 
 #### Params
@@ -108,7 +108,7 @@ This endpoint is disabled when `DEPLOYMENT_ENV=PRODUCTION`.
 |`top_matches_for_each_query`|list[list[list]]|In the outer list, each element corresponds to a query message (in `queries_to_check`)<br>In the list that corresponds to each query: each element corresponds to a top FAQ matched by query. Each element is of format [Title of FAQ, score, list of tags]. The new FAQ with tags in `tags_to_check` is titled "*** New FAQ with these tags ***"|
 
 ### Find bad tags: `POST /tools/validate-tags`
-:warning: This endpoint is disabled when `DEPLOYMENT_ENV=PRODUCTION`.
+⚠️ This endpoint is disabled when `DEPLOYMENT_ENV=PRODUCTION`.
 
 #### Params
 |Param|Type|Description|

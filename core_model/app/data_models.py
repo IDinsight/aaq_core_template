@@ -38,11 +38,13 @@ class FAQModel(db.Model):
 
     faq_id = db.Column(db.Integer, primary_key=True)
     faq_added_utc = db.Column(db.DateTime())
+    faq_updated_utc = db.Column(db.DateTime())
     faq_author = db.Column(db.String())
     faq_title = db.Column(db.String())
     faq_content_to_send = db.Column(db.String())
     faq_tags = db.Column(db.ARRAY(db.String()))
     faq_thresholds = db.Column(db.ARRAY(db.Float()))
+    faq_weight = db.Column(db.Integer())
 
     def __repr__(self):
         """Pretty print"""
