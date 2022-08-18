@@ -4,13 +4,15 @@
 include ./project_config.cfg
 export
 
+include ./secrets/*.env
+export
+
 $(eval NAME=$(PROJECT_NAME))
 $(eval PORT=9902)
 $(eval VERSION=dev)
 
 # Need to specify bash in order for conda activate to work.
 SHELL=/bin/bash
-
 
 # Note that the extra activate is needed to ensure that the activate floats env to the front of PATH
 CONDA_ACTIVATE=source $$(conda info --base)/etc/profile.d/conda.sh ; conda activate ; conda activate
@@ -73,6 +75,14 @@ init-db-tables: cmd-exists-psql guard-PG_ENDPOINT guard-PG_PORT guard-PG_USERNAM
 	@psql -h $(PG_ENDPOINT) -U $(PG_USERNAME)_test -d $(PG_DATABASE)-test -a -f ./scripts/core_tables.sql 
 	@rm .pgpass
 
+# Setup postgres tables in stg
+init-db-tables-stg: cmd-exists-psql guard-PG_ENDPOINT guard-PG_PORT guard-PG_USERNAME guard-PG_PASSWORD guard-PG_DATABASE
+	@echo $(PG_ENDPOINT):$(PG_PORT):$(PG_DATABASE):$(PG_USERNAME):$(PG_PASSWORD) > .pgpass
+	@chmod 0600 .pgpass
+	@psql -h $(PG_ENDPOINT) -U $(PG_USERNAME) -d $(PG_DATABASE) -a -f ./scripts/core_tables.sql 
+	@rm .pgpass
+	python3 ./scripts/load_db.py
+
 setup-env: guard-PROJECT_CONDA_ENV cmd-exists-conda
 	conda create --name $(PROJECT_CONDA_ENV) python==3.9 -y
 	$(CONDA_ACTIVATE) $(PROJECT_CONDA_ENV); pip install --upgrade pip
@@ -130,6 +140,30 @@ container:
 		--env-file ./secrets/sentry_config.env \
 		--mount type=bind,source="$(PWD)/data/pretrained_wv_models/GoogleNews-vectors-negative300-prenorm.bin",target=/usr/src/data/pretrained_wv_models/GoogleNews-vectors-negative300-prenorm.bin \
 		$(NAME):$(VERSION)
+
+container-stg:
+	# Configure ecs-cli options
+	@ecs-cli configure --cluster ${SOLUTION_NAME}-cluster \
+	--default-launch-type EC2 \
+	--region $(AWS_REGION) \
+	--config-name ${NAME}-config
+
+	@PROJECT_NAME=$(NAME) \
+	PORT=$(PORT) \
+	IMAGE_NAME=$(AWS_ACCOUNT_ID).dkr.ecr.$(AWS_REGION).amazonaws.com/aaq_solution/$(NAME):$(VERSION) \
+	ecs-cli compose -f docker-compose/docker-compose-stg.yaml \
+	--project-name ${NAME} \
+	--cluster-config ${NAME}-config \
+	--task-role-arn arn:aws:iam::$(AWS_ACCOUNT_ID):role/${SOLUTION_NAME}-task-role \
+	service up \
+	--create-log-groups \
+	--deployment-min-healthy-percent 0
+
+down-stg:
+	@ecs-cli compose \
+	-f docker-compose/docker-compose-stg.yaml \
+	--project-name ${NAME} \
+	--cluster-config ${NAME}-config service down
 
 push-image: image cmd-exists-aws
 	aws ecr --profile=praekelt-user get-login-password --region af-south-1 \

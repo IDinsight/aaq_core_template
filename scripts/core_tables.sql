@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS faqmatches;
+
 CREATE TABLE faqmatches (
 	faq_id serial NOT NULL,
 	faq_added_utc timestamp without time zone NOT NULL,
@@ -8,6 +10,8 @@ CREATE TABLE faqmatches (
 	faq_thresholds real [] NOT NULL,
 	PRIMARY KEY (faq_id)
 );
+
+DROP TABLE IF EXISTS inbounds;
 
 CREATE TABLE inbounds (
 	inbound_id serial NOT NULL,
