@@ -151,7 +151,7 @@ container-stg:
 	@PROJECT_NAME=$(NAME) \
 	PORT=$(PORT) \
 	IMAGE_NAME=$(AWS_ACCOUNT_ID).dkr.ecr.$(AWS_REGION).amazonaws.com/aaq_solution/$(NAME):$(VERSION) \
-	ecs-cli compose -f docker-compose/docker-compose-stg.yaml \
+	ecs-cli compose -f docker-compose/docker-compose-stg.yml \
 	--project-name ${NAME} \
 	--cluster-config ${NAME}-config \
 	--task-role-arn arn:aws:iam::$(AWS_ACCOUNT_ID):role/${SOLUTION_NAME}-task-role \
@@ -161,7 +161,7 @@ container-stg:
 
 down-stg:
 	@ecs-cli compose \
-	-f docker-compose/docker-compose-stg.yaml \
+	-f docker-compose/docker-compose-stg.yml \
 	--project-name ${NAME} \
 	--cluster-config ${NAME}-config service down
 
