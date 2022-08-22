@@ -114,7 +114,7 @@ def create_faqt_model():
     hunspell = Hunspell()
 
     scoring_function_args = pp_params["scoring_function_args"]
-    n_top_matches = faqs_params["n_top_matches"]
+    n_top_matches = faqs_params["n_top_matches_per_page"]
 
     return KeyedVectorsScorer(
         w2v_model,

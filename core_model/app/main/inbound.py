@@ -65,7 +65,7 @@ def inbound_check():
     if ("return_scoring" in incoming) and (incoming["return_scoring"] == "true"):
         return_scoring = True
     else:
-        return_scoring - False
+        return_scoring = False
 
     processed_message = current_app.text_preprocessor(incoming["text_to_match"])
     word_vector_scores, spell_corrected = current_app.faqt_model.score(
@@ -143,11 +143,7 @@ def save_inbound_to_db(incoming, scoring_output, json_return, secret_keys):
         The id of the new record created in the Db
     """
     received_ts = datetime.utcnow()
-
-    if "metadata" in incoming:
-        incoming_metadata = incoming["metadata"]
-    else:
-        incoming_metadata = None
+    incoming_metadata = incoming.get("metadata")
 
     new_inbound_query = Inbound(
         # Inbound details
