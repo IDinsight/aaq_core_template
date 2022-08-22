@@ -200,6 +200,22 @@ class TestInboundFeedback:
         assert response.status_code == 400
         assert response.data == b"Malformed Feedback JSON"
 
+    @pytest.mark.parametrize("feedback_type", [None, "", "funkyfeedback"])
+    def test_inbound_feedack_wrong_feedback_type(
+        self, inbounds, inbound_id, client, request_json, feedback_type
+    ):
+        request_data = {
+            "inbound_id": inbound_id,
+            "feedback_secret_key": "abc123",
+            "feedback": {"feedback_type": feedback_type},
+        }
+        request_json.update(request_data)
+
+        headers = {"Authorization": "Bearer %s" % os.getenv("INBOUND_CHECK_TOKEN")}
+        response = client.put("/inbound/feedback", json=request_json, headers=headers)
+        assert response.status_code == 400
+        assert response.data == b"Malformed Feedback JSON"
+
 
 @pytest.mark.slow
 class TestInboundPagination:

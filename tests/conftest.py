@@ -4,6 +4,7 @@ import pytest
 import sqlalchemy
 import yaml
 from core_model.app import create_app, get_config_data
+from sqlalchemy import text
 
 
 @pytest.fixture(scope="session")
@@ -19,6 +20,13 @@ def app(test_params):
     app = create_app(test_params)
     app.faqt_model.n_top_matches = 3
     return app
+
+
+@pytest.fixture(scope="class", autouse=True)
+def clean_start(db_engine):
+    with db_engine.connect() as db_connection:
+        t = text("DELETE FROM faqmatches " "WHERE faq_author='Pytest author'")
+        db_connection.execute(t)
 
 
 @pytest.fixture(scope="session")

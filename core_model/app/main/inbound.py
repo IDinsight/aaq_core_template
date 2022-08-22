@@ -364,7 +364,7 @@ def bad_feedback_schema(feedback_json):
     Check if the feedback JSON is well formed.
     """
 
-    if "feedback_type" not in feedback_json:
+    if feedback_json.get("feedback_type") not in ["positive", "negative"]:
         return True
     if feedback_json["feedback_type"] == "positive":
         if "faq_id" not in feedback_json:
@@ -372,5 +372,4 @@ def bad_feedback_schema(feedback_json):
     if feedback_json["feedback_type"] == "negative":
         if ("faq_id" not in feedback_json) and ("page_number" not in feedback_json):
             return True
-
     return False
