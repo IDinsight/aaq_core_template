@@ -19,5 +19,5 @@ score_reduction:
 # Params related model. Any model from data_sources
 # Set type as either "fasttext" or "w2v"
 matching_model:
-  model: google_news_pretrained
-  type: w2v
+  model: google_news_pretrained #simple_fasttext_with_faq # google_news_pretrained
+  type: w2v #fasttext #w2v

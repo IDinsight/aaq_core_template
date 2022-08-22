@@ -98,11 +98,13 @@ def get_config_data(params):
     return config
 
 
-def create_faqt_model():
+def load_embeddings(params_override=None):
     """
-    Create a new instance of the faqt class.
+    Load the correct embeddings
     """
     params = load_parameters()
+    if params_override:
+        params.update(params_override)
     data_sources = load_data_sources()
     model_to_use_name = params["matching_model"]["model"]
 
@@ -112,6 +114,16 @@ def create_faqt_model():
         params["matching_model"]["type"],
     )
 
+    return w2v_model
+
+
+def create_faqt_model():
+    """
+    Create a new instance of the faqt class.
+    """
+    params = load_parameters()
+
+    w2v_model = load_embeddings()
     pp_params = params["preprocessing"]
     faqs_params = load_parameters("faq_match")
     custom_wvs = load_custom_wvs()

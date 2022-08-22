@@ -3,8 +3,25 @@ from pathlib import Path
 import pytest
 import sqlalchemy
 import yaml
-from core_model.app import create_app, get_config_data
 from sqlalchemy import text
+from core_model import app
+from core_model.app import create_app, get_config_data, load_embeddings
+
+
+# parameterize this to load different embeddings
+@pytest.fixture(scope="session")
+def embedding_bin():
+    return load_embeddings()
+
+
+@pytest.fixture(scope="session")
+def monkeysession(request):
+    from _pytest.monkeypatch import MonkeyPatch
+
+    mpatch = MonkeyPatch()
+    yield mpatch
+    mpatch.undo()
+>>>>>>> d42df0d (fixed weight tests)
 
 
 @pytest.fixture(scope="session")
@@ -16,7 +33,12 @@ def test_params():
 
 
 @pytest.fixture(scope="session")
-def app(test_params):
+def patchbinary(monkeysession, embedding_bin):
+    monkeysession.setattr(app, "load_embeddings", lambda *x: embedding_bin)
+
+
+@pytest.fixture(scope="session")
+def app_main(test_params, patchbinary):
     app = create_app(test_params)
     app.faqt_model.n_top_matches = 3
     return app
@@ -30,15 +52,21 @@ def clean_start(db_engine):
 
 
 @pytest.fixture(scope="session")
-def client(app):
-    with app.test_client() as client:
+def client(app_main):
+    with app_main.test_client() as client:
         yield client
 
 
 @pytest.fixture(scope="session")
-def client_weight(app):
-    app.config["REDUCTION_FUNCTION"] = "mean_plus_weight"
-    with app.test_client() as client:
+def app_weight(test_params, patchbinary):
+    app = create_app(test_params)
+    return app
+
+
+@pytest.fixture(scope="session")
+def client_weight(app_weight):
+    app_weight.config["REDUCTION_FUNCTION"] = "mean_plus_weight"
+    with app_weight.test_client() as client:
         yield client
 
 
