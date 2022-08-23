@@ -114,34 +114,107 @@ class TestInboundFeedback:
 
         yield inbound_id
 
-    def test_inbound_feedback_nonexistent_id(self, client):
-        request_data = {"inbound_id": 0, "feedback_secret_key": "abcde", "feedback": ""}
+    @pytest.fixture
+    def request_json(self):
+        feedback_json = {
+            "inbound_id": 0,
+            "feedback_secret_key": "abcde",
+            "feedback": {"feedback_type": "positive", "faq_id": 3},
+        }
+        return feedback_json
+
+    def test_inbound_feedback_nonexistent_id(self, client, request_json):
         headers = {"Authorization": "Bearer %s" % os.getenv("INBOUND_CHECK_TOKEN")}
-        response = client.put("/inbound/feedback", json=request_data, headers=headers)
+        response = client.put("/inbound/feedback", json=request_json, headers=headers)
         assert response.status_code == 404
         assert response.data == b"No Matches"
 
-    def test_inbound_feedback_wrong_feedback_key(self, inbound_id, client):
+    def test_inbound_feedback_wrong_feedback_key(
+        self, inbound_id, client, request_json
+    ):
         request_data = {
             "inbound_id": inbound_id,
             "feedback_secret_key": "wrong_secret_key",
-            "feedback": "",
         }
+        request_json.update(request_data)
+
         headers = {"Authorization": "Bearer %s" % os.getenv("INBOUND_CHECK_TOKEN")}
-        response = client.put("/inbound/feedback", json=request_data, headers=headers)
+        response = client.put("/inbound/feedback", json=request_json, headers=headers)
         assert response.status_code == 403
         assert response.data == b"Incorrect Feedback Secret Key"
 
-    def test_inbound_feedback_success(self, inbounds, inbound_id, client):
+    def test_inbound_feedback_success(self, inbounds, inbound_id, client, request_json):
         request_data = {
             "inbound_id": inbound_id,
             "feedback_secret_key": "abc123",
-            "feedback": "test_feedback",
         }
+        request_json.update(request_data)
+
         headers = {"Authorization": "Bearer %s" % os.getenv("INBOUND_CHECK_TOKEN")}
-        response = client.put("/inbound/feedback", json=request_data, headers=headers)
+        response = client.put("/inbound/feedback", json=request_json, headers=headers)
         assert response.status_code == 200
         assert response.data == b"Success"
+
+    def test_inbound_feedback_success_negative(
+        self, inbounds, inbound_id, client, request_json
+    ):
+        request_data = {
+            "inbound_id": inbound_id,
+            "feedback_secret_key": "abc123",
+            "feedback": {"feedback_type": "negative", "page_number": 3},
+        }
+        request_json.update(request_data)
+
+        headers = {"Authorization": "Bearer %s" % os.getenv("INBOUND_CHECK_TOKEN")}
+        response = client.put("/inbound/feedback", json=request_json, headers=headers)
+        assert response.status_code == 200
+        assert response.data == b"Success"
+
+    def test_inbound_feedback_no_faq_id(
+        self, inbounds, inbound_id, client, request_json
+    ):
+        request_data = {
+            "inbound_id": inbound_id,
+            "feedback_secret_key": "abc123",
+            "feedback": {"feedback_type": "positive", "page_number": 10},
+        }
+        request_json.update(request_data)
+
+        headers = {"Authorization": "Bearer %s" % os.getenv("INBOUND_CHECK_TOKEN")}
+        response = client.put("/inbound/feedback", json=request_json, headers=headers)
+        assert response.status_code == 400
+        assert response.data == b"Malformed Feedback JSON"
+
+    def test_inbound_feedback_negative_no_page_or_faq(
+        self, inbounds, inbound_id, client, request_json
+    ):
+        request_data = {
+            "inbound_id": inbound_id,
+            "feedback_secret_key": "abc123",
+            "feedback": {"feedback_type": "negative"},
+        }
+        request_json.update(request_data)
+
+        headers = {"Authorization": "Bearer %s" % os.getenv("INBOUND_CHECK_TOKEN")}
+        response = client.put("/inbound/feedback", json=request_json, headers=headers)
+        assert response.status_code == 400
+        assert response.data == b"Malformed Feedback JSON"
+
+    @pytest.mark.parametrize("feedback_type", [None, "", "funkyfeedback"])
+    def test_inbound_feedack_wrong_feedback_type(
+        self, inbounds, inbound_id, client, request_json, feedback_type
+    ):
+        request_data = {
+            "inbound_id": inbound_id,
+            "feedback_secret_key": "abc123",
+            "feedback": {"feedback_type": feedback_type},
+        }
+        request_json.update(request_data)
+
+        headers = {"Authorization": "Bearer %s" % os.getenv("INBOUND_CHECK_TOKEN")}
+        response = client.put("/inbound/feedback", json=request_json, headers=headers)
+        assert response.status_code == 400
+        assert response.data == b"Malformed Feedback JSON"
 
 
 @pytest.mark.slow
