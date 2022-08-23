@@ -3,54 +3,53 @@ import os
 import pytest
 from sqlalchemy import text
 
+insert_faq = (
+    "INSERT INTO faqmatches ("
+    "faq_tags, faq_author, faq_title, faq_content_to_send, "
+    "faq_added_utc, faq_thresholds) "
+    "VALUES (:faq_tags, :author, :title, :content, :added_utc, :threshold)"
+)
+faq_tags = [
+    """{"rock", "guitar", "melody", "chord"}""",
+    """{"cheese", "tomato", "bread", "mustard"}""",
+    """{"rock", "lake", "mountain", "sky"}""",
+    """{"trace", "vector", "length", "angle"}""",
+    """{"draw", "sing", "exercise", "code"}""",
+    """{"digest", "eat", "chew", "expel"}""",
+]
+faq_other_params = {
+    "added_utc": "2022-04-14",
+    "author": "Pytest author",
+    "threshold": "{0.1, 0.1, 0.1, 0.1}",
+}
+
+
+@pytest.fixture
+def faq_data(client, db_engine):
+    headers = {"Authorization": "Bearer %s" % os.getenv("INBOUND_CHECK_TOKEN")}
+    with db_engine.connect() as db_connection:
+        inbound_sql = text(insert_faq)
+        for i, tags in enumerate(faq_tags):
+            db_connection.execute(
+                inbound_sql,
+                title=f"Pytest title #{i}",
+                content=f"Dummy content #{i}",
+                faq_tags=tags,
+                **faq_other_params,
+            )
+    client.get("/internal/refresh-faqs", headers=headers)
+    yield
+    with db_engine.connect() as db_connection:
+        t = text("DELETE FROM faqmatches " "WHERE faq_author='Pytest author'")
+        db_connection.execute(t)
+    client.get("/internal/refresh-faqs", headers=headers)
+
 
 class TestInboundMessage:
-
-    insert_faq = (
-        "INSERT INTO faqmatches ("
-        "faq_tags, faq_author, faq_title, faq_content_to_send, "
-        "faq_added_utc, faq_thresholds) "
-        "VALUES (:faq_tags, :author, :title, :content, :added_utc, :threshold)"
-    )
-    faq_tags = [
-        """{"rock", "guitar", "melody", "chord"}""",
-        """{"cheese", "tomato", "bread", "mustard"}""",
-        """{"rock", "lake", "mountain", "sky"}""",
-        """{"trace", "vector", "length", "angle"}""",
-        """{"draw", "sing", "exercise", "code"}""",
-        """{"digest", "eat", "chew", "expel"}""",
-    ]
-    faq_other_params = {
-        "added_utc": "2022-04-14",
-        "author": "Pytest author",
-        "content": "{}",
-        "threshold": "{0.1, 0.1, 0.1, 0.1}",
-    }
-
-    @pytest.fixture
-    def faq_data(self, client, db_engine):
-        headers = {"Authorization": "Bearer %s" % os.getenv("INBOUND_CHECK_TOKEN")}
-        with db_engine.connect() as db_connection:
-            inbound_sql = text(self.insert_faq)
-            for i, tags in enumerate(self.faq_tags):
-                db_connection.execute(
-                    inbound_sql,
-                    title=f"Pytest title #{i}",
-                    faq_tags=tags,
-                    **self.faq_other_params,
-                )
-        client.get("/internal/refresh-faqs", headers=headers)
-        yield
-        with db_engine.connect() as db_connection:
-            t = text("DELETE FROM faqmatches " "WHERE faq_author='Pytest author'")
-            db_connection.execute(t)
-        client.get("/internal/refresh-faqs", headers=headers)
-
-    def test_inbound_returns_6_faqs(self, client, faq_data):
-        """Since we insert only up to 6 messages in this test and the top_n_matches 
-        is set to 10 in app config, the response will only return 6 faq names. 
-        
-        TODO: parametrize the test based on top_n_matches"""
+    def test_inbound_returns_3_faqs(self, client, faq_data):
+        """
+        TODO: parametrize the test based on top_n_matches
+        """
         request_data = {
             "text_to_match": "I love going hiking. What should I pack for lunch?",
             "return_scoring": "true",
@@ -59,7 +58,7 @@ class TestInboundMessage:
         response = client.post("/inbound/check", json=request_data, headers=headers)
         json_data = response.get_json()
 
-        assert len(json_data["top_responses"]) == 6
+        assert len(json_data["top_responses"]) == 3
 
     def test_inbound_endpoint_works(self, client):
         request_data = {
@@ -83,7 +82,8 @@ class TestInboundFeedback:
         "INSERT INTO inbounds ("
         "inbound_text, feedback_secret_key, inbound_metadata, "
         "inbound_utc, model_scoring, returned_content, returned_utc) "
-        "VALUES ('i am 12. Can i get the vaccine?', :secret_key, :metadata, :utc, :score, :content, :r_utc)"
+        "VALUES ('i am 12. Can i get the vaccine?', :secret_key, :metadata, :utc, "
+        ":score, :content, :r_utc)"
     )
     inbound_other_params = {
         "secret_key": "abc123",
@@ -142,3 +142,64 @@ class TestInboundFeedback:
         response = client.put("/inbound/feedback", json=request_data, headers=headers)
         assert response.status_code == 200
         assert response.data == b"Success"
+
+
+@pytest.mark.slow
+class TestInboundPagination:
+    @pytest.fixture
+    def inbound_response_json(self, client, db_engine, faq_data):
+        request_data = {
+            "text_to_match": "I love going hiking. What should I pack for lunch?",
+            "return_scoring": "true",
+        }
+        headers = {"Authorization": "Bearer %s" % os.getenv("INBOUND_CHECK_TOKEN")}
+        response = client.post("/inbound/check", json=request_data, headers=headers)
+
+        yield response.get_json()
+
+        with db_engine.connect() as db_connection:
+            t = text("DELETE FROM inbounds")
+            db_connection.execute(t)
+
+    def test_no_previous_url_for_first_page(self, inbound_response_json):
+        prev_page_url = inbound_response_json.get("prev_page_url")
+        assert prev_page_url is None
+
+    def test_accessing_valid_next_page(self, client, inbound_response_json):
+        next_page_url = inbound_response_json["next_page_url"]
+
+        headers = {"Authorization": "Bearer %s" % os.getenv("INBOUND_CHECK_TOKEN")}
+        page_response = client.get(next_page_url, headers=headers)
+        response_json = page_response.get_json()
+
+        assert page_response.status_code == 200
+        assert inbound_response_json["inbound_id"] == response_json["inbound_id"]
+
+        top_results_page1 = {x[0] for x in inbound_response_json["top_responses"]}
+        top_results_page2 = {x[0] for x in response_json["top_responses"]}
+
+        assert len(top_results_page1.intersection(top_results_page2)) == 0
+
+    def test_accessing_valid_prev_page(self, client, inbound_response_json):
+        headers = {"Authorization": "Bearer %s" % os.getenv("INBOUND_CHECK_TOKEN")}
+
+        next_page_url = inbound_response_json["next_page_url"]
+        page2_response = client.get(next_page_url, headers=headers)
+
+        prev_page_url = page2_response.get_json()["prev_page_url"]
+        page1_response = client.get(prev_page_url, headers=headers)
+
+        response_json = page1_response.get_json()
+
+        assert inbound_response_json["top_responses"] == response_json["top_responses"]
+        assert inbound_response_json["inbound_id"] == response_json["inbound_id"]
+        assert response_json.get("prev_page_url") is None
+
+    def test_no_next_url_past_max_pages(self, client, inbound_response_json):
+        headers = {"Authorization": "Bearer %s" % os.getenv("INBOUND_CHECK_TOKEN")}
+
+        next_page_url = inbound_response_json["next_page_url"]
+        page2_response = client.get(next_page_url, headers=headers)
+
+        next_page_url = page2_response.get_json().get("next_page_url")
+        assert next_page_url is None

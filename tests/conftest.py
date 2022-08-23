@@ -17,6 +17,7 @@ def test_params():
 @pytest.fixture(scope="session")
 def app(test_params):
     app = create_app(test_params)
+    app.faqt_model.n_top_matches = 3
     return app
 
 
