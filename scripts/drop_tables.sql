@@ -1,0 +1,3 @@
+DROP TABLE IF EXISTS faqmatches;
+
+DROP TABLE IF EXISTS inbounds;

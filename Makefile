@@ -80,9 +80,10 @@ init-db-tables: cmd-exists-psql guard-PG_ENDPOINT guard-PG_PORT guard-PG_USERNAM
 init-db-tables-stg: cmd-exists-psql guard-PG_ENDPOINT guard-PG_PORT guard-PG_USERNAME guard-PG_PASSWORD guard-PG_DATABASE
 	@echo $(PG_ENDPOINT):$(PG_PORT):$(PG_DATABASE):$(PG_USERNAME):$(PG_PASSWORD) > .pgpass
 	@chmod 0600 .pgpass
+	@psql -h $(PG_ENDPOINT) -U $(PG_USERNAME) -d $(PG_DATABASE) -a -f ./scripts/drop_tables.sql 
 	@psql -h $(PG_ENDPOINT) -U $(PG_USERNAME) -d $(PG_DATABASE) -a -f ./scripts/core_tables.sql 
 	@rm .pgpass
-	python3 ./scripts/load_db.py
+	@python ./scripts/load_db.py
 
 setup-env: guard-PROJECT_CONDA_ENV cmd-exists-conda
 	conda create --name $(PROJECT_CONDA_ENV) python==3.9 -y
@@ -144,7 +145,7 @@ container:
 
 container-stg:
 	# Configure ecs-cli options
-	@ecs-cli configure --cluster ${SOLUTION_NAME}-cluster \
+	@ecs-cli configure --cluster ${PROJECT_SHORT_NAME}-cluster \
 	--default-launch-type EC2 \
 	--region $(AWS_REGION) \
 	--config-name ${NAME}-config
@@ -155,7 +156,7 @@ container-stg:
 	ecs-cli compose -f docker-compose/docker-compose-stg.yml \
 	--project-name ${NAME} \
 	--cluster-config ${NAME}-config \
-	--task-role-arn arn:aws:iam::$(AWS_ACCOUNT_ID):role/${SOLUTION_NAME}-task-role \
+	--task-role-arn arn:aws:iam::$(AWS_ACCOUNT_ID):role/${PROJECT_SHORT_NAME}-task-role \
 	service up \
 	--create-log-groups \
 	--deployment-min-healthy-percent 0
@@ -204,7 +205,7 @@ tf-backend-apply:
 	@terraform -chdir="./infrastructure/tf_backend" init
 
 	@terraform -chdir="./infrastructure/tf_backend" apply \
-	-var 'project_name=${SOLUTION_NAME}' \
+	-var 'project_name=${PROJECT_SHORT_NAME}' \
 	-var 'billing_code=${AWS_BILLING_CODE}' \
 	-var 'region=${AWS_REGION}' 
 
@@ -212,36 +213,36 @@ tf-backend-destroy:
 	@terraform -chdir="./infrastructure/tf_backend" init
 
 	@terraform -chdir="./infrastructure/tf_backend" destroy \
-	-var 'project_name=${SOLUTION_NAME}' \
+	-var 'project_name=${PROJECT_SHORT_NAME}' \
 	-var 'billing_code=${AWS_BILLING_CODE}' \
 	-var 'region=${AWS_REGION}' 
 
 tf-apply:
 	@terraform -chdir="./infrastructure/deployment" init \
-	-backend-config="bucket=${SOLUTION_NAME}-terraform-state" \
+	-backend-config="bucket=${PROJECT_SHORT_NAME}-terraform-state" \
 	-backend-config="key=terraform.tfstate" \
 	-backend-config="region=${AWS_REGION}" \
-	-backend-config="dynamodb_table=${SOLUTION_NAME}-terraform-state-locks" \
+	-backend-config="dynamodb_table=${PROJECT_SHORT_NAME}-terraform-state-locks" \
 	-backend-config="encrypt=true" \
 
 	@terraform -chdir="./infrastructure/deployment" apply \
-	-var 'project_name=${SOLUTION_NAME}' \
+	-var 'project_name=${PROJECT_SHORT_NAME}' \
 	-var 'billing_code=${AWS_BILLING_CODE}' \
 	-var 'region=${AWS_REGION}' \
 	-var 'keypair_name=${SSH_KEYPAIR}' 
 
 tf-destroy:
 	@terraform -chdir="./infrastructure/deployment" init \
-	-backend-config="bucket=${SOLUTION_NAME}-terraform-state" \
+	-backend-config="bucket=${PROJECT_SHORT_NAME}-terraform-state" \
 	-backend-config="key=terraform.tfstate" \
 	-backend-config="region=${AWS_REGION}" \
-	-backend-config="dynamodb_table=${SOLUTION_NAME}-terraform-state-locks" \
+	-backend-config="dynamodb_table=${PROJECT_SHORT_NAME}-terraform-state-locks" \
 	-backend-config="encrypt=true" \
 
 	@terraform -chdir="./infrastructure/deployment" destroy \
-	-var 'project_name=${SOLUTION_NAME}' \
+	-var 'project_name=${PROJECT_SHORT_NAME}' \
 	-var 'billing_code=${AWS_BILLING_CODE}' \
 	-var 'region=${AWS_REGION}' \
 	-var 'keypair_name=${SSH_KEYPAIR}' 
 
-	@python ./infrastructure/delete_secrets.py ${SOLUTION_NAME} ${AWS_REGION}
+	@python ./infrastructure/delete_secrets.py ${PROJECT_SHORT_NAME} ${AWS_REGION}
