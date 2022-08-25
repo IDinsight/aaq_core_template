@@ -4,7 +4,6 @@ import pytest
 import sqlalchemy
 import yaml
 from sqlalchemy import text
-from core_model import app
 from core_model.app import create_app, get_config_data, load_embeddings
 
 # parameterize this to load different embeddings
@@ -20,7 +19,6 @@ def monkeysession(request):
     mpatch = MonkeyPatch()
     yield mpatch
     mpatch.undo()
->>>>>>> d42df0d (fixed weight tests)
 
 
 @pytest.fixture(scope="session")
@@ -29,11 +27,6 @@ def test_params():
         params_dict = yaml.safe_load(stream)
 
     return params_dict
-
-
-# @pytest.fixture(scope="session")
-# def patchbinary(monkeysession, embedding_bin):
-#     monkeysession.setattr(app, "load_embeddings", lambda *x: embedding_bin)
 
 
 @pytest.fixture(scope="session")
@@ -66,6 +59,27 @@ def app_weight(test_params):
 def client_weight(app_weight):
     app_weight.config["REDUCTION_FUNCTION"] = "mean_plus_weight"
     with app_weight.test_client() as client:
+        yield client
+
+
+@pytest.fixture(scope="session")
+def test_params_other_model():
+    with open(Path(__file__).parent / "config_test_other_model.yaml", "r") as stream:
+        params_dict = yaml.safe_load(stream)
+
+    return params_dict
+
+
+@pytest.fixture(scope="session")
+def app_other_model(test_params_other_model):
+    app = create_app(test_params_other_model)
+    return app
+
+
+@pytest.fixture(scope="session")
+def client_other_model(app_other_model):
+    app_other_model.config["REDUCTION_FUNCTION"] = "mean_plus_weight"
+    with app_other_model.test_client() as client:
         yield client
 
 

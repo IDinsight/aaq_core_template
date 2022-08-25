@@ -77,6 +77,80 @@ class TestInboundMessage:
 
 
 @pytest.mark.slow
+class TestInboundMessageOtherModel:
+
+    insert_faq = (
+        "INSERT INTO faqmatches ("
+        "faq_tags, faq_author, faq_title, faq_content_to_send, "
+        "faq_added_utc, faq_thresholds) "
+        "VALUES (:faq_tags, :author, :title, :content, :added_utc, :threshold)"
+    )
+    faq_tags = [
+        """{"rock", "guitar", "melody", "chord"}""",
+        """{"cheese", "tomato", "bread", "mustard"}""",
+        """{"rock", "lake", "mountain", "sky"}""",
+        """{"trace", "vector", "length", "angle"}""",
+        """{"draw", "sing", "exercise", "code"}""",
+        """{"digest", "eat", "chew", "expel"}""",
+    ]
+    faq_other_params = {
+        "added_utc": "2022-04-14",
+        "author": "Pytest author",
+        "content": "{}",
+        "threshold": "{0.1, 0.1, 0.1, 0.1}",
+    }
+
+    @pytest.fixture
+    def faq_data(self, client_other_model, db_engine):
+        headers = {"Authorization": "Bearer %s" % os.getenv("INBOUND_CHECK_TOKEN")}
+        with db_engine.connect() as db_connection:
+            inbound_sql = text(self.insert_faq)
+            for i, tags in enumerate(self.faq_tags):
+                db_connection.execute(
+                    inbound_sql,
+                    title=f"Pytest title #{i}",
+                    faq_tags=tags,
+                    **self.faq_other_params,
+                )
+        client_other_model.get("/internal/refresh-faqs", headers=headers)
+        yield
+        with db_engine.connect() as db_connection:
+            t = text("DELETE FROM faqmatches " "WHERE faq_author='Pytest author'")
+            db_connection.execute(t)
+        client_other_model.get("/internal/refresh-faqs", headers=headers)
+
+    def test_inbound_returns_3_faqs(self, client_other_model, faq_data):
+        request_data = {
+            "text_to_match": "I love going hiking. What should I pack for lunch?",
+            "return_scoring": "true",
+        }
+        headers = {"Authorization": "Bearer %s" % os.getenv("INBOUND_CHECK_TOKEN")}
+        response = client_other_model.post(
+            "/inbound/check", json=request_data, headers=headers
+        )
+        json_data = response.get_json()
+
+        assert len(json_data["top_responses"]) == 3
+
+    def test_inbound_endpoint_works(self, client_other_model):
+        request_data = {
+            "text_to_match": """ I'm worried about the vaccines. Can I have some
+        information? \U0001f600
+        πλέων ἐπὶ οἴνοπα πόντον ἐπ᾽ ἀλλοθρόους ἀνθρώπους, ἐς Τεμέσην""",
+            "return_scoring": "true",
+        }
+        headers = {"Authorization": "Bearer %s" % os.getenv("INBOUND_CHECK_TOKEN")}
+        response = client_other_model.post(
+            "/inbound/check", json=request_data, headers=headers
+        )
+        json_data = response.get_json()
+        assert "inbound_id" in json_data
+        assert "scoring" in json_data
+        assert "top_responses" in json_data
+        assert "feedback_secret_key" in json_data
+
+
+@pytest.mark.slow
 class TestInboundFeedback:
     insert_inbound = (
         "INSERT INTO inbounds ("
