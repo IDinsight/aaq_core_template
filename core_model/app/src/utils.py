@@ -7,7 +7,6 @@ from collections import UserDict
 from pathlib import Path
 
 import boto3
-import numpy as np
 import pandas as pd
 import yaml
 from gensim.models import KeyedVectors
@@ -20,6 +19,9 @@ def load_word_embeddings_bin(folder, filename, model_type):
     based on environment var.
 
     TODO: make into a pure function and take ENV as input
+    TODO: Change env var to be VECTORS_BINARY_BUCKET since it is no longer just W2V
+    TODO: Refactor to reduce repetition. Break into functions. See:
+    https://github.com/IDinsight/aaq_core_template/pull/17#discussion_r945825199
     """
 
     if model_type == "fasttext":

@@ -3,17 +3,12 @@ from pathlib import Path
 import pytest
 import sqlalchemy
 import yaml
+from core_model.app import create_app, get_config_data
 from sqlalchemy import text
-from core_model.app import create_app, get_config_data, load_embeddings
-
-# parameterize this to load different embeddings
-# @pytest.fixture(scope="session")
-# def embedding_bin():
-#     return load_embeddings()
 
 
 @pytest.fixture(scope="session")
-def monkeysession(request):
+def monkeysession():
     from _pytest.monkeypatch import MonkeyPatch
 
     mpatch = MonkeyPatch()
@@ -21,10 +16,19 @@ def monkeysession(request):
     mpatch.undo()
 
 
-@pytest.fixture(scope="session")
-def test_params():
-    with open(Path(__file__).parent / "config.yaml", "r") as stream:
+@pytest.fixture(
+    params=[
+        "google_w2v",
+        pytest.param("simple_fasttext_with_faq", marks=pytest.mark.extended),
+    ],
+    scope="session",
+)
+def test_params(request):
+    with open(Path(__file__).parent / "configs/base.yaml", "r") as stream:
         params_dict = yaml.safe_load(stream)
+
+    with open(Path(__file__).parent / f"configs/{request.param}.yaml", "r") as stream:
+        params_dict.update(yaml.safe_load(stream))
 
     return params_dict
 
@@ -68,19 +72,6 @@ def test_params_other_model():
         params_dict = yaml.safe_load(stream)
 
     return params_dict
-
-
-@pytest.fixture(scope="session")
-def app_other_model(test_params_other_model):
-    app = create_app(test_params_other_model)
-    return app
-
-
-@pytest.fixture(scope="session")
-def client_other_model(app_other_model):
-    app_other_model.config["REDUCTION_FUNCTION"] = "mean_plus_weight"
-    with app_other_model.test_client() as client:
-        yield client
 
 
 @pytest.fixture(scope="class")
