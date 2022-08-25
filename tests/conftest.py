@@ -7,11 +7,10 @@ from sqlalchemy import text
 from core_model import app
 from core_model.app import create_app, get_config_data, load_embeddings
 
-
 # parameterize this to load different embeddings
-@pytest.fixture(scope="session")
-def embedding_bin():
-    return load_embeddings()
+# @pytest.fixture(scope="session")
+# def embedding_bin():
+#     return load_embeddings()
 
 
 @pytest.fixture(scope="session")
@@ -32,13 +31,13 @@ def test_params():
     return params_dict
 
 
-@pytest.fixture(scope="session")
-def patchbinary(monkeysession, embedding_bin):
-    monkeysession.setattr(app, "load_embeddings", lambda *x: embedding_bin)
+# @pytest.fixture(scope="session")
+# def patchbinary(monkeysession, embedding_bin):
+#     monkeysession.setattr(app, "load_embeddings", lambda *x: embedding_bin)
 
 
 @pytest.fixture(scope="session")
-def app_main(test_params, patchbinary):
+def app_main(test_params):
     app = create_app(test_params)
     app.faqt_model.n_top_matches = 3
     return app
@@ -58,7 +57,7 @@ def client(app_main):
 
 
 @pytest.fixture(scope="session")
-def app_weight(test_params, patchbinary):
+def app_weight(test_params):
     app = create_app(test_params)
     return app
 

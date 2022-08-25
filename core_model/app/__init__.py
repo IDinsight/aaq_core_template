@@ -72,7 +72,7 @@ def setup(app, params):
     db.init_app(app)
     metrics.init_app(app)
 
-    app.faqt_model = create_faqt_model()
+    app.faqt_model = create_faqt_model(config)
     app.text_preprocessor = get_text_preprocessor()
 
     refresh_faqs(app)
@@ -85,8 +85,12 @@ def get_config_data(params):
 
     config = DefaultEnvDict()
     app_config = load_parameters("score_reduction")
+    text_preprocessor_config = load_parameters("preprocessing")
+    config["matching_model"] = load_parameters("matching_model")
     config.update(app_config)
+    config.update(text_preprocessor_config)
     config.update(params)
+
     config["SQLALCHEMY_DATABASE_URI"] = get_postgres_uri(
         config["PG_ENDPOINT"],
         config["PG_PORT"],
@@ -98,15 +102,12 @@ def get_config_data(params):
     return config
 
 
-def load_embeddings(params_override=None):
+def load_embeddings(name_of_model_in_data_source):
     """
     Load the correct embeddings
     """
-    params = load_parameters()
-    if params_override:
-        params.update(params_override)
 
-    model_to_use_name = params["matching_model"]
+    model_to_use_name = name_of_model_in_data_source
 
     data_sources = load_data_sources()
 
@@ -123,24 +124,22 @@ def load_embeddings(params_override=None):
     return w2v_model
 
 
-def create_faqt_model():
+def create_faqt_model(config):
     """
     Create a new instance of the faqt class.
     """
-    params = load_parameters()
 
-    w2v_model = load_embeddings()
-    pp_params = params["preprocessing"]
+    gensim_keyed_vector = load_embeddings(config["matching_model"])
     faqs_params = load_parameters("faq_match")
     custom_wvs = load_custom_wvs()
     tags_guiding_typos = load_tags_guiding_typos()
     hunspell = Hunspell()
 
-    scoring_function_args = pp_params["scoring_function_args"]
+    scoring_function_args = config["scoring_function_args"]
     n_top_matches = faqs_params["n_top_matches_per_page"]
 
     return KeyedVectorsScorer(
-        w2v_model,
+        gensim_keyed_vector,
         glossary=custom_wvs,
         hunspell=hunspell,
         tags_guiding_typos=tags_guiding_typos,
