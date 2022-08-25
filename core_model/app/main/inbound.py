@@ -249,7 +249,18 @@ def finalise_return_json(json_return, inbound_id, current_page, max_pages):
     return json_return
 
 
-@main.route("/inbound/<inbound_id>/<page_number>", methods=["GET"])
+@main.route("/inbound/<int:inbound_id>/<int:page_number>", methods=["GET"])
+@metrics.do_not_track()
+@metrics.summary(
+    "pagination_latencies_by_status",
+    "Pagination latencies",
+    labels={"status": lambda r: r.status_code},
+)
+@metrics.counter(
+    "pagination_by_page_number",
+    "Number of requests by page number",
+    labels={"page_number": lambda: request.view_args["page_number"]},
+)
 @auth.login_required
 def inbound_results_page(inbound_id, page_number):
     """
@@ -364,6 +375,8 @@ def bad_feedback_schema(feedback_json):
     Check if the feedback JSON is well formed.
     """
 
+    if not isinstance(feedback_json, dict):
+        return True
     if feedback_json.get("feedback_type") not in ["positive", "negative"]:
         return True
     if feedback_json["feedback_type"] == "positive":
