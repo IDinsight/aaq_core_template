@@ -22,7 +22,7 @@ from .src.utils import (
     load_pairwise_entities,
     load_parameters,
     load_tags_guiding_typos,
-    load_wv_pretrained_bin,
+    load_word_embeddings_bin,
 )
 
 
@@ -105,13 +105,19 @@ def load_embeddings(params_override=None):
     params = load_parameters()
     if params_override:
         params.update(params_override)
-    data_sources = load_data_sources()
-    model_to_use_name = params["matching_model"]["model"]
 
-    w2v_model = load_wv_pretrained_bin(
-        data_sources[model_to_use_name]["folder"],
-        data_sources[model_to_use_name]["filename"],
-        params["matching_model"]["type"],
+    model_to_use_name = params["matching_model"]
+
+    data_sources = load_data_sources()
+
+    model_folder = data_sources[model_to_use_name]["folder"]
+    model_filename = data_sources[model_to_use_name]["filename"]
+    model_type = data_sources[model_to_use_name]["type"]
+
+    w2v_model = load_word_embeddings_bin(
+        model_folder,
+        model_filename,
+        model_type,
     )
 
     return w2v_model

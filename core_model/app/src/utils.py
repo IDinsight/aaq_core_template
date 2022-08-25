@@ -14,9 +14,9 @@ from gensim.models import KeyedVectors
 from gensim.models.fasttext import load_facebook_vectors
 
 
-def load_wv_pretrained_bin(folder, filename, model_type="w2v"):
+def load_word_embeddings_bin(folder, filename, model_type):
     """
-    Load pretrained word2vec model from either local mount or S3
+    Load pretrained word2vec or fasttext model from either local mount or S3
     based on environment var.
 
     TODO: make into a pure function and take ENV as input
@@ -45,7 +45,7 @@ def load_wv_pretrained_bin(folder, filename, model_type="w2v"):
                 binary=True,
             )
     else:
-        raise ValueError('model_type should be either "fasttext" or "w2v"')
+        raise NotImplementedError('model_type should be either "fasttext" or "w2v"')
 
     return model
 
