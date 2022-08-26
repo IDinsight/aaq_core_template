@@ -129,7 +129,7 @@ container:
 		--env-file ./secrets/database_secrets.env \
 		--env-file ./secrets/sentry_config.env \
 		--mount type=bind,source="$(PWD)/data/pretrained_wv_models/GoogleNews-vectors-negative300-prenorm.bin",target=/usr/src/data/pretrained_wv_models/GoogleNews-vectors-negative300-prenorm.bin \
-		--mount type=bind,source="$(PWD)/data/custom_word_embeddings/simple_fasttext_with_faq.bin",target=/usr/src/data/custom_word_embeddings/simple_fasttext_with_faq.bin \
+		--mount type=bind,source="$(PWD)/data/custom_word_embeddings",target=/usr/src/data/custom_word_embeddings \
 		$(NAME):$(VERSION)
 
 push-image: image cmd-exists-aws
