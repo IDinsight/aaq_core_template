@@ -78,8 +78,8 @@ jobs:
       - name: Load project config variables
         id: get-project-config
         uses: ./.github/actions/setup-environment
-          with:
-            environment-config-file: "project_config.cfg"
+        with:
+          environment-config-file: "project_config.cfg"
 
       - name: Pull down ECS service
         env:
