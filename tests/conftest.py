@@ -77,14 +77,6 @@ def client_weight(app_weight):
         yield client
 
 
-@pytest.fixture(scope="session")
-def test_params_other_model():
-    with open(Path(__file__).parent / "config_test_other_model.yaml", "r") as stream:
-        params_dict = yaml.safe_load(stream)
-
-    return params_dict
-
-
 @pytest.fixture(scope="class")
 def db_engine(test_params):
     config = get_config_data(test_params)
