@@ -6,6 +6,6 @@ MODEL_PROTOCOL: http
 THRESHOLD_CRITERIA: 0.5
 TRUE_FAQ_COL: "FAQ Name"
 QUERY_COL: "Question"
-VALIDATION_DATA_PREFIX: validation_aaq/validation_khumo_labelled.csv
-VALIDATION_FAQ_PREFIX: validation_aaq/praekelt_mc_faqs.csv
+VALIDATION_DATA_PREFIX: # Key of the Final Test Dataset on S3
+VALIDATION_FAQ_PREFIX: # Key of the FAQ dataset on S3
 matching_model: google_news_pretrained
