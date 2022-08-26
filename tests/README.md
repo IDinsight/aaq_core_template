@@ -7,7 +7,7 @@ The fixtures in the test delete all rows in the tables after the test has been r
 
 ## Setup database connection
 
-Update details your wish to override in the the `config.yaml` file.
+Update details your wish to override in the `yaml` files under `configs`. 
 You may wish to add it to .gitignore if it will include passwords.
 
 ## Running tests

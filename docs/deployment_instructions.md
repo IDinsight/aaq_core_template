@@ -9,7 +9,9 @@ This is the deployment instructions for the **AAQ Core App**. It does not cover 
 
 # Initial setup
 
-1. Save GoogleNews pretrained model binary, to be mounted onto the containers. Download from https://www.dropbox.com/s/0ah0kslf7ac199g/GoogleNews-vectors-negative300-prenorm.bin?dl=0, and un-zip (so file is `.bin`).
+1. Save model binary, to be mounted onto the containers. 
+    - Pre-trained models should be saved to `data/pretrained_wv_models` and custom embeddings should be saved to `data\custom_word_embedding`.
+    - Download pretrained model from https://www.dropbox.com/s/0ah0kslf7ac199g/GoogleNews-vectors-negative300-prenorm.bin?dl=0, and un-zip (so file is `.bin`).
     - You could also have this `.bin` in S3, so that whenever cluster instances are launched, they copy from S3 and then mount into the container.
 
 2. Setup DB tables using `scripts/core_tables.sql`.
