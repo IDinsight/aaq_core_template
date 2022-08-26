@@ -2,35 +2,52 @@
 General utility functions
 """
 import os
+import tempfile
 from collections import UserDict
 from pathlib import Path
 
-import numpy as np
+import boto3
 import pandas as pd
 import yaml
 from gensim.models import KeyedVectors
+from gensim.models.fasttext import load_facebook_vectors
 
 
-def load_wv_pretrained_bin(folder, filename):
+def load_word_embeddings_bin(folder, filename, model_type):
     """
-    Load pretrained word2vec model from either local mount or S3
+    Load pretrained word2vec or fasttext model from either local mount or S3
     based on environment var.
 
     TODO: make into a pure function and take ENV as input
+    TODO: Change env var to be VECTORS_BINARY_BUCKET since it is no longer just W2V
+    TODO: Refactor to reduce repetition. Break into functions. See:
+    https://github.com/IDinsight/aaq_core_template/pull/17#discussion_r945825199
     """
 
-    if os.getenv("GITHUB_ACTIONS") == "true":
-        bucket = os.getenv("WORD2VEC_BINARY_BUCKET")
-        model = KeyedVectors.load_word2vec_format(
-            f"s3://{bucket}/{filename}", binary=True
-        )
-
+    if model_type == "fasttext":
+        if os.getenv("GITHUB_ACTIONS") == "true":
+            bucket = os.getenv("WORD2VEC_BINARY_BUCKET")
+            s3 = boto3.resource("s3")
+            with tempfile.NamedTemporaryFile() as tf:
+                s3.Bucket(bucket).download_file(filename, tf.name)
+                model = load_facebook_vectors(tf.name)
+        else:
+            full_path = Path(__file__).parents[3] / "data" / folder / filename
+            model = load_facebook_vectors(full_path)
+    elif model_type == "w2v":
+        if os.getenv("GITHUB_ACTIONS") == "true":
+            bucket = os.getenv("WORD2VEC_BINARY_BUCKET")
+            model = KeyedVectors.load_word2vec_format(
+                f"s3://{bucket}/{filename}", binary=True
+            )
+        else:
+            full_path = Path(__file__).parents[3] / "data" / folder / filename
+            model = KeyedVectors.load_word2vec_format(
+                full_path,
+                binary=True,
+            )
     else:
-        full_path = Path(__file__).parents[3] / "data" / folder / filename
-        model = KeyedVectors.load_word2vec_format(
-            full_path,
-            binary=True,
-        )
+        raise NotImplementedError('model_type should be either "fasttext" or "w2v"')
 
     return model
 
