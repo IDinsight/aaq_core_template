@@ -6,7 +6,7 @@ on:
 
 jobs:
   ValidateModels:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     outputs:
       env-name: ${{ steps.env-name.outputs.environment }}
     steps:

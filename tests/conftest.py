@@ -8,6 +8,23 @@ from core_model.app import create_app, get_config_data, load_embeddings
 from sqlalchemy import text
 
 
+@pytest.fixture(
+    params=[
+        "google_w2v",
+        pytest.param("simple_fasttext_with_faq", marks=pytest.mark.extended),
+    ],
+    scope="session",
+)
+def test_params(request):
+    with open(Path(__file__).parent / "configs/base.yaml", "r") as stream:
+        params_dict = yaml.safe_load(stream)
+
+    with open(Path(__file__).parent / f"configs/{request.param}.yaml", "r") as stream:
+        params_dict.update(yaml.safe_load(stream))
+
+    return params_dict
+
+
 @pytest.fixture(scope="session")
 def embedding_bin(test_params):
     return load_embeddings(test_params["matching_model"])
@@ -25,23 +42,6 @@ def monkeysession():
 @pytest.fixture(scope="session")
 def patchbinary(monkeysession, embedding_bin):
     monkeysession.setattr(app, "load_embeddings", lambda *x: embedding_bin)
-
-
-@pytest.fixture(
-    params=[
-        "google_w2v",
-        pytest.param("simple_fasttext_with_faq", marks=pytest.mark.extended),
-    ],
-    scope="session",
-)
-def test_params(request):
-    with open(Path(__file__).parent / "configs/base.yaml", "r") as stream:
-        params_dict = yaml.safe_load(stream)
-
-    with open(Path(__file__).parent / f"configs/{request.param}.yaml", "r") as stream:
-        params_dict.update(yaml.safe_load(stream))
-
-    return params_dict
 
 
 @pytest.fixture(scope="session")
