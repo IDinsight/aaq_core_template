@@ -50,7 +50,7 @@ jobs:
 
   DeployStagingECSCluster:
     name: Deploy ECS cluster
-    needs: [DockerMakeAndPushRelease, RefreshStagingDatabase]
+    needs: [DockerMakeAndPushRelease]
     runs-on: ubuntu-latest
     environment: staging
     steps:
