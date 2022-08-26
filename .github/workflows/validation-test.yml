@@ -6,7 +6,7 @@ on:
 
 jobs:
   ValidateModels:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     outputs:
       env-name: ${{ steps.env-name.outputs.environment }}
     steps:
@@ -16,7 +16,7 @@ jobs:
       - name: Install Dependencies with Apt Get
         run: |
           sudo apt-get update
-          sudo apt-get install python3.8 jq -y
+          sudo apt-get install python3.9.6 jq -y
       - name: Install libraries
         run: |
           pip install -r requirements.txt
