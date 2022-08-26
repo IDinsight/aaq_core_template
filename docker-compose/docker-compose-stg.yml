@@ -1,7 +1,7 @@
 version: '2'
 services:
     core:
-        image: ${IMAGE_NAME}
+        image: 678681925278.dkr.ecr.af-south-1.amazonaws.com/aaq_solution/praekelt_mc_core:v1.0.0
         cpu_shares: 1200
         mem_limit: 13048576000
         environment:
