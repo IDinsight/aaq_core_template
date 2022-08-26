@@ -68,7 +68,7 @@ jobs:
           WORD2VEC_BINARY_BUCKET: ${{secrets.WORD2VEC_BINARY_BUCKET}}
           PROMETHEUS_MULTIPROC_DIR: /tmp
         run: |
-          coverage run -m pytest tests -m "not extended"
+          coverage run -m pytest tests -m "not extended" --durations=0
           coverage lcov --include="core_model/*"
       - name: Run Validation Tests
         env:
