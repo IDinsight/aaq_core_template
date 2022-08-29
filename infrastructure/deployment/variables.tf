@@ -1,13 +1,8 @@
-variable "project_name" {
+variable "project_short_name" {
   type = string
 
   validation {
-    condition     = var.project_name != "<fill_project_name>"
-    error_message = "You must provide your project name in deployment.auto.tfvars."
-  }
-
- validation {
-    condition     = can(regex("^[a-z]+(-[a-z]+)*$", var.project_name))
+    condition     = can(regex("^[a-z]+(-[a-z]+)*$", var.project_short_name))
     error_message = "Invalid project name. Project names must be all lowercase letters with non-consecutive hyphens, e.g. my-airflow-project."
   }
 }
@@ -16,8 +11,8 @@ variable "billing_code" {
   type = string
 
   validation {
-    condition     = var.billing_code != "<fill_billing_code>"
-    error_message = "You must provide your billing code in deployment.auto.tfvars."
+    condition     = var.billing_code != ""
+    error_message = "You must provide your billing code."
   }
 }
 
@@ -25,16 +20,16 @@ variable "region" {
   type = string
   
   validation {
-    condition     = var.region != "<fill_aws_region>"
-    error_message = "You must provide your AWS region in deployment.auto.tfvars."
+    condition     = var.region != ""
+    error_message = "You must provide your AWS region."
   }
 }
 
 variable "keypair_name" {
   type = string
   validation {
-    condition     = var.keypair_name != "<fill_keypair_name>"
-    error_message = "You must provide your keypair name in deployment.auto.tfvars."
+    condition     = var.keypair_name != ""
+    error_message = "You must provide your keypair name."
   }
 }
 

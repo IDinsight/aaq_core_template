@@ -1,12 +1,7 @@
-variable "project_name" {
+variable "project_short_name" {
   type = string
 
   validation {
-    condition     = var.project_name != "<fill_project_name>"
-    error_message = "You must provide your project name in tf_backend.auto.tfvars."
-  }
-
- validation {
     condition     = can(regex("^[a-z]+(-[a-z]+)*$", var.project_name))
     error_message = "Invalid project name. Project names must be all lowercase letters with non-consecutive hyphens, e.g. my-superset-project."
   }
@@ -17,7 +12,7 @@ variable "billing_code" {
 
   validation {
     condition     = var.billing_code != "<fill_billing_code>"
-    error_message = "You must provide your billing code in tf_backend.auto.tfvars."
+    error_message = "You must provide your billing code."
   }
 }
 
@@ -26,7 +21,7 @@ variable "region" {
   
   validation {
     condition     = var.region != "<fill_region_name>"
-    error_message = "You must provide your AWS region in deployment.auto.tfvars."
+    error_message = "You must provide your AWS region."
   }
 }
 
