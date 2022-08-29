@@ -22,7 +22,7 @@ from .src.utils import (
     load_pairwise_entities,
     load_parameters,
     load_tags_guiding_typos,
-    load_wv_pretrained_bin,
+    load_word_embeddings_bin,
 )
 
 
@@ -72,7 +72,7 @@ def setup(app, params):
     db.init_app(app)
     metrics.init_app(app)
 
-    app.faqt_model = create_faqt_model()
+    app.faqt_model = create_faqt_model(config)
     app.text_preprocessor = get_text_preprocessor()
 
     refresh_faqs(app)
@@ -85,8 +85,12 @@ def get_config_data(params):
 
     config = DefaultEnvDict()
     app_config = load_parameters("score_reduction")
+    text_preprocessor_config = load_parameters("preprocessing")
+    config["matching_model"] = load_parameters("matching_model")
     config.update(app_config)
+    config.update(text_preprocessor_config)
     config.update(params)
+
     config["SQLALCHEMY_DATABASE_URI"] = get_postgres_uri(
         config["PG_ENDPOINT"],
         config["PG_PORT"],
@@ -98,26 +102,44 @@ def get_config_data(params):
     return config
 
 
-def create_faqt_model():
+def load_embeddings(name_of_model_in_data_source):
+    """
+    Load the correct embeddings
+    """
+
+    model_to_use_name = name_of_model_in_data_source
+
+    data_sources = load_data_sources()
+
+    model_folder = data_sources[model_to_use_name]["folder"]
+    model_filename = data_sources[model_to_use_name]["filename"]
+    model_type = data_sources[model_to_use_name]["type"]
+
+    w2v_model = load_word_embeddings_bin(
+        model_folder,
+        model_filename,
+        model_type,
+    )
+
+    return w2v_model
+
+
+def create_faqt_model(config):
     """
     Create a new instance of the faqt class.
     """
-    data_sources = load_data_sources()
-    w2v_model = load_wv_pretrained_bin(
-        data_sources["google_news_pretrained"]["folder"],
-        data_sources["google_news_pretrained"]["filename"],
-    )
-    pp_params = load_parameters("preprocessing")
+
+    gensim_keyed_vector = load_embeddings(config["matching_model"])
     faqs_params = load_parameters("faq_match")
     custom_wvs = load_custom_wvs()
     tags_guiding_typos = load_tags_guiding_typos()
     hunspell = Hunspell()
 
-    scoring_function_args = pp_params["scoring_function_args"]
-    n_top_matches = faqs_params["n_top_matches"]
+    scoring_function_args = config["scoring_function_args"]
+    n_top_matches = faqs_params["n_top_matches_per_page"]
 
     return KeyedVectorsScorer(
-        w2v_model,
+        gensim_keyed_vector,
         glossary=custom_wvs,
         hunspell=hunspell,
         tags_guiding_typos=tags_guiding_typos,

@@ -7,7 +7,11 @@ minversion = "6.0"
 addopts = "-rP"
 testpaths = ["tests"]
 python_files = ["*.py"]
-markers = ["slow: mark test as slow", "fast: mark test as fast"]
+markers = [
+    "slow: mark test as slow", 
+    "fast: mark test as fast", 
+    "extended: for detailed test run"
+]
 filterwarnings = [
     "error",
     "ignore::DeprecationWarning",

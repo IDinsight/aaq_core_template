@@ -2,35 +2,52 @@
 General utility functions
 """
 import os
+import tempfile
 from collections import UserDict
 from pathlib import Path
 
-import numpy as np
+import boto3
 import pandas as pd
 import yaml
 from gensim.models import KeyedVectors
+from gensim.models.fasttext import load_facebook_vectors
 
 
-def load_wv_pretrained_bin(folder, filename):
+def load_word_embeddings_bin(folder, filename, model_type):
     """
-    Load pretrained word2vec model from either local mount or S3
+    Load pretrained word2vec or fasttext model from either local mount or S3
     based on environment var.
 
     TODO: make into a pure function and take ENV as input
+    TODO: Change env var to be VECTORS_BINARY_BUCKET since it is no longer just W2V
+    TODO: Refactor to reduce repetition. Break into functions. See:
+    https://github.com/IDinsight/aaq_core_template/pull/17#discussion_r945825199
     """
 
-    if os.getenv("GITHUB_ACTIONS") == "true":
-        bucket = os.getenv("WORD2VEC_BINARY_BUCKET")
-        model = KeyedVectors.load_word2vec_format(
-            f"s3://{bucket}/{filename}", binary=True
-        )
-
+    if model_type == "fasttext":
+        if os.getenv("GITHUB_ACTIONS") == "true":
+            bucket = os.getenv("WORD2VEC_BINARY_BUCKET")
+            s3 = boto3.resource("s3")
+            with tempfile.NamedTemporaryFile() as tf:
+                s3.Bucket(bucket).download_file(filename, tf.name)
+                model = load_facebook_vectors(tf.name)
+        else:
+            full_path = Path(__file__).parents[3] / "data" / folder / filename
+            model = load_facebook_vectors(full_path)
+    elif model_type == "w2v":
+        if os.getenv("GITHUB_ACTIONS") == "true":
+            bucket = os.getenv("WORD2VEC_BINARY_BUCKET")
+            model = KeyedVectors.load_word2vec_format(
+                f"s3://{bucket}/{filename}", binary=True
+            )
+        else:
+            full_path = Path(__file__).parents[3] / "data" / folder / filename
+            model = KeyedVectors.load_word2vec_format(
+                full_path,
+                binary=True,
+            )
     else:
-        full_path = Path(__file__).parents[3] / "data" / folder / filename
-        model = KeyedVectors.load_word2vec_format(
-            full_path,
-            binary=True,
-        )
+        raise NotImplementedError('model_type should be either "fasttext" or "w2v"')
 
     return model
 
@@ -203,63 +220,3 @@ class DefaultEnvDict(UserDict):
         if value is None:
             raise KeyError(f"{key} not found in dict or environment variables")
         return os.getenv(key)
-
-
-def get_faq_scores_for_message(inbound_vectors, faqs, scores):
-    """
-    Returns scores for the inbound vectors against each faq
-    Parameters
-    ----------
-    inbound_vectors: List[Array]
-        List of inbound tokens as word vectors
-    faqs: List[FAQ]
-        A list of faq-like objects. Each FAQ object must contain word vectors for
-        each tags as a dictionary under `FAQ.tags_wvs`
-    Returns
-    -------
-    Dict[int, Dict]
-        A Dictionary with `faq_id` as key. Values: faq details including scores
-        for each tag and an `overall_score`
-    """
-
-    scoring = {}
-    for faq, faq_score in zip(faqs, scores):
-        scoring[faq.faq_id] = {}
-        scoring[faq.faq_id]["faq_title"] = faq.faq_title
-        scoring[faq.faq_id]["faq_content_to_send"] = faq.faq_content_to_send
-        scoring[faq.faq_id]["tag_cs"] = faq_score
-
-        cs_values = list(scoring[faq.faq_id]["tag_cs"].values())
-        scoring[faq.faq_id]["overall_score"] = (min(cs_values) + np.mean(cs_values)) / 2
-
-    return scoring
-
-
-def get_top_n_matches(scoring, n_top_matches):
-    """
-    Gives a list of scores for each FAQ, return the top `n_top_matches` FAQs
-    Parameters
-    ----------
-    scoring: Dict[int, Dict]
-        Dict with faq_id as key and faq details and scores as values.
-        See return value of `get_faq_scores_for_message`.
-    n_top_matches: int
-        the number of top matches to return
-    Returns
-    -------
-    List[Tuple(int, str)]
-        A list of tuples of (faq_id, faq_content_to_send)._
-    """
-    matched_faq_titles = set()
-    # Sort and copy over top matches
-    top_matches_list = []
-    for id in sorted(scoring, key=lambda x: scoring[x]["overall_score"], reverse=True):
-        if scoring[id]["faq_title"] not in matched_faq_titles:
-            top_matches_list.append(
-                (scoring[id]["faq_title"], scoring[id]["faq_content_to_send"])
-            )
-            matched_faq_titles.add(scoring[id]["faq_title"])
-
-        if len(matched_faq_titles) == n_top_matches:
-            break
-    return top_matches_list

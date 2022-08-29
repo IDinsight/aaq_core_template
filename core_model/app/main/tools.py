@@ -9,7 +9,7 @@ from flask import abort, current_app, jsonify, request
 
 from ..data_models import TemporaryModel
 from ..prometheus_metrics import metrics
-from ..src import utils
+from ..src import faq_weights, scoring_functions
 from . import main
 from .auth import auth
 
@@ -65,10 +65,11 @@ def check_new_tags():
         faq_title="*** NEW TAGS MATCHED ***",
         faq_tags=req_json["tags_to_check"],
         faq_content_to_send="",
+        faq_weight=1,
     )
     original_faqs = current_app.faqs
     with_temp_faqs = original_faqs + [temp_faq]
-
+    with_temp_faqs = faq_weights.add_faq_weight_share(with_temp_faqs)
     current_app.faqt_model.set_tags([faq.faq_tags for faq in with_temp_faqs])
 
     json_return = {}
@@ -81,8 +82,12 @@ def check_new_tags():
             processed_message
         )
 
-        scoring = utils.get_faq_scores_for_message(
-            processed_message, with_temp_faqs, word_vector_scores
+        scoring = scoring_functions.get_faq_scores_for_message(
+            processed_message,
+            with_temp_faqs,
+            word_vector_scores,
+            current_app.config["REDUCTION_FUNCTION"],
+            **current_app.config["REDUCTION_FUNCTION_ARGS"],
         )
 
         matched_faq_titles = set()

@@ -11,8 +11,10 @@ preprocessing:
     - where
     - can
 faq_match:
-  n_top_matches: 10
+  n_top_matches_per_page: 10
 score_reduction:
   REDUCTION_FUNCTION: simple_mean
   REDUCTION_FUNCTION_ARGS:
     N: 5
+# Params for model to be used. Any model from data_sources
+matching_model: google_news_pretrained #simple_fasttext_with_faq # google_news_pretrained

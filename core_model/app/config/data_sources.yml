@@ -1,3 +1,29 @@
 google_news_pretrained:
   filename: GoogleNews-vectors-negative300-prenorm.bin
   folder: pretrained_wv_models
+  type: w2v
+
+# The following models are custom word-embeddings trained 
+# on real world data.
+# To find Notebooks where the models was trained, check out
+# the respective project repos.
+faqt_w2v_with_faq:
+  filename: faqt_w2v_with_faq.bin
+  folder: custom_word_embeddings
+  type: w2v
+simple_w2v:
+  filename: simple_w2v.bin
+  folder: custom_word_embeddings
+  type: w2v
+faqt_w2v:
+  filename: faqt_w2v.bin
+  folder: custom_word_embeddings
+  type: w2v
+simple_w2v_with_faq:
+  filename: simple_w2v_with_faq.bin
+  folder: custom_word_embeddings
+  type: w2v
+simple_fasttext_with_faq:
+  filename: simple_fasttext_with_faq.bin
+  folder: custom_word_embeddings
+  type: fasttext

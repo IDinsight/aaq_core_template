@@ -89,7 +89,7 @@ You should edit each of the files in `./secrets` and set the correct parameters.
 
 -   `tests/config.yaml` should be updated. This file is used by `pytest` and is required to run tests locally.
 
--   `validation/config.yaml` should also be updated. This is used by the validation script. 
+-   `validation/config.yaml` should also be updated. This is used by the validation script.
 
 -   Other files should be updated before you can test the instance.
 
@@ -112,9 +112,12 @@ Note the secrets setup for this repository in Github. Ensure that these are also
 
 ### Data and config
 
-#### Pre-trained model
+#### Embeddings binaries
 
-Copy (or symlink) the pre-trained Google News model to `data/pretrained_wv_models`.
+You only need to copy the binaries for the model you wish to use. The model can be set in the `core_model/app/config/parameters.yml` file.
+
+-   Copy the pre-trained models to `data/pretrained_wv_models`
+-   Copy the custom models to `data/custom_word_embedding`
 
 #### Configure to context
 
@@ -126,8 +129,10 @@ Copy (or symlink) the pre-trained Google News model to `data/pretrained_wv_model
 1. Setup `coveralls`
 2. Setup auto deployment on EC2 (using webhooks or other)
 3. Update this file!
-  - Remove irrelevant content (all the template text)
-  - Update the badges at the top of this file
+
+-   Remove irrelevant content (all the template text)
+-   Update the badges at the top of this file
+
 6. Setup application monitoring
 7. Setup other apps as necessary,
 

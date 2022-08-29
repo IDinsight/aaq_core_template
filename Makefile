@@ -136,7 +136,7 @@ container:
 		--env-file ./secrets/app_secrets.env \
 		--env-file ./secrets/database_secrets.env \
 		--env-file ./secrets/sentry_config.env \
-		--mount type=bind,source="$(PWD)/data/pretrained_wv_models/GoogleNews-vectors-negative300-prenorm.bin",target=/usr/src/data/pretrained_wv_models/GoogleNews-vectors-negative300-prenorm.bin \
+		--mount type=bind,source="$(PWD)/data",target="/usr/src/data" \
 		$(NAME):$(VERSION)
 
 container-stg:

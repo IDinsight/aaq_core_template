@@ -16,7 +16,7 @@ jobs:
       - name: Install Dependencies with Apt Get
         run: |
           sudo apt-get update
-          sudo apt-get install python3.8 jq -y
+          sudo apt-get install python3.9 jq -y
       - name: Install libraries
         run: |
           pip install -r requirements.txt
@@ -68,7 +68,7 @@ jobs:
           WORD2VEC_BINARY_BUCKET: ${{secrets.WORD2VEC_BINARY_BUCKET}}
           PROMETHEUS_MULTIPROC_DIR: /tmp
         run: |
-          coverage run -m pytest tests
+          coverage run -m pytest tests -m "not extended" --durations=0
           coverage lcov --include="core_model/*"
       - name: Run Validation Tests
         env:
