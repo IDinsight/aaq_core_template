@@ -12,7 +12,7 @@ variable "billing_code" {
 
   validation {
     condition     = var.billing_code != ""
-    error_message = "You must provide your billing code"
+    error_message = "You must provide your billing code."
   }
 }
 
@@ -21,7 +21,7 @@ variable "region" {
   
   validation {
     condition     = var.region != ""
-    error_message = "You must provide your AWS region"
+    error_message = "You must provide your AWS region."
   }
 }
 
@@ -29,7 +29,7 @@ variable "keypair_name" {
   type = string
   validation {
     condition     = var.keypair_name != ""
-    error_message = "You must provide your keypair name"
+    error_message = "You must provide your keypair name."
   }
 }
 
