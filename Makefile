@@ -229,7 +229,7 @@ tf-apply:
 	-var 'project_name=${PROJECT_SHORT_NAME}' \
 	-var 'billing_code=${AWS_BILLING_CODE}' \
 	-var 'region=${AWS_REGION}' \
-	-var 'keypair_name=${SSH_KEYPAIR}' 
+	-var 'keypair_name=${PROJECT_SHORT_NAME}-keypair' 
 
 tf-destroy:
 	@terraform -chdir="./infrastructure/deployment" init \
@@ -243,6 +243,6 @@ tf-destroy:
 	-var 'project_name=${PROJECT_SHORT_NAME}' \
 	-var 'billing_code=${AWS_BILLING_CODE}' \
 	-var 'region=${AWS_REGION}' \
-	-var 'keypair_name=${SSH_KEYPAIR}' 
+	-var 'keypair_name=${PROJECT_SHORT_NAME}-keypair' 
 
 	@python ./infrastructure/delete_secrets.py ${PROJECT_SHORT_NAME} ${AWS_REGION}

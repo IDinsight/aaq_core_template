@@ -7,8 +7,7 @@
    This sets up the S3 bucket and dynamodb table which will be used to store terraform metadata for the project.
 
 2. Deploy dev/test components:
-	- On the AWS console, create an ssh keypair in the same region where you will deploy. You can find the keypair creation screen under EC2 > Key Pairs (on the left-hand menu under "Network & Security"). Save the private key (the .pem file) in your local `~/.ssh/` directory and make note of the keypair name so you can add it to the Terraform deployment variables in the next step.
-	- Add the name of the keypair to `project_config.cfg` file
+	- On the AWS console, create an ssh keypair called `<PROJECT_SHORT_NAME>-keypair` in the same region where you will deploy. You can find the keypair creation screen under EC2 > Key Pairs (on the left-hand menu under "Network & Security"). Save the private key (the .pem file) in your local `~/.ssh/` directory.
 	- Check the input variable definition file `infrastructure/deployment/variables.tf` for input variables that you may want to override the default values for. 
 	- Run the following command:`make tf-apply`. Only confirm by typing 'yes' if the changes being made are as expected.
 	<br/>

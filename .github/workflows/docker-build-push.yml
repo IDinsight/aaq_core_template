@@ -1,11 +1,8 @@
 name: Docker Make and Push Release Image and Deploy to staging
 on:
-  # release:
-  #   # Only use the types keyword to narrow down the activity types that will trigger your workflow.
-  #   types: [published]
-   push:
-    branches:
-      - ecs_deployment
+  release:
+    # Only use the types keyword to narrow down the activity types that will trigger your workflow.
+    types: [published]
 
 jobs:
   DockerMakeAndPushRelease:
@@ -13,11 +10,10 @@ jobs:
     runs-on: ubuntu-latest
     environment: staging
     env:
-      # IMAGE_NAME: ${{ github.event.repository.name }}:${{ github.event.release.tag_name }}
-      IMAGE_NAME: ${{ github.event.repository.name }}:test
+      IMAGE_NAME: ${{ github.event.repository.name }}:${{ github.event.release.tag_name }}
     outputs:
       env-name: ${{ steps.env-name.outputs.environment }}
-      ecr-image-path: ${{ steps.update-ecr.outputs.EcrImagePath }}
+      EcrImagePath: ${{ steps.update-ecr.outputs.EcrImagePath }}
     steps:
       - uses: actions/checkout@v2
         with:
@@ -47,11 +43,12 @@ jobs:
         id: update-ecr
         run: |
           docker image tag ${IMAGE_NAME} $ECR_REGISTRY/aaq_solution/${IMAGE_NAME}
-          echo "::set-output name=EcrImagePath::$ECR_REGISTRY/aaq_solution/${IMAGE_NAME}"
+          docker push $ECR_REGISTRY/aaq_solution/$IMAGE_NAME
+          echo "::set-output name=EcrImagePath::aaq_solution/${IMAGE_NAME}"
 
   DeployStagingECSCluster:
     name: Deploy ECS cluster
-    needs: [DockerMakeAndPushRelease]
+    needs: DockerMakeAndPushRelease
     runs-on: ubuntu-latest
     environment: staging
     steps:
@@ -78,30 +75,43 @@ jobs:
 
       - name: Load project config variables
         id: get-project-config
-        uses: ./.github/actions/setup-environment
+        uses: thgbrb/setup-environment@v1
         with:
           environment-config-file: "project_config.cfg"
 
+      - name: Configure variables
+        shell: bash
+        id: vars
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_IMAGE_PATH: ${{ needs.DockerMakeAndPushRelease.outputs.EcrImagePath }}
+        run: |
+          echo "::set-output name=IMAGE_NAME::${ECR_REGISTRY}/${ECR_IMAGE_PATH}"
+
       - name: Pull down ECS service
         env:
-          IMAGE_NAME: ${{ needs.DockerMakeAndPushRelease.outputs.ecr-image-path }}
-          PROJECT_NAME: ${{ steps.get-project-config.outputs.PROJECT_NAME }}
-          PROJECT_SHORT_NAME: ${{ steps.get-project-config.outputs.PROJECT_SHORT_NAME }}
+          PORT: 9902
+          IMAGE_NAME: ${{ steps.vars.outputs.IMAGE_NAME }}
         run: |
+          PORT=${PORT} \
+          IMAGE_NAME=${IMAGE_NAME} \
           ecs-cli compose \
           -f docker-compose/docker-compose-stg.yml \
           --project-name ${PROJECT_NAME} \
           --cluster-config ${PROJECT_NAME}-config \
           --cluster ${PROJECT_SHORT_NAME}-cluster \
           service down --timeout 10
+        continue-on-error: true
+
+      - name: Sleep for 300 seconds
+        run: sleep 300s
+        shell: bash
 
       - name: Deploy using ECS CLI
         env:
-          IMAGE_NAME: ${{ needs.DockerMakeAndPushRelease.outputs.ecr-image-path }}
-          PROJECT_NAME: ${{ steps.get-project-config.outputs.PROJECT_NAME }}
-          PROJECT_SHORT_NAME: ${{ steps.get-project-config.outputs.PROJECT_SHORT_NAME }}
           PORT: 9902
           AWS_REGION: ${{ secrets.AWS_REGION }}
+          IMAGE_NAME: ${{ steps.vars.outputs.IMAGE_NAME }}
 
           # app secrets
           INBOUND_CHECK_TOKEN: ${{ secrets.GA_INBOUND_CHECK_TOKEN }}
@@ -112,7 +122,6 @@ jobs:
           PG_PORT: 5432
           PG_USERNAME: "flask"
           PG_PASSWORD: ${{ secrets.GA_PG_PASSWORD }}
-          PG_DATABASE: ${{ steps.get-project-config.outputs.PROJECT_SHORT_NAME }}
           # sentry config
           SENTRY_DSN: ${{ secrets.GA_SENTRY_DSN }}
           SENTRY_ENVIRONMENT: ${{ secrets.GA_SENTRY_ENVIRONMENT }}
@@ -125,6 +134,7 @@ jobs:
           --region ${AWS_REGION} \
           --config-name ${PROJECT_NAME}-config
 
+          PG_DATABASE=${PROJECT_SHORT_NAME} \
           ecs-cli compose \
           -f docker-compose/docker-compose-stg.yml \
           --project-name ${PROJECT_NAME} \

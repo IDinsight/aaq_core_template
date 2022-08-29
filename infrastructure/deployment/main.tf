@@ -6,7 +6,7 @@ terraform {
 module "deployment" {
     source = "../tf_module"
 
-    project_name = var.project_name
+    project_name = var.project_short_name
     billing_code = var.billing_code
     region = var.region
     keypair_name = var.keypair_name
