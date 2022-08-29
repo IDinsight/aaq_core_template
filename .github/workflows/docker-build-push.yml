@@ -103,7 +103,7 @@ jobs:
           service down --timeout 10
         continue-on-error: true
 
-      - name: Sleep for 300 seconds
+      - name: Sleep for 300 seconds for service to drain
         run: sleep 300s
         shell: bash
 

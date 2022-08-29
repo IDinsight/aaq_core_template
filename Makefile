@@ -4,13 +4,9 @@
 include ./project_config.cfg
 export
 
-include ./secrets/*.env
-export
-
 $(eval NAME=$(PROJECT_NAME))
 $(eval PORT=9902)
 $(eval VERSION=dev)
-$(eval AWS_BILLING_CODE=Praekelt NLP)
 
 # Need to specify bash in order for conda activate to work.
 SHELL=/bin/bash
@@ -153,6 +149,7 @@ container-stg:
 	@PROJECT_NAME=$(NAME) \
 	PORT=$(PORT) \
 	IMAGE_NAME=$(AWS_ACCOUNT_ID).dkr.ecr.$(AWS_REGION).amazonaws.com/aaq_solution/$(NAME):$(VERSION) \
+	AWS_REGION=$(AWS_REGION) \
 	ecs-cli compose -f docker-compose/docker-compose-stg.yml \
 	--project-name ${NAME} \
 	--cluster-config ${NAME}-config \

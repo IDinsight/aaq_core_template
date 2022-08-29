@@ -2,8 +2,8 @@ version: '2'
 services:
     core:
         image: ${IMAGE_NAME}
-        cpu_shares: 1200
-        mem_limit: 13048576000
+        cpu_shares: 1000
+        mem_limit: 10048576000
         environment:
           # app secrets
           - INBOUND_CHECK_TOKEN=${INBOUND_CHECK_TOKEN}
@@ -25,7 +25,7 @@ services:
           driver: awslogs
           options:
             awslogs-group: aaq_solution
-            awslogs-region: af-south-1
+            awslogs-region: ${AWS_REGION}
             awslogs-stream-prefix: ${PROJECT_NAME}
         volumes:
             - /home/ec2-user/data/GoogleNews-vectors-negative300-prenorm.bin:/usr/src/data/pretrained_wv_models/GoogleNews-vectors-negative300-prenorm.bin
