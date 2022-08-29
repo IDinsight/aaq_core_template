@@ -1,6 +1,6 @@
-July 28, 2022
+Aug 24, 2022
 
-CURRENT VERSION: aaq_core_template:v1.0.0
+CURRENT VERSION: aaq_core_template:v1.1.0
 # API Instructions for AAQ Core App (Template)
 
 Requests to all the endpoints below (except `/healthcheck`) must be authenticated with the bearer token in the header. This bearer token must be the same as the environment variable `INBOUND_CHECK_TOKEN`.
@@ -81,6 +81,46 @@ Use this endpoint to append feedback to an inbound message. You can continuously
 |`inbound_id`|required, int|Provided in response to original /inbound/check POST.|
 |`feedback_secret_key`|required, string|Provided in response to original /inbound/check POST.|
 |`feedback`|optional, any format|Any custom feedback. Directly saved by us.|
+
+##### Example
+The following only show required fields. Any other key/values sent are not parsed or checked and simply saved to the DB.
+
+For positive feedback (i.e. user says the chosen content answered their question),
+```json
+{"feedback_secret_key": "b06041c9b454822",
+ "inbound_id": "101",
+ "feedback": {
+    "feedback_type": "positive",
+    "faq_id": "12"
+    // ...
+  }
+ }
+```
+
+For negative feedback on a specific FAQ content,
+```json
+{"feedback_secret_key": "b06041c9b454822",
+ "inbound_id": "101",
+ "feedback": {
+    "feedback_type": "negative",
+    "faq_id": "12"
+    ...
+  }
+ }
+```
+
+For negative feedback on the entire page of FAQs,
+```json
+{"feedback_secret_key": "b06041c9b454822",
+ "inbound_id": "101",
+ "feedback": {
+    "feedback_type": "negative",
+    "page_number": "2"
+    ...
+  }
+ }
+```
+
 
 #### Response
 Response is one of the following pairs of (message, HTTP status)
