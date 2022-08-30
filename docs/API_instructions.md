@@ -82,7 +82,7 @@ This example assumes number of top matches to be returned is 3, return_scoring =
 
 ### Get paginated responses: `GET /inbound/<inbound_id>/<page_id>`
 
-It is recommended that you use the endpoint returned by `/inbound/check` (the value for key `next_page_url`) directly.
+To move to the next page of FAQs, it is recommended that you use the `next_page_url` value provided by your previous call directly. Similarly, use `prev_page_url` to move to the previous page.
 
 This is because in order to use this endpoint you need `inbound_id` and `inbound_secret_key` returned from a call to the `/inbound/check` endpoint. Unlike the feedback endpoint, the `inbound_secret_key` is expected as a request query parameter. 
 
