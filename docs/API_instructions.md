@@ -1,4 +1,4 @@
-Aug 24, 2022
+Aug 30, 2022
 
 CURRENT VERSION: aaq_core_template:v1.1.0
 # API Instructions for AAQ Core App (Template)
@@ -33,7 +33,7 @@ Requests to all the endpoints below (except `/healthcheck`) must be authenticate
 |`inbound_id`|integer|ID of inbound query, to be used when submitting feedback|
 |`feedback_secret_key`|string|Secret key attached to inbound query, to be used when submitting feedback|
 |`inbound_secret_key`|string|Secret key attached to inbound query, to be used for requesting paginated results|
-|`next_page_url`|string|*This field is returned only if another page exists.* URL to request the next page of results.|
+|`next_page_url`|string|*This field is returned only if another page exists.* The path to request the next page of results. This must be appended to the host address.|
 |`scoring`|dict|Scoring metadata, only returned if "return_scoring" == "true" in the request. Includes the spell-corrected query that we processed, under key spell_corrected|
 |`spell_corrected`|string|Spell corrected and preprocessed form of the inbound message. Useful for debugging.|
 
@@ -84,11 +84,11 @@ This example assumes number of top matches to be returned is 3, return_scoring =
 
 To move to the next page of FAQs, it is recommended that you use the `next_page_url` value provided by your previous call directly. Similarly, use `prev_page_url` to move to the previous page.
 
-This is because in order to use this endpoint you need `inbound_id` and `inbound_secret_key` returned from a call to the `/inbound/check` endpoint. Unlike the feedback endpoint, the `inbound_secret_key` is expected as a request query parameter. 
-
-
 #### Params
-None
+All of the following is included in the paths in `next_page_url`/`prev_page_url` returned by `/inbound/check`.
+* `<inbound_id>` should be the `inbound_id` returned by `/inbound/check`
+* `<page_id>` is the page ID, starting from 1.
+* `inbound_secret_key` is required as a query parameter in the URL. No JSON data is required. 
 
 #### Response
 |Param|Type|Description|
@@ -175,7 +175,7 @@ For negative feedback on a specific FAQ content,
  "feedback": {
     "feedback_type": "negative",
     "faq_id": "12"
-    ...
+    // ...
   }
  }
 ```
@@ -187,7 +187,7 @@ For negative feedback on the entire page of FAQs,
  "feedback": {
     "feedback_type": "negative",
     "page_number": "2"
-    ...
+    // ...
   }
  }
 ```
