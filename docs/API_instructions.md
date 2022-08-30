@@ -85,7 +85,7 @@ This example assumes number of top matches to be returned is 3, return_scoring =
 To move to the next page of FAQs, it is recommended that you use the `next_page_url` value provided by your previous call directly. Similarly, use `prev_page_url` to move to the previous page.
 
 #### Params
-All of the following is included in the paths in `next_page_url`/`prev_page_url` returned by `/inbound/check`.
+All of the following are included in the paths in `next_page_url`/`prev_page_url` returned by `/inbound/check`.
 * `<inbound_id>` should be the `inbound_id` returned by `/inbound/check`
 * `<page_id>` is the page ID, starting from 1.
 * `inbound_secret_key` is required as a query parameter in the URL. No JSON data is required. 
