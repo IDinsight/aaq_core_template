@@ -9,15 +9,17 @@ This is the deployment instructions for the **AAQ Core App**. It does not cover 
 
 # Initial setup
 
-1. Save GoogleNews pretrained model binary, to be mounted onto the containers. Download from https://www.dropbox.com/s/0ah0kslf7ac199g/GoogleNews-vectors-negative300-prenorm.bin?dl=0, and un-zip (so file is `.bin`).
-    - You could also have this `.bin` in S3, so that whenever cluster instances are launched, they copy from S3 and then mount into the container.
+1. Choose your word embedding model.
+   1. If you choose the GoogleNews pretrained model, save the model binary, to be mounted onto the containers. Download from https://www.dropbox.com/s/0ah0kslf7ac199g/GoogleNews-vectors-negative300-prenorm.bin?dl=0, and un-zip (so file is `.bin`).
+       - You could also have this `.bin` in S3, so that whenever cluster instances are launched, they copy from S3 and then mount into the container.
+   2. For other models, you will need the custom-trained model binaries. 
 
 2. Setup DB tables using `scripts/core_tables.sql`.
 
 # Images
 
 The Docker image for the core model server is hosted on AWS ECR at
-`[AWS_ACCOUNT_ID].dkr.ecr.af-south-1.amazonaws.com/aaq_solution/aaq_core_template:v1.0.0`
+`678681925278.dkr.ecr.af-south-1.amazonaws.com/aaq_solution/aaq_core_template:v1.0.0`
 
 Your AWS user will need access to this resource. Please contact IDinsight for access.
 
