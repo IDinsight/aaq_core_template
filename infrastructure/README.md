@@ -14,8 +14,9 @@
 	This sets up all the AWS components needed: 
 	1. VPC, subnets and security groups 
 	2. EC2, RDS with development and testing database and secrets with the DB credentials for admin user, flask and flask_test user
-	2. EC2, RDS and ECS cluster for staging environment
+	3. EC2, RDS and ECS cluster for staging environment
 	To add/remove any resources, update the code in `infrastructure/tf_module` before deployment. 
+	4. Github Actions user for staging deployment with all required permissions
 
 
 ## Additional things to note:
@@ -26,4 +27,5 @@
 3. To connect to the PostgreSQL database created as part of deployment:
 	- Obtain the database credentials (host, username and password) from the secret called `<project_name>-db`, `<project_name>-db-flask-dev` or `<project_name>-db-flask-test` for admin user, flask_dev or flask_test user logins respectively.
 
+4. Github Actions user credentials are stored in a secret called `<project_name>-staging-ga-user-credentials`.
  
