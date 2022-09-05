@@ -57,7 +57,7 @@ export PG_PASSWORD=
 
 export INBOUND_CHECK_TOKEN=
 export TOKEN_MACHINE_USER=
-
+export PROMETHEUS_MULTIPROC_DIR=
 ```
 
 ### Configure project details
@@ -80,7 +80,7 @@ In past projects, this has been Postgres on RDS. You don't need to create any da
 
 Note the connection details for the DB and the password for the `postgres` user. We'll need them in the [section](#enter_details_in_secrets_file) below.
 
-#### `make setup-dev`
+#### Run `make setup-dev`
 
 This command does the following:
 
