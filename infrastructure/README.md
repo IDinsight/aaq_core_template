@@ -5,20 +5,21 @@
       - Make sure that `AWS_PROFILE_NAME` is the name of the profile (stored in `~/.aws/credentials`) with appropriate permissions to create and destroy AWS resources.
     - Check the input variable definition file `infrastructure/tf_backend/variables.tf` for other input variables that you may want to override the default values for. 
     - Run the following command:`make tf-backend-apply`. Only confirm by typing 'yes' if the changes being made are as expected.
-	<br/>
+    <br/>
    This sets up the S3 bucket and dynamodb table which will be used to store terraform metadata for the project.
 
 2. Deploy dev/test components:
-	- On the AWS console, create an ssh keypair called `<PROJECT_SHORT_NAME>-keypair` in the same region where you will deploy. You can find the keypair creation screen under EC2 > Key Pairs (on the left-hand menu under "Network & Security"). Save the private key (the .pem file) in your local `~/.ssh/` directory.
-	- Check the input variable definition file `infrastructure/deployment/variables.tf` for input variables that you may want to override the default values for. 
-	- Run the following command:`make tf-apply`. Only confirm by typing 'yes' if the changes being made are as expected.
-	<br/>
-	This sets up all the AWS components needed: 
-	1. VPC, subnets and security groups 
-	2. EC2, RDS with development and testing database and secrets with the DB credentials for admin user, flask and flask_test user
-	3. EC2, RDS and ECS cluster for staging environment
-	To add/remove any resources, update the code in `infrastructure/tf_module` before deployment. 
-	4. Github Actions user for staging deployment with all required permissions
+    - On the AWS console, create an ssh keypair called `<PROJECT_SHORT_NAME>-keypair` in the same region where you will deploy. You can find the keypair creation screen under EC2 > Key Pairs (on the left-hand menu under "Network & Security"). Save the private key (the .pem file) in your local `~/.ssh/` directory.
+    - Check the input variable definition file `infrastructure/deployment/variables.tf` for input variables that you may want to override the default values for. 
+    - Run the following command:`make tf-apply`. Only confirm by typing 'yes' if the changes being made are as expected.
+    <br/>
+    This sets up all the AWS components needed: 
+    1. VPC, subnets and security groups 
+    2. EC2, RDS with development and testing database and secrets with the DB credentials for admin user, flask and flask_test user
+    3. EC2, RDS and ECS cluster for staging environment
+    To add/remove any resources, update the code in `infrastructure/tf_module` before deployment. 
+    4. Github Actions user for staging deployment with all required permissions
+3. In your github repository, inside the environment `staging`, update the secrets `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` with the values saved in `<project_name>-staging-ga-user-credentials` in  AWS Secrets Manager.
 
 
 ## Additional things to note:
