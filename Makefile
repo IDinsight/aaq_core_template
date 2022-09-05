@@ -204,7 +204,8 @@ tf-backend-apply:
 	@terraform -chdir="./infrastructure/tf_backend" apply \
 	-var 'project_short_name=${PROJECT_SHORT_NAME}' \
 	-var 'billing_code=${AWS_BILLING_CODE}' \
-	-var 'region=${AWS_REGION}' 
+	-var 'region=${AWS_REGION}' \
+	-var 'aws_profile_name=${AWS_PROFILE_NAME}'
 
 tf-backend-destroy:
 	@terraform -chdir="./infrastructure/tf_backend" init
@@ -212,7 +213,8 @@ tf-backend-destroy:
 	@terraform -chdir="./infrastructure/tf_backend" destroy \
 	-var 'project_short_name=${PROJECT_SHORT_NAME}' \
 	-var 'billing_code=${AWS_BILLING_CODE}' \
-	-var 'region=${AWS_REGION}' 
+	-var 'region=${AWS_REGION}' \
+	-var 'aws_profile_name=${AWS_PROFILE_NAME}'
 
 tf-apply:
 	@terraform -chdir="./infrastructure/deployment" init \
@@ -221,12 +223,14 @@ tf-apply:
 	-backend-config="region=${AWS_REGION}" \
 	-backend-config="dynamodb_table=${PROJECT_SHORT_NAME}-terraform-state-locks" \
 	-backend-config="encrypt=true" \
+	-backend-config="aws_profile_name=${AWS_PROFILE_NAME}"
 
 	@terraform -chdir="./infrastructure/deployment" apply \
 	-var 'project_short_name=${PROJECT_SHORT_NAME}' \
 	-var 'billing_code=${AWS_BILLING_CODE}' \
 	-var 'region=${AWS_REGION}' \
-	-var 'keypair_name=${PROJECT_SHORT_NAME}-keypair' 
+	-var 'keypair_name=${PROJECT_SHORT_NAME}-keypair' \
+	-var 'aws_profile_name=${AWS_PROFILE_NAME}'
 
 tf-destroy:
 	@terraform -chdir="./infrastructure/deployment" init \

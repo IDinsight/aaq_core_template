@@ -64,6 +64,14 @@ export TOKEN_MACHINE_USER=
 
 The `project_config.cfg` in the root directory should be updated with your project details.
 
+* `PROJECT_NAME`: Project repository name
+* `PROJECT_SHORT_NAME`: Short name for the project. Make sure to choose a value that contains only lowercase letters and hyphens (e.g. my-project).
+* `PROJECT_CONDA_ENV`: Name for the conda environment for local development.
+* `AWS_ACCOUNT_ID`: AWS account ID for testing, development, and staging resources
+* `AWS_REGION`: AWS region for testing, development, and staging resources
+* `AWS_BILLING_CODE`: Tag for billing code for AWS resources
+* `AWS_PROFILE_NAME`: Name of AWS profile (stored in `~/.aws/credentials`) with appropriate permissions to create the resources
+
 ### Initialise
 
 #### Create a Postgres Db instance

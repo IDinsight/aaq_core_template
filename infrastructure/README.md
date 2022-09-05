@@ -1,8 +1,10 @@
 ## Steps for setting up the AWS infrastructure
 1. Set up terraform backend:
-    - Update `project_config.cfg` with required variables. Make sure to choose a value for solution_name that contains only lowercase letters and hyphens (e.g. my-project). 
+    - Update `project_config.cfg` with required variables.
+      - Make sure to choose a value for `PROJECT_SHORT_NAME` that contains only lowercase letters and hyphens (e.g. my-project).
+      - Make sure that `AWS_PROFILE_NAME` is the name of the profile (stored in `~/.aws/credentials`) with appropriate permissions to create and destroy AWS resources.
     - Check the input variable definition file `infrastructure/tf_backend/variables.tf` for other input variables that you may want to override the default values for. 
-	- Run the following command:`make tf-backend-apply`. Only confirm by typing 'yes' if the changes being made are as expected.
+    - Run the following command:`make tf-backend-apply`. Only confirm by typing 'yes' if the changes being made are as expected.
 	<br/>
    This sets up the S3 bucket and dynamodb table which will be used to store terraform metadata for the project.
 
