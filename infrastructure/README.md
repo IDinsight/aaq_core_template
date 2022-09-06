@@ -32,19 +32,6 @@ This sets up all the AWS components needed:
    in `infrastructure/tf_module` before deployment.
 4. Github Actions user for staging deployment with all required permissions
 
-## 3. Update your Github Actions secrets
-
-In the environment `staging`,
-
-- Create or update AWS secrets `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` with the values saved
-  in `<PROJECT_SHORT_NAME>-staging-ga-user-credentials` in AWS Secrets Manager.
-- Create or update the DB secrets: `GA_PG_ENDPOINT` and `GA_PG_PASSWORD` with AWS secret `<PROJECT_SHORT_NAME>-db`.
-
-In the repository environment  (assuming only test DB will be used)
-
-- Create or update the DB secrets: `GA_PG_ENDPOINT` and `GA_PG_PASSWORD` with AWS
-  secret `<PROJECT_SHORT_NAME>-db-flask-test`.
-
 # Additional things to note
 
 ## 1. To remove the resources
@@ -71,4 +58,25 @@ password) from the secrets
 ## 4. To obtain Github Actions user credentials
 
 Github Actions user credentials are stored in a secret called `<PROJECT_SHORT_NAME>-staging-ga-user-credentials`.
- 
+
+## 5. To run Github Actions
+
+### 5.1 Update your Github Actions secrets
+
+In the environment `staging`,
+
+- Create or update AWS secrets `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` with the values saved
+  in `<PROJECT_SHORT_NAME>-staging-ga-user-credentials` in AWS Secrets Manager.
+- Create or update the DB secrets: `GA_PG_ENDPOINT` and `GA_PG_PASSWORD` with AWS secret `<PROJECT_SHORT_NAME>-db`.
+
+In the repository environment  (assuming only test DB will be used)
+
+- Create or update the DB secrets: `GA_PG_ENDPOINT` and `GA_PG_PASSWORD` with AWS
+  secret `<PROJECT_SHORT_NAME>-db-flask-test`.
+
+### 5.2 Update your tests config
+
+Update the databse configs in pytests.
+
+In both `tests/configs/base.yaml` and `validation/config.yaml`, change the value stored in `PG_DATABASE`
+to `<PROJECT_SHORT_NAME>_test`.
