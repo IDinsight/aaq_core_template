@@ -32,6 +32,53 @@ This sets up all the AWS components needed:
    in `infrastructure/tf_module` before deployment.
 4. Github Actions user for staging deployment with all required permissions
 
+## 3. Manually set up tables in DB
+
+You must
+
+1. Create the neessary tables (see `scripts/core_tables.sql` and equivalents in other repositories)
+2. Manually contents into the tables.
+
+### To connect to the PostgreSQL database
+
+To connect to the PostgreSQL database created as part of deployment, obtain the database credentials (host, username and
+password) from the secrets
+
+- staging admin user: `<PROJECT_SHORT_NAME>-db`
+- dev admin user: `<PROJECT_SHORT_NAME>-dev-db`
+- dev flask user: `<PROJECT_SHORT_NAME>-db-flask-dev`
+- dev flast_test user`<PROJECT_SHORT_NAME>-db-flask-test`
+
+## 4. Load models into the EC2 instances
+
+There is no aws cli set up so we have to do this manually for now.
+
+Use the `<PROJECT_SHORT_NAME>-keyfile.pem` to ssh/scp.
+
+1. In the `<PROJECT_SHORT_NAME>-server` for staging and `<PROJECT_SHORT_NAME>-server-dev` for dev/testing ensure there
+   is a folder called `data`. Create necessary child directories and sudo chmod-them to 766.
+2. In your local machine where the models are stored, scp the models.
+
+## 5. Update your Github Actions secrets
+
+In the environment `staging`,
+
+- Create or update AWS secrets `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` with the values saved
+  in `<PROJECT_SHORT_NAME>-staging-ga-user-credentials` in AWS Secrets Manager.
+- Create or update the DB secrets: `GA_PG_ENDPOINT` and `GA_PG_PASSWORD` with AWS secret `<PROJECT_SHORT_NAME>-db`.
+
+In the repository environment  (assuming only test DB will be used)
+
+- Create or update the DB secrets: `GA_PG_ENDPOINT` and `GA_PG_PASSWORD` with AWS
+  secret `<PROJECT_SHORT_NAME>-db-flask-test`.
+
+## 6. Update your tests config
+
+Update the database configs in pytests.
+
+In both `tests/configs/base.yaml` and `validation/config.yaml`, change the value stored in `PG_DATABASE`
+to `<PROJECT_SHORT_NAME>_test`.
+
 # Additional things to note
 
 ## 1. To remove the resources
@@ -45,38 +92,7 @@ the python script `infrastructure/delete_secrets.py` because `terraform destroy`
 
 To removes the Terraform backend as well run `make tf-backend-destroy`
 
-## 3. To connect to the PostgreSQL database
-
-To connect to the PostgreSQL database created as part of deployment, obtain the database credentials (host, username and
-password) from the secrets
-
-- staging admin user: `<PROJECT_SHORT_NAME>-db`
-- dev admin user: `<PROJECT_SHORT_NAME>-dev-db`
-- dev flask user: `<PROJECT_SHORT_NAME>-db-flask-dev`
-- dev flast_test user`<PROJECT_SHORT_NAME>-db-flask-test`
-
 ## 4. To obtain Github Actions user credentials
 
 Github Actions user credentials are stored in a secret called `<PROJECT_SHORT_NAME>-staging-ga-user-credentials`.
 
-## 5. To run Github Actions
-
-### 5.1 Update your Github Actions secrets
-
-In the environment `staging`,
-
-- Create or update AWS secrets `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` with the values saved
-  in `<PROJECT_SHORT_NAME>-staging-ga-user-credentials` in AWS Secrets Manager.
-- Create or update the DB secrets: `GA_PG_ENDPOINT` and `GA_PG_PASSWORD` with AWS secret `<PROJECT_SHORT_NAME>-db`.
-
-In the repository environment  (assuming only test DB will be used)
-
-- Create or update the DB secrets: `GA_PG_ENDPOINT` and `GA_PG_PASSWORD` with AWS
-  secret `<PROJECT_SHORT_NAME>-db-flask-test`.
-
-### 5.2 Update your tests config
-
-Update the databse configs in pytests.
-
-In both `tests/configs/base.yaml` and `validation/config.yaml`, change the value stored in `PG_DATABASE`
-to `<PROJECT_SHORT_NAME>_test`.
