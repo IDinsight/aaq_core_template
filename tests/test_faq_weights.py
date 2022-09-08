@@ -67,8 +67,10 @@ class TestFaqWeights:
     def faq_data_w_weights(self, client_weight, db_engine, faq_weights):
         headers = {"Authorization": "Bearer %s" % os.getenv("INBOUND_CHECK_TOKEN")}
         with db_engine.connect() as db_connection:
-            t = text("DELETE FROM faqmatches " "WHERE faq_author='Pytest author'")
+            t = text("DELETE FROM faqmatches")
             db_connection.execute(t)
+            t2 = text("DELETE FROM inbounds")
+            db_connection.execute(t2)
         with db_engine.connect() as db_connection:
             inbound_sql = text(self.insert_faq_w_weights)
             for i, (tags, weight) in enumerate(zip(self.faq_tags, faq_weights)):
