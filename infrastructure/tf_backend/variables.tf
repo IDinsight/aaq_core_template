@@ -3,7 +3,7 @@ variable "project_short_name" {
 
   validation {
     condition     = can(regex("^[a-z]+(-[a-z]+)*$", var.project_short_name))
-    error_message = "Invalid project name. Project names must be all lowercase letters with non-consecutive hyphens, e.g. my-superset-project."
+    error_message = "Invalid project short name. Project names must be all lowercase letters with non-consecutive hyphens, e.g. my-superset-project."
   }
 }
 
