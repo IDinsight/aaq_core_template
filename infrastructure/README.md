@@ -36,18 +36,18 @@ This sets up all the AWS components needed:
 
 You must
 
-1. Create the neessary tables (see `scripts/core_tables.sql` and equivalents in other repositories)
-2. Manually contents into the tables.
+1. Create the necessary tables (see `scripts/core_tables.sql` and equivalents in other repositories)
+2. Manually add content into the tables.
 
 ### To connect to the PostgreSQL database
 
 To connect to the PostgreSQL database created as part of deployment, obtain the database credentials (host, username and
 password) from the secrets
 
-- staging admin user: `<PROJECT_SHORT_NAME>-db`
-- dev admin user: `<PROJECT_SHORT_NAME>-dev-db`
-- dev flask user: `<PROJECT_SHORT_NAME>-db-flask-dev`
-- dev flast_test user`<PROJECT_SHORT_NAME>-db-flask-test`
+-   staging admin user: `<PROJECT_SHORT_NAME>-db`
+-   dev admin user: `<PROJECT_SHORT_NAME>-dev-db`
+-   dev flask user: `<PROJECT_SHORT_NAME>-db-flask-dev`
+-   dev flast_test user`<PROJECT_SHORT_NAME>-db-flask-test`
 
 ## 4. Load models into the EC2 instances
 
@@ -63,14 +63,14 @@ Use the `<PROJECT_SHORT_NAME>-keyfile.pem` to ssh/scp.
 
 In the environment `staging`,
 
-- Create or update AWS secrets `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` with the values saved
-  in `<PROJECT_SHORT_NAME>-staging-ga-user-credentials` in AWS Secrets Manager.
-- Create or update the DB secrets: `GA_PG_ENDPOINT` and `GA_PG_PASSWORD` with AWS secret `<PROJECT_SHORT_NAME>-db`.
+-   Create or update AWS secrets `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` with the values saved
+    in `<PROJECT_SHORT_NAME>-staging-ga-user-credentials` in AWS Secrets Manager.
+-   Create or update the DB secrets: `GA_PG_ENDPOINT` and `GA_PG_PASSWORD` with values from the AWS secret `<PROJECT_SHORT_NAME>-db`.
 
-In the repository environment  (assuming only test DB will be used)
+In the dev/test environment (assuming only test DB will be used)
 
-- Create or update the DB secrets: `GA_PG_ENDPOINT` and `GA_PG_PASSWORD` with AWS
-  secret `<PROJECT_SHORT_NAME>-db-flask-test`.
+-   Create or update the DB secrets: `GA_PG_ENDPOINT` and `GA_PG_PASSWORD` with values from the AWS
+    secret `<PROJECT_SHORT_NAME>-db-flask-test`.
 
 ## 6. Update your tests config
 
@@ -85,14 +85,13 @@ to `<PROJECT_SHORT_NAME>_test`.
 
 To remove the resources created by terraform run `make tf-destroy`.
 
-This first remove the project resources by running `terraform destroy` and then permanently deletes the secrets using
+This first removes the project resources by running `terraform destroy` and then permanently deletes the secrets using
 the python script `infrastructure/delete_secrets.py` because `terraform destroy` only schedules secrets to be deleted.
 
 ## 2. To removes the Terraform backend
 
-To removes the Terraform backend as well run `make tf-backend-destroy`
+To remove the Terraform backend as well run `make tf-backend-destroy`
 
 ## 4. To obtain Github Actions user credentials
 
 Github Actions user credentials are stored in a secret called `<PROJECT_SHORT_NAME>-staging-ga-user-credentials`.
-

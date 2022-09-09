@@ -198,7 +198,7 @@ uptime-exporter: guard-UPTIMEROBOT_API_KEY
 		-e UPTIMEROBOT_API_KEY=$(UPTIMEROBOT_API_KEY) \
 		-p 9705:9705 --read-only lekpamartin/uptimerobot_exporter
 
-tf-backend-apply: guard-PROJECT_SHORT_NAME guard-AWS_REGION guard-AWS_BILLING_CODE guard-AWS_PROFILE_NAME
+tf-backend-apply: cmd-exists-terraform guard-PROJECT_SHORT_NAME guard-AWS_REGION guard-AWS_BILLING_CODE guard-AWS_PROFILE_NAME
 	@terraform -chdir="./infrastructure/tf_backend" init
 
 	@terraform -chdir="./infrastructure/tf_backend" apply \
@@ -207,7 +207,7 @@ tf-backend-apply: guard-PROJECT_SHORT_NAME guard-AWS_REGION guard-AWS_BILLING_CO
 	-var 'region=${AWS_REGION}' \
 	-var 'aws_profile_name=${AWS_PROFILE_NAME}'
 
-tf-backend-destroy: guard-PROJECT_SHORT_NAME guard-AWS_REGION guard-AWS_BILLING_CODE guard-AWS_PROFILE_NAME
+tf-backend-destroy: cmd-exists-terraform guard-PROJECT_SHORT_NAME guard-AWS_REGION guard-AWS_BILLING_CODE guard-AWS_PROFILE_NAME
 	@terraform -chdir="./infrastructure/tf_backend" init
 
 	@terraform -chdir="./infrastructure/tf_backend" destroy \
@@ -216,7 +216,7 @@ tf-backend-destroy: guard-PROJECT_SHORT_NAME guard-AWS_REGION guard-AWS_BILLING_
 	-var 'region=${AWS_REGION}' \
 	-var 'aws_profile_name=${AWS_PROFILE_NAME}'
 
-tf-apply: guard-PROJECT_SHORT_NAME guard-AWS_REGION guard-AWS_BILLING_CODE guard-AWS_PROFILE_NAME
+tf-apply: cmd-exists-terraform guard-PROJECT_SHORT_NAME guard-AWS_REGION guard-AWS_BILLING_CODE guard-AWS_PROFILE_NAME
 	@terraform -chdir="./infrastructure/deployment" init \
 	-backend-config="bucket=${PROJECT_SHORT_NAME}-terraform-state" \
 	-backend-config="key=terraform.tfstate" \
@@ -232,7 +232,7 @@ tf-apply: guard-PROJECT_SHORT_NAME guard-AWS_REGION guard-AWS_BILLING_CODE guard
 	-var 'keypair_name=${PROJECT_SHORT_NAME}-keypair' \
 	-var 'aws_profile_name=${AWS_PROFILE_NAME}'
 
-tf-destroy: guard-PROJECT_SHORT_NAME guard-AWS_REGION guard-AWS_BILLING_CODE guard-AWS_PROFILE_NAME
+tf-destroy: cmd-exists-terraform guard-PROJECT_SHORT_NAME guard-AWS_REGION guard-AWS_BILLING_CODE guard-AWS_PROFILE_NAME
 	@terraform -chdir="./infrastructure/deployment" init \
 	-backend-config="bucket=${PROJECT_SHORT_NAME}-terraform-state" \
 	-backend-config="key=terraform.tfstate" \
