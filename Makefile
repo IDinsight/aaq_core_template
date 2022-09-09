@@ -139,7 +139,7 @@ container:
 		--mount type=bind,source="$(PWD)/data",target="/usr/src/data" \
 		$(NAME):$(VERSION)
 
-container-stg:
+container-stg: guard-PROJECT_SHORT_NAME guard-AWS_REGION guard-AWS_ACCOUNT_ID
 	# Configure ecs-cli options
 	@ecs-cli configure --cluster ${PROJECT_SHORT_NAME}-cluster \
 	--default-launch-type EC2 \
@@ -164,7 +164,7 @@ down-stg:
 	--project-name ${NAME} \
 	--cluster-config ${NAME}-config service down
 
-push-image: image cmd-exists-aws
+push-image: image cmd-exists-aws guard-AWS_ACCOUNT_ID
 	aws ecr --profile=praekelt-user get-login-password --region af-south-1 \
 		| docker login --username AWS --password-stdin $(AWS_ACCOUNT_ID).dkr.ecr.af-south-1.amazonaws.com
 	docker tag $(NAME):$(VERSION) $(AWS_ACCOUNT_ID).dkr.ecr.af-south-1.amazonaws.com/aaq_solution/$(NAME):$(VERSION)
@@ -190,7 +190,7 @@ grafana:
 		-v $(PWD)/monitoring/grafana/dashboards:/var/lib/grafana/dashboards \
 		grafana/grafana-oss
 
-uptime-exporter:
+uptime-exporter: guard-UPTIMEROBOT_API_KEY
 	@docker container ls -a --filter name=uptimerobot_exporter --format "{{.ID}}" | xargs -r docker stop
 	@docker container ls -a --filter name=uptimerobot_exporter --format "{{.ID}}" | xargs -r docker rm
 	@docker container run -d \
@@ -198,37 +198,41 @@ uptime-exporter:
 		-e UPTIMEROBOT_API_KEY=$(UPTIMEROBOT_API_KEY) \
 		-p 9705:9705 --read-only lekpamartin/uptimerobot_exporter
 
-tf-backend-apply:
+tf-backend-apply: cmd-exists-terraform guard-PROJECT_SHORT_NAME guard-AWS_REGION guard-AWS_BILLING_CODE guard-AWS_PROFILE_NAME
 	@terraform -chdir="./infrastructure/tf_backend" init
 
 	@terraform -chdir="./infrastructure/tf_backend" apply \
 	-var 'project_short_name=${PROJECT_SHORT_NAME}' \
 	-var 'billing_code=${AWS_BILLING_CODE}' \
-	-var 'region=${AWS_REGION}' 
+	-var 'region=${AWS_REGION}' \
+	-var 'aws_profile_name=${AWS_PROFILE_NAME}'
 
-tf-backend-destroy:
+tf-backend-destroy: cmd-exists-terraform guard-PROJECT_SHORT_NAME guard-AWS_REGION guard-AWS_BILLING_CODE guard-AWS_PROFILE_NAME
 	@terraform -chdir="./infrastructure/tf_backend" init
 
 	@terraform -chdir="./infrastructure/tf_backend" destroy \
 	-var 'project_short_name=${PROJECT_SHORT_NAME}' \
 	-var 'billing_code=${AWS_BILLING_CODE}' \
-	-var 'region=${AWS_REGION}' 
+	-var 'region=${AWS_REGION}' \
+	-var 'aws_profile_name=${AWS_PROFILE_NAME}'
 
-tf-apply:
+tf-apply: cmd-exists-terraform guard-PROJECT_SHORT_NAME guard-AWS_REGION guard-AWS_BILLING_CODE guard-AWS_PROFILE_NAME
 	@terraform -chdir="./infrastructure/deployment" init \
 	-backend-config="bucket=${PROJECT_SHORT_NAME}-terraform-state" \
 	-backend-config="key=terraform.tfstate" \
 	-backend-config="region=${AWS_REGION}" \
 	-backend-config="dynamodb_table=${PROJECT_SHORT_NAME}-terraform-state-locks" \
 	-backend-config="encrypt=true" \
+	-backend-config="aws_profile_name=${AWS_PROFILE_NAME}"
 
 	@terraform -chdir="./infrastructure/deployment" apply \
 	-var 'project_short_name=${PROJECT_SHORT_NAME}' \
 	-var 'billing_code=${AWS_BILLING_CODE}' \
 	-var 'region=${AWS_REGION}' \
-	-var 'keypair_name=${PROJECT_SHORT_NAME}-keypair' 
+	-var 'keypair_name=${PROJECT_SHORT_NAME}-keypair' \
+	-var 'aws_profile_name=${AWS_PROFILE_NAME}'
 
-tf-destroy:
+tf-destroy: cmd-exists-terraform guard-PROJECT_SHORT_NAME guard-AWS_REGION guard-AWS_BILLING_CODE guard-AWS_PROFILE_NAME
 	@terraform -chdir="./infrastructure/deployment" init \
 	-backend-config="bucket=${PROJECT_SHORT_NAME}-terraform-state" \
 	-backend-config="key=terraform.tfstate" \

@@ -57,12 +57,20 @@ export PG_PASSWORD=
 
 export INBOUND_CHECK_TOKEN=
 export TOKEN_MACHINE_USER=
-
+export PROMETHEUS_MULTIPROC_DIR=
 ```
 
 ### Configure project details
 
 The `project_config.cfg` in the root directory should be updated with your project details.
+
+* `PROJECT_NAME`: Project repository name
+* `PROJECT_SHORT_NAME`: Short name for the project. Make sure to choose a value that contains only lowercase letters and hyphens (e.g. my-project).
+* `PROJECT_CONDA_ENV`: Name for the conda environment for local development.
+* `AWS_ACCOUNT_ID`: AWS account ID for testing, development, and staging resources
+* `AWS_REGION`: AWS region for testing, development, and staging resources
+* `AWS_BILLING_CODE`: Tag for billing code for AWS resources
+* `AWS_PROFILE_NAME`: Name of AWS profile (stored in `~/.aws/credentials`) with appropriate permissions to create the resources
 
 ### Initialise
 
@@ -72,7 +80,7 @@ In past projects, this has been Postgres on RDS. You don't need to create any da
 
 Note the connection details for the DB and the password for the `postgres` user. We'll need them in the [section](#enter_details_in_secrets_file) below.
 
-#### `make setup-dev`
+#### Run `make setup-dev`
 
 This command does the following:
 
