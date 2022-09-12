@@ -287,7 +287,8 @@ def inbound_results_page(inbound_id, page_number):
         - inbound_id: id of inbound query, to be used when submitting feedback
         - feedback_secret_key: secret key attached to inbound query, to be used when
           submitting feedback
-        - inbound_secret_key: Secret key attached to inbound query, to be used for requesting paginated results
+        - inbound_secret_key: Secret key attached to inbound query, to be used for
+          requesting paginated results
         - scoring: scoring dictionary, only returned if "return_scoring" == "true";
           further described in return_faq_matches
         - next_page_url: only if the next page exists, the path to request
@@ -309,6 +310,15 @@ def inbound_results_page(inbound_id, page_number):
     scoring_output = orig_inbound.model_scoring
     _ = scoring_output.pop("spell_corrected")
     max_pages = ceil(len(scoring_output) / current_app.faqt_model.n_top_matches)
+
+    if page_number > max_pages:
+        return (
+            (
+                "Page does not exist. Max page number for "
+                f"`id` {inbound_id} is {max_pages}"
+            ),
+            404,
+        )
 
     keys = {
         "feedback_secret_key": orig_inbound.feedback_secret_key,

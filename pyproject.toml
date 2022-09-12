@@ -1,6 +1,5 @@
 [tool.isort]
 profile = "black"
-src_paths = ["src", "api_demo_apicall", "api_faq_db", "api_model"]
 
 [tool.pytest.ini_options]
 minversion = "6.0"
