@@ -57,7 +57,8 @@ def inbound_check():
         - inbound_id: id of inbound query, to be used when submitting feedback
         - feedback_secret_key: secret key attached to inbound query, to be used when
           submitting feedback
-        - inbound_secret_key: Secret key attached to inbound query, to be used for requesting paginated results
+        - inbound_secret_key: Secret key attached to inbound query, to be used for
+          requesting paginated results
         - scoring: scoring dictionary, only returned if "return_scoring" == "true";
           further described in return_faq_matches
         - spell_corrected: Spell corrected and preprocessed form of the
@@ -311,10 +312,10 @@ def inbound_results_page(inbound_id, page_number):
     _ = scoring_output.pop("spell_corrected")
     max_pages = ceil(len(scoring_output) / current_app.faqt_model.n_top_matches)
 
-    if page_number > max_pages:
+    if (page_number > max_pages) or (page_number < 1):
         return (
             (
-                "Page does not exist. Max page number for "
+                "Page does not exist. Min pages number is 1. Max page number for "
                 f"`id` {inbound_id} is {max_pages}."
             ),
             404,
