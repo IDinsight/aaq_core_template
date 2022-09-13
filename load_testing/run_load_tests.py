@@ -80,7 +80,10 @@ def run_single_test(
     # run locust test
     locust_command = shlex.split(
         # The webUI should be enabled so that graphs are generated for the html reports. Hence not using --headless.
-        f"locust --autostart --autoquit 2 --host {host} --locustfile {locustfile} -u {users} -r {spawn_rate} -t {run_time} --csv {output_filepath} --html {html_output}"
+        f"locust --autostart --autoquit 10 \
+        --host {host} --locustfile {locustfile} \
+        -u {users} -r {spawn_rate} -t {run_time} \
+        --csv {output_filepath} --html {html_output}"
     )
     subprocess.run(locust_command)
 
@@ -145,6 +148,7 @@ def run_tests(config, output_folder):
             )
 
             print(f"Finished {test_name} load test.")
+            
 
     print(f"All tests complete. Results saved to {output_folder}.")
 
@@ -166,8 +170,14 @@ def collate_and_plot_results_per_test(config, output_folder):
     """
 
     ### Extract relevant config params
-    users_list = config["users_list"]
-    locustfile_list = config["locustfile_list"]
+    users_list = config.get("users_list")
+    locustfile_list = config.get("locustfile_list")
+    # check if test is ramped or not
+    spawn_rate_list = config.get("spawn_rate_list")
+    if spawn_rate_list is not None:
+        is_ramped = True
+    else:
+        is_ramped = False
 
     ### Instantiate list to collect combined results
     result_df_list = []
@@ -178,7 +188,7 @@ def collate_and_plot_results_per_test(config, output_folder):
     figsize_y = max(2.5 * len(locustfile_list), 6)
     # For response time plots
     f_rt, axes_rt = plt.subplots(
-        len(locustfile_list),
+        len(locustfile_list) + 1 if is_ramped else len(locustfile_list),
         len(users_list),
         squeeze=False,
         figsize=(figsize_x, figsize_y),
@@ -191,12 +201,12 @@ def collate_and_plot_results_per_test(config, output_folder):
 
     # For requests/s + errors/s plots
     f_reqs, axes_reqs = plt.subplots(
-        len(locustfile_list),
+        len(locustfile_list) + 1 if is_ramped else len(locustfile_list),
         len(users_list),
         squeeze=False,
         figsize=(figsize_x, figsize_y),
         sharex="col",
-        sharey=True,
+        sharey="row",
         constrained_layout=True,
     )
     f_reqs.supxlabel("Seconds Elapsed")
@@ -221,7 +231,7 @@ def collate_and_plot_results_per_test(config, output_folder):
             )
 
             ### Plot
-            ## Response times
+            ## 1. Response times
             # Median (50th percentile)
             sns.lineplot(
                 data=test_results,
@@ -251,7 +261,7 @@ def collate_and_plot_results_per_test(config, output_folder):
             if locustfile_iter == 0 and users_iter == 0:
                 axes_rt[locustfile_iter, users_iter].legend(loc="upper left")
 
-            ## Reqs/s + Errors/s
+            ## 2. Reqs/s + Errors/s
             # Requests/s
             sns.lineplot(
                 data=test_results,
@@ -306,7 +316,40 @@ def collate_and_plot_results_per_test(config, output_folder):
                 test_failures["User Count"] = users
                 # add failures from this test to list
                 failures_df_list.append(test_failures)
+        
+            ### if ramped test, add total users vs time plot
+            if is_ramped:
+                # Response Times - Total users
+                sns.lineplot(
+                    data=test_results,
+                    x="Seconds Elapsed",
+                    y="User Count",
+                    label="Total Users",
+                    legend=None,
+                    ax=axes_rt[-1, users_iter],
+                )
+                # remove axis labels for all subplots in but those in the bottom row and leftmost column
+                axes_rt[-1, users_iter].set_xlabel("")
+                axes_rt[-1, users_iter].set_ylabel("Total Users")
 
+                # Reqs/s - Total users
+                sns.lineplot(
+                    data=test_results,
+                    x="Seconds Elapsed",
+                    y="User Count",
+                    label="Total Users",
+                    legend=None,
+                    ax=axes_reqs[-1, users_iter],
+                )
+                # remove axis labels for all subplots in but those in the bottom row and leftmost column
+                axes_reqs[-1, users_iter].set_xlabel("")
+                axes_reqs[-1, users_iter].set_ylabel("Total Users")
+
+    ### Save plots
+    print("Saving visualizations for all tests...")
+    f_rt.savefig(f"{output_folder}/processed/all_tests_response_times_vs_time.png")
+    f_reqs.savefig(f"{output_folder}/processed/all_tests_reqs_per_sec_vs_time.png")
+    
     ### combine results into one dataframe
     results_df = pd.concat(result_df_list, axis=1).T
     # select rows to keep and reorder
@@ -351,10 +394,6 @@ def collate_and_plot_results_per_test(config, output_folder):
         failures_df = pd.concat(failures_df_list, axis=0)
         failures_df = failures_df[['locustfile', 'User Count', 'Method', 'Name', 'Error', 'Occurrences']]
         failures_df.to_csv(f"{output_folder}/processed/all_tests_failures.csv", index=False)
-
-    print("Saving visualizations for all tests...")
-    f_rt.savefig(f"{output_folder}/processed/all_tests_response_times_vs_time.png")
-    f_reqs.savefig(f"{output_folder}/processed/all_tests_reqs_per_sec_vs_time.png")
 
     return results_df
 
