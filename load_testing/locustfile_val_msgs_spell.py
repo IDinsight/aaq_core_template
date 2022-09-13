@@ -32,7 +32,7 @@ class APIUser(HttpUser):
 
         # send question to API
         response = self.client.post(
-            "/inbound/check",  # set host to "http://13.246.32.186:9902" in config
+            "/inbound/check",
             json={"text_to_match": question, "return_scoring": "false"},
             headers={"Authorization": f"Bearer {INBOUND_CHECK_TOKEN}"},
         )
