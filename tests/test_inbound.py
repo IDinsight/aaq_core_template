@@ -1,4 +1,5 @@
 import os
+import re
 
 import pytest
 from sqlalchemy import text
@@ -276,3 +277,16 @@ class TestInboundPagination:
 
         next_page_url = page2_response.get_json().get("next_page_url")
         assert next_page_url is None
+
+    def test_page_does_not_exist(self, client, inbound_response_json):
+        headers = {"Authorization": "Bearer %s" % os.getenv("INBOUND_CHECK_TOKEN")}
+
+        next_page_url = inbound_response_json["next_page_url"]
+        nonexistent_page_response_url = re.sub(
+            r"/inbound/([0-9]+)/[0-9]+\?(.+)$", r"/inbound/\1/9999?\2", next_page_url
+        )
+        nonexistent_page_response = client.get(
+            nonexistent_page_response_url, headers=headers
+        )
+
+        assert nonexistent_page_response.status_code == 404
