@@ -1,0 +1,7 @@
+locustfile,User Count,Method,Name,Error,Occurrences
+locustfile_same_msgs,500,POST,/inbound/check,"ConnectionResetError(54, 'Connection reset by peer')",447
+locustfile_same_msgs,500,POST,/inbound/check,"TimeoutError(60, 'Operation timed out')",66
+locustfile_val_msgs,500,POST,/inbound/check,"ConnectionResetError(54, 'Connection reset by peer')",421
+locustfile_val_msgs,500,POST,/inbound/check,"TimeoutError(60, 'Operation timed out')",71
+locustfile_val_msgs_spell,500,POST,/inbound/check,"ConnectionResetError(54, 'Connection reset by peer')",418
+locustfile_val_msgs_spell,500,POST,/inbound/check,"TimeoutError(60, 'Operation timed out')",50

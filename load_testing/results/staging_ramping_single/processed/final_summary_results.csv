@@ -1,0 +1,4 @@
+locustfile,Max Requests/s,Total Request Count,Total Failure Count,Minimum Median Response Time,Minimum Average Response Time
+locustfile_same_msgs,31.2,13412,438,6300.0,7806.75688992508
+locustfile_val_msgs,35.8,13225,420,6400.0,7930.467560167006
+locustfile_val_msgs_spell,30.4,12959,420,6500.0,8051.030856271186
