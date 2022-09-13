@@ -1,0 +1,17 @@
+{
+    "simple_staging_stepped_multi": {
+        "host": "http://13.245.109.60:9902",
+        "locustfile_list": [
+            "locustfile_same_msgs.py",
+            "locustfile_val_msgs.py"
+        ],
+        "users_list": [
+            1,
+            10
+        ],
+        "run_time_list": [
+            "30s",
+            "30s"
+        ]
+    }
+}

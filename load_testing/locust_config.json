@@ -1,0 +1,84 @@
+{
+    "staging_stepped_multi": {
+        "host": "http://13.245.109.60:9902",
+        "locustfile_list": [
+            "locustfile_same_msgs.py",
+            "locustfile_val_msgs.py",
+            "locustfile_val_msgs_spell.py"
+        ],
+        "users_list": [
+            1,
+            10,
+            50,
+            100,
+            200,
+            500
+        ],
+        "run_time_list": [
+            "30s",
+            "30s",
+            "1m",
+            "1m",
+            "1m",
+            "2m"
+        ]
+    },
+    "staging_ramping_single": {
+        "host": "http://13.245.109.60:9902",
+        "locustfile_list": [
+            "locustfile_same_msgs.py",
+            "locustfile_val_msgs.py",
+            "locustfile_val_msgs_spell.py"
+        ],
+        "users_list": [
+            500
+        ],
+        "spawn_rate_list": [
+            1
+        ],
+        "run_time_list": [
+            "8m"
+        ]
+    },
+    "dev_stepped_multi": {
+        "host": "http://13.246.32.186:9902",
+        "locustfile_list": [
+            "locustfile_same_msgs.py",
+            "locustfile_val_msgs.py",
+            "locustfile_val_msgs_spell.py"
+        ],
+        "users_list": [
+            1,
+            10,
+            50,
+            100,
+            200,
+            500
+        ],
+        "run_time_list": [
+            "30s",
+            "30s",
+            "1m",
+            "1m",
+            "1m",
+            "2m"
+        ]
+    },
+    "dev_ramping_single": {
+        "host": "http://13.246.32.186:9902",
+        "locustfile_list": [
+            "locustfile_same_msgs.py",
+            "locustfile_val_msgs.py",
+            "locustfile_val_msgs_spell.py"
+        ],
+        "users_list": [
+            500
+        ],
+        "spawn_rate_list": [
+            1
+        ],
+        "run_time_list": [
+            "8m"
+        ]
+    }
+}
