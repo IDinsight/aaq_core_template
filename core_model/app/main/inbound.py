@@ -315,7 +315,7 @@ def inbound_results_page(inbound_id, page_number):
         return (
             (
                 "Page does not exist. Max page number for "
-                f"`id` {inbound_id} is {max_pages}"
+                f"`id` {inbound_id} is {max_pages}."
             ),
             404,
         )
