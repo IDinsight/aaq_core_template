@@ -68,7 +68,9 @@ Results are saved at during each test run, at the end of each test run, and at c
 
 3. `processed/`: Once all tests have concluded, the raw stats for all tests  are read, collated, plotted and saved here by the main script. Files created are described below.
 
-    [Presenting info for all tests]
+    Presenting info for all tests
+
+    ---
 
     Grid of progression plots for each test - similar to plots from the HTML report. Rows are locustfile used, columns are number of users:
 
@@ -77,7 +79,7 @@ Results are saved at during each test run, at the end of each test run, and at c
     all_tests_response_times_vs_time.png
     ```
 
-    > Only the above files are output for ramped tests - see [ramped load-tests](#ramped-load-tests) section for details.
+    > Only the above plots (and no other files) are output for ramped tests - see [ramped load-tests](#ramped-load-tests) section for details.
 
     End-of-test results for all tests:
 
@@ -85,11 +87,19 @@ Results are saved at during each test run, at the end of each test run, and at c
     all_tests_results.csv
     ```
 
-    [Presenting summarized results]
+    If there have been any failed requests, the following is also output which details the count and type of failures that occured:
+
+    ```console
+    all_tests_failures.csv
+    ```
+
+    Presenting summarized results
+
+    ---
+
+    > The following files summarize the information from the above files across numbers of users tested. As such, if multiple numbers of users are not tested, these results are not produced.
 
     Minimum response time and maximum reqs/sec obtained across all user counts used for each locustfile (i.e. host and request-type combination):
-
-    > This table is a summary of `all_tests_results.csv`.
 
     ```console
     final_summary_results.csv
