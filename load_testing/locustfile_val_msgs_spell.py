@@ -1,7 +1,7 @@
 import os
 from dotenv import load_dotenv
 import numpy as np
-from locust import HttpUser, task, events  # , between, constant, constant_throughput
+from locust import HttpUser, task  # , between, constant, constant_throughput
 
 ### load custom functions for loading questions from file
 import question_loading_functions
