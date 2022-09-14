@@ -1,6 +1,6 @@
 {
     "staging_stepped_multi": {
-        "host": "http://13.245.109.60:9902",
+        "host_label": "STAGING_HOST",
         "locustfile_list": [
             "locustfile_same_msgs.py",
             "locustfile_val_msgs.py",
@@ -24,7 +24,7 @@
         ]
     },
     "staging_ramping_single": {
-        "host": "http://13.245.109.60:9902",
+        "host_label": "STAGING_HOST",
         "locustfile_list": [
             "locustfile_same_msgs.py",
             "locustfile_val_msgs.py",
@@ -41,7 +41,7 @@
         ]
     },
     "dev_stepped_multi": {
-        "host": "http://13.246.32.186:9902",
+        "host_label": "DEV_HOST",
         "locustfile_list": [
             "locustfile_same_msgs.py",
             "locustfile_val_msgs.py",
@@ -65,7 +65,7 @@
         ]
     },
     "dev_ramping_single": {
-        "host": "http://13.246.32.186:9902",
+        "host_label": "DEV_HOST",
         "locustfile_list": [
             "locustfile_same_msgs.py",
             "locustfile_val_msgs.py",

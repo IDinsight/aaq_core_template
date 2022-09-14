@@ -3,12 +3,12 @@ import string
 import pandas as pd
 import numpy as np
 
-#### Function for loading a question from file ####
+### Function for loading a question from file ####
 def load_questions(filepath):
     """
     Load questions from file.
     Params:
-        filepath: path to file containing questions
+        filepath: path to CSV file containing questions
     Returns:
         questions_df (pd.DataFrame): dataframe of questions loaded from file
     """
@@ -26,51 +26,53 @@ def load_questions(filepath):
     return questions_df
 
 
-#### Function for Adding Typos ####
-nearby_keys = {
-    "a": ["q", "w", "s", "x", "z"],
-    "b": ["v", "g", "h", "n"],
-    "c": ["x", "d", "f", "v"],
-    "d": ["s", "e", "r", "f", "c", "x"],
-    "e": ["w", "s", "d", "r"],
-    "f": ["d", "r", "t", "g", "v", "c"],
-    "g": ["f", "t", "y", "h", "b", "v"],
-    "h": ["g", "y", "u", "j", "n", "b"],
-    "i": ["u", "j", "k", "o"],
-    "j": ["h", "u", "i", "k", "n", "m"],
-    "k": ["j", "i", "o", "l", "m"],
-    "l": ["k", "o", "p"],
-    "m": ["n", "j", "k", "l"],
-    "n": ["b", "h", "j", "m"],
-    "o": ["i", "k", "l", "p"],
-    "p": ["o", "l"],
-    "q": ["w", "a", "s"],
-    "r": ["e", "d", "f", "t"],
-    "s": ["w", "e", "d", "x", "z", "a"],
-    "t": ["r", "f", "g", "y"],
-    "u": ["y", "h", "j", "i"],
-    "v": ["c", "f", "g", "v", "b"],
-    "w": ["q", "a", "s", "e"],
-    "x": ["z", "s", "d", "c"],
-    "y": ["t", "g", "h", "u"],
-    "z": ["a", "s", "x"],
-    " ": ["c", "v", "b", "n", "m"],
-}
-
-all_keys = list(string.ascii_uppercase + string.ascii_lowercase + " ,.")
-
-
+### Function for adding typos
 def generate_typo(sentence, p_delete, p_insert, p_replace):
     """
-    Generate typos in sentence, character by character, with probabilities
-    - p_delete of deleting character
-    - p_insert/2 of inserting other character before
-    - p_insert/2 of inserting other character after
-    - p_replace of replacing character
+    [From Adam's load-testing]
+    Generate typos in sentence, character by character using given with probabilities.
 
-    For insertion and replacement, for chars in nearby_keys above, replace
-    with nearby characters. For other chars, replace with random ASCII.
+    Args:
+        sentence (str): sentence to generate typos in
+        p_delete (float): probability of deleting character
+        p_insert (float): probability of inserting character (50% probability of inserting character before or after)
+        p_replace (float): probability of replacing character
+    Returns:
+        sentence (str): sentence with typos
     """
+
+    nearby_keys = {
+        "a": ["q", "w", "s", "x", "z"],
+        "b": ["v", "g", "h", "n"],
+        "c": ["x", "d", "f", "v"],
+        "d": ["s", "e", "r", "f", "c", "x"],
+        "e": ["w", "s", "d", "r"],
+        "f": ["d", "r", "t", "g", "v", "c"],
+        "g": ["f", "t", "y", "h", "b", "v"],
+        "h": ["g", "y", "u", "j", "n", "b"],
+        "i": ["u", "j", "k", "o"],
+        "j": ["h", "u", "i", "k", "n", "m"],
+        "k": ["j", "i", "o", "l", "m"],
+        "l": ["k", "o", "p"],
+        "m": ["n", "j", "k", "l"],
+        "n": ["b", "h", "j", "m"],
+        "o": ["i", "k", "l", "p"],
+        "p": ["o", "l"],
+        "q": ["w", "a", "s"],
+        "r": ["e", "d", "f", "t"],
+        "s": ["w", "e", "d", "x", "z", "a"],
+        "t": ["r", "f", "g", "y"],
+        "u": ["y", "h", "j", "i"],
+        "v": ["c", "f", "g", "v", "b"],
+        "w": ["q", "a", "s", "e"],
+        "x": ["z", "s", "d", "c"],
+        "y": ["t", "g", "h", "u"],
+        "z": ["a", "s", "x"],
+        " ": ["c", "v", "b", "n", "m"],
+    }
+
+    all_keys = list(string.ascii_uppercase + string.ascii_lowercase + " ,.")
+
     new_sentence = ""
     prob = np.random.uniform(size=len(sentence))
 
@@ -82,6 +84,9 @@ def generate_typo(sentence, p_delete, p_insert, p_replace):
     for i, s in enumerate(sentence):
         p = prob[i]
 
+        # For insertions and replacements, use a character from nearby_keys 
+        # if the current character appears in nearby_keys. 
+        # If not, use a random ASCII character.
         if p < delete_cutoff:
             pass
         elif p < insert_before_cutoff:
@@ -105,10 +110,19 @@ def generate_typo(sentence, p_delete, p_insert, p_replace):
     return new_sentence
 
 
-#### Select, process, and return a question ####
+### Select, process, and return a question
 def select_a_question(questions_df, add_typo=False):
     """
-    Load a question from the validation dataset
+    Randomly selects a question from the dataframe and returns the question_msg_id, question, faq_name, urgent.
+
+    Args:
+        questions_df (pd.DataFrame): dataframe of questions
+        add_typo (bool): whether to add typos to the question
+    Returns:
+        question_msg_id (str): message ID of question
+        question (str): question (with added typos if add_typo=True)
+        faq_name (str): FAQ name
+        urgent (bool): whether question is urgent
     """
     df_val_row = questions_df.sample(1).values[0]
     question_msg_id, question, faq_name, urgent = df_val_row
