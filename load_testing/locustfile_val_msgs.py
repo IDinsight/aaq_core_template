@@ -10,11 +10,14 @@ import question_loading_functions
 load_dotenv(dotenv_path="../secrets/app_secrets.env", verbose=True)
 INBOUND_CHECK_TOKEN = os.getenv("INBOUND_CHECK_TOKEN")
 
+### Assign data path to be used for loading the question
+data_path = "../data/validation_khumo_labelled_aaq.csv"
+
 ### Run API calls
 # Add seed for reproducibility
 np.random.seed(0)
 # import df of real-world questions
-questions_df = question_loading_functions.load_questions()
+questions_df = question_loading_functions.load_questions(data_path)
 
 
 class APIUser(HttpUser):

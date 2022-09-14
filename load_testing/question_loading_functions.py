@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 
 #### Function for loading a question from file ####
-def load_questions(filepath="../../data/validation_khumo_labelled_aaq.csv"):
+def load_questions(filepath):
     """
     Load questions from file.
     Params:
