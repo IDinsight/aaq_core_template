@@ -1,9 +1,12 @@
 locust
+dotenv
 os
 argparse
 json
 subprocess
 shlex
+string
 pandas
+numpy
 seaborn
 matplotlib
