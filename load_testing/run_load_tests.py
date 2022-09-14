@@ -345,6 +345,10 @@ def collate_and_plot_results_per_test(config, output_folder):
                 axes_reqs[-1, users_iter].set_xlabel("")
                 axes_reqs[-1, users_iter].set_ylabel("Total Users")
 
+
+    # Make new output subfolder for processed results
+    os.makedirs(output_folder + "/processed", exist_ok=True)
+
     ### Save plots
     print("Saving visualizations for all tests...")
     f_rt.savefig(f"{output_folder}/processed/all_tests_response_times_vs_time.png")
@@ -381,9 +385,6 @@ def collate_and_plot_results_per_test(config, output_folder):
     results_df.sort_values(
         by=["locustfile", "User Count"], ascending=True, inplace=True, ignore_index=True
     )
-
-    # Make new output subfolder for processed results
-    os.makedirs(output_folder + "/processed", exist_ok=True)
 
     # Save results and plots
     print("Saving all_tests_results.csv...")
@@ -493,17 +494,17 @@ def main():
     configs = read_configs(args.config_file)
 
     # Run the tests for each experiment (primary key) given in the config file
-    for key in configs.keys():
+    for experiment in configs.keys():
 
         print(
             f"""
             #################################################
-            ### Running experiment {key} ###
+            ### Running experiment {experiment} ###
             #################################################
             """
         )
-        config = configs[key]
-        output_folder = f"{args.output_folder}/{key}"
+        config = configs[experiment]
+        output_folder = f"{args.output_folder}/{experiment}"
 
         # if analyze-results-only arg is passed, skip running locust
         if args.analyze_results_only:
@@ -518,16 +519,13 @@ def main():
         calculate_stats_per_locustfile(
             results_df=results_df, output_folder=output_folder
         )
-        if len(config["users_list"]) > 1:
+
+        # Only create summary dataset and plots if the experiment is a constant load-test 
+        # (i.e. spawn rates not given for ramping) and different numbers of users are tested
+        if config.get("spawn_rate_list") is None and len(config["users_list"]) > 1:
             plot_final_results_per_locustfile(
                 results_df=results_df, output_folder=output_folder
             )
-
-    ## Redo for:
-    # done - Messages from the validation dataset
-    # done - Messages with typos
-    # Short messages
-    # Long messages
 
 
 if __name__ == "__main__":
