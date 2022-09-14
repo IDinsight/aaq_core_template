@@ -129,7 +129,7 @@ Results from each individual load-testing experiment are also saved under a corr
 
     > Note: These plots are not produced if multiple n_users were not tested.
 
-### Example output folder structure
+### Example output folder structure:
 
 ```console
 📂results
