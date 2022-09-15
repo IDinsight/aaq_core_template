@@ -133,7 +133,7 @@ Results from each individual load-testing experiment are also saved under a corr
 
 ```console
 📂results
-┣ all_experiments_endoftest_results_summaries.csv
+┣ all_experiments_endoftest_results_summary.csv
 ┣ 📂dev_stepped_multi
 ┃ ┣ 📂html_reports
 ┃ ┃ ┣ 100_user_locustfile_same_msgs_report.html
