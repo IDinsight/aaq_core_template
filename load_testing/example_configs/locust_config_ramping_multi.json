@@ -1,0 +1,21 @@
+{
+    "dev_ramping_multi": {
+        "host_label": "DEV_HOST",
+        "locustfile_list": [
+            "locustfile_same_msgs.py",
+            "locustfile_val_msgs.py"
+        ],
+        "users_list": [
+            10,
+            20
+        ],
+        "spawn_rate_list": [
+            1,
+            1
+        ],
+        "run_time_list": [
+            "25s",
+            "25s"
+        ]
+    }
+}
