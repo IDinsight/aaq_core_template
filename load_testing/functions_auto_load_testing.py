@@ -314,7 +314,7 @@ def collate_and_plot_all_results(experiment_configs, output_folder):
                     ax=axes_rt[-1, users_iter],
                 )
                 # Set bottom row title
-                axes_rt[-1, 0].set_ylabel("Total Users")
+                axes_rt[-1, 0].set_xlabel("")
 
                 # Do the same for Reqs/s and Errors/s
                 sns.lineplot(
@@ -326,7 +326,7 @@ def collate_and_plot_all_results(experiment_configs, output_folder):
                     ax=axes_reqs[-1, users_iter],
                 )
                 # Set bottom row title
-                axes_rt[-1, 0].set_ylabel("Total Users")
+                axes_reqs[-1, 0].set_xlabel("")
 
     ### Make new output subfolder for processed results
     os.makedirs(output_folder + "/processed", exist_ok=True)
