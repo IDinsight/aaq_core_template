@@ -4,7 +4,7 @@ import numpy as np
 from locust import HttpUser, task  # , between, constant, constant_throughput
 
 ### load custom functions for loading questions from file
-import question_loading_functions
+from functions_question_import import load_questions, select_a_question
 
 ### Import env variables
 load_dotenv(dotenv_path="../secrets/app_secrets.env", verbose=True)
@@ -17,7 +17,7 @@ data_path = "../data/validation_khumo_labelled_aaq.csv"
 # Add seed for reproducibility
 np.random.seed(0)
 # import df of real-world questions
-questions_df = question_loading_functions.load_questions(data_path)
+questions_df = load_questions(data_path)
 
 
 class APIUser(HttpUser):
@@ -29,7 +29,7 @@ class APIUser(HttpUser):
             question,
             faq_name,
             urgent,
-        ) = question_loading_functions.select_a_question(questions_df, add_typo=True)
+        ) = select_a_question(questions_df, add_typo=True)
         # send question to API
         self.client.post(
             "/inbound/check",
