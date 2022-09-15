@@ -180,19 +180,19 @@ When multiple request types (via different locustfiles) and numbers of users are
 An example of a config entry for multiple constant load-tests performed on the `STAGING_HOST` is given below:
 
 ```json
-"experiment_name":{
-    "host": "STAGING_HOST",
+"simple_staging_stepped_multi": {
+    "host_label": "STAGING_HOST",
     "locustfile_list": [
         "locustfile_same_msgs.py",
-        "locustfile_val_msgs.py",
+        "locustfile_val_msgs.py"
     ],
     "users_list": [
         1,
-        10,
+        10
     ],
     "run_time_list": [
         "30s",
-        "30s",
+        "30s"
     ]
 }
 ```
@@ -212,20 +212,20 @@ Also note that end-of-test results are often unreliable or irrelevant in ramped 
 An example of a config entry for a single ramped load-test is given below. This test is performed on the `STAGING_HOST`, with 2 users spawned per second, up to a maximum of 500 users, with a max run-time of 8 minutes.
 
 ```json
-"staging_ramping_single": {
-    "host": "STAGING_HOST",
+"simple_staging_ramping_single": {
+    "host_label": "STAGING_HOST",
     "locustfile_list": [
         "locustfile_same_msgs.py",
-        "locustfile_val_msgs.py",
+        "locustfile_val_msgs.py"
     ],
     "users_list": [
-        500
+        100
     ],
     "spawn_rate_list": [
         2
     ],
     "run_time_list": [
-        "8m"
+        "1m"
     ]
 }
 ```
