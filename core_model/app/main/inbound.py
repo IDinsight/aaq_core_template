@@ -3,6 +3,7 @@
 ##############################################################################
 import os
 from base64 import b64encode
+from collections import defaultdict
 from datetime import datetime
 from math import ceil
 
@@ -74,21 +75,22 @@ def inbound_check():
         return_scoring = False
 
     processed_message = current_app.text_preprocessor(incoming["text_to_match"])
-    word_vector_scores, spell_corrected = current_app.faqt_model.score(
-        processed_message
+    result = current_app.faqt_model.score_contents(
+        processed_message, return_spell_corrected=True, return_tag_scores=True
     )
 
-    scoring_output = scoring_functions.get_faq_scores_for_message(
-        processed_message,
-        current_app.faqs,
-        word_vector_scores,
-        current_app.config["REDUCTION_FUNCTION"],
-        **current_app.config["REDUCTION_FUNCTION_ARGS"],
+    word_vector_scores = result["overall_scores"]
+    spell_corrected = result["spell_corrected"]
+    tag_scores = result["tag_scores"]
+
+    max_pages = ceil(
+        len(word_vector_scores) / current_app.config["N_TOP_MATCHES_PER_PAGE"]
     )
-    max_pages = ceil(len(scoring_output) / current_app.faqt_model.n_top_matches)
 
     secret_keys = generate_secret_keys()
-    scoring_output = prepare_scoring_as_json(scoring_output)
+    scoring_output = prepare_scoring_as_json(
+        current_app.faqs, word_vector_scores, tag_scores
+    )
     json_return = prepare_return_json(scoring_output, secret_keys, return_scoring, 1)
     scoring_output["spell_corrected"] = " ".join(spell_corrected)
     inbound_id = save_inbound_to_db(incoming, scoring_output, json_return, secret_keys)
@@ -109,19 +111,19 @@ def generate_secret_keys():
     return request_keys
 
 
-def prepare_scoring_as_json(scoring_output):
+def prepare_scoring_as_json(faqs, overall_scores, tag_scores):
     """
-    Convert scoring so it can be saved as JSON in Db. Also save spell corrected
+    Convert scores so it can be saved as JSON in Db. Also save spell corrected
     terms.
     """
-    for faq_id in scoring_output:
-        scoring_output[faq_id]["overall_score"] = str(
-            scoring_output[faq_id]["overall_score"]
-        )
-
+    scoring_output = defaultdict(dict)
+    for i, faq in enumerate(faqs):
+        scoring_output[faq.faq_id]["overall_score"] = str(overall_scores[i])
+        scoring_output[faq.faq_id]["faq_title"] = faq.faq_title
+        scoring_output[faq.faq_id]["faq_content_to_send"] = faq.faq_content_to_send
         # Convert scoring[faq.faq_id] to have string values (to save in DB as JSON)
-        scoring_output[faq_id]["tag_cs"] = {
-            key: str(val) for key, val in scoring_output[faq_id]["tag_cs"].items()
+        scoring_output[faq.faq_id]["tag_cs"] = {
+            key: str(val) for key, val in tag_scores[i].items()
         }
 
     return scoring_output
@@ -192,7 +194,7 @@ def prepare_return_json(scoring_output, keys, return_scoring, page_number):
     scoring_output: Dict
         With spell_correct
     """
-    items_per_page = current_app.faqt_model.n_top_matches
+    items_per_page = current_app.config["N_TOP_MATCHES_PER_PAGE"]
     if page_number < 1:
         top_matches_list = []
     else:
@@ -312,7 +314,7 @@ def inbound_results_page(inbound_id, page_number):
 
     scoring_output = orig_inbound.model_scoring
     _ = scoring_output.pop("spell_corrected")
-    max_pages = ceil(len(scoring_output) / current_app.faqt_model.n_top_matches)
+    max_pages = ceil(len(scoring_output) / current_app.config["N_TOP_MATCHES_PER_PAGE"])
 
     if (page_number > max_pages) or (page_number < 1):
         return (

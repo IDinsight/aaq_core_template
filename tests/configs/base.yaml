@@ -3,3 +3,4 @@ PG_DATABASE: aaq-template-db-test
 PG_USERNAME: flask_test
 MODEL_PORT: 9902
 MODEL_PROTOCOL: http
+N_TOP_MATCHES_PER_PAGE: 3
