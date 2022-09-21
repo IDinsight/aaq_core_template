@@ -4,7 +4,7 @@
 import os
 from functools import wraps
 
-from faqt.model.faq_matching.keyed_vector_scoring import model_search_word
+from faqt.model.faq_matching.keyed_vectors_scoring import model_search_word
 from flask import abort, current_app, jsonify, request
 
 from ..data_models import TemporaryModel
