@@ -117,6 +117,19 @@ def prepare_scoring_as_json(faqs, overall_scores, tag_scores):
     terms.
     """
     scoring_output = defaultdict(dict)
+
+    if len(overall_scores) == 0 or len(tag_scores) == 0:
+        return scoring_output
+
+    n_faqs = len(faqs)
+
+    if not all(len(x) == n_faqs for x in [overall_scores, tag_scores]):
+        raise ValueError(
+            f"Lengths of `faqs`, `overall_scores`, `tag_scores` must all "
+            f"be equal but got lengths {n_faqs}, {len(overall_scores)}, "
+            f"{len(tag_scores)}."
+        )
+
     for i, faq in enumerate(faqs):
         scoring_output[faq.faq_id]["overall_score"] = str(overall_scores[i])
         scoring_output[faq.faq_id]["faq_title"] = faq.faq_title
