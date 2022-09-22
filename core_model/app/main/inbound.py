@@ -13,7 +13,6 @@ from sqlalchemy.orm.attributes import flag_modified
 from ..data_models import Inbound
 from ..database_sqlalchemy import db
 from ..prometheus_metrics import metrics
-from ..src import scoring_functions
 from . import main
 from .auth import auth
 
@@ -211,7 +210,7 @@ def prepare_return_json(scoring_output, keys, return_scoring, page_number):
     if page_number < 1:
         top_matches_list = []
     else:
-        top_matches_list = scoring_functions.get_top_n_matches(
+        top_matches_list = get_top_n_matches(
             scoring_output, items_per_page, (page_number - 1) * items_per_page
         )
 
@@ -223,6 +222,44 @@ def prepare_return_json(scoring_output, keys, return_scoring, page_number):
         json_return["scoring"] = scoring_output
 
     return json_return
+
+
+def get_top_n_matches(scoring, n_top_matches, start_idx=0):
+    """
+    Gives a list of scores for each FAQ, return the top `n_top_matches` FAQs
+
+    Parameters
+    ----------
+    scoring: Dict[int, Dict]
+        Dict with faq_id as key and faq details and scores as values.
+        See return value of `get_faq_scores_for_message`. Assumes that `scoring`
+        is sorted from highest score to lowest score.
+    n_top_matches: int
+        the number of top matches to return
+    start_idx: int, optional
+        takes the `n_top_matches` starting the `start_idx`
+
+    Returns
+    -------
+    List[Tuple(int, str)]
+        A list of tuples of (faq_id, faq_content_to_send)._
+    """
+    matched_faq_titles = set()
+    # Sort and copy over top matches
+    top_matches_list = []
+    sorted_scoring = sorted(
+        scoring, key=lambda x: float(scoring[x]["overall_score"]), reverse=True
+    )
+    for id in sorted_scoring[start_idx:]:
+        if scoring[id]["faq_title"] not in matched_faq_titles:
+            top_matches_list.append(
+                (scoring[id]["faq_title"], scoring[id]["faq_content_to_send"])
+            )
+            matched_faq_titles.add(scoring[id]["faq_title"])
+
+        if len(matched_faq_titles) == n_top_matches:
+            break
+    return top_matches_list
 
 
 def finalise_return_json(json_return, inbound_id, current_page, max_pages):
