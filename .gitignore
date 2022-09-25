@@ -161,3 +161,6 @@ core_model/requirements.txt
 load_testing/old/
 load_testing/results/
 load_testing/results_old/
+
+# profiling
+profiling/*
