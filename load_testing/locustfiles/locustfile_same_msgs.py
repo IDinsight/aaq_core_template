@@ -1,23 +1,21 @@
 import os
-from dotenv import load_dotenv
+
 import numpy as np
-from locust import HttpUser, task  # , between, constant, constant_throughput
+from locust import HttpUser, task
 
-### Import env variables
-load_dotenv(dotenv_path="../secrets/app_secrets.env", verbose=True)
 INBOUND_CHECK_TOKEN = os.getenv("INBOUND_CHECK_TOKEN")
-
-### Run API calls
-# Add seed for reproducibility
 np.random.seed(0)
 
 
 class APIUser(HttpUser):
     @task
     def ask_a_question(self):
-        ### Experiment 1 - same message sent repeatedly
+        """
+        Sends a question to the API.
+        Experiment 1 - send the same question repeatedly.
+        """
+
         question = "Test question."
-        # send question to API
         self.client.post(
             "/inbound/check",
             json={"text_to_match": question, "return_scoring": "false"},
