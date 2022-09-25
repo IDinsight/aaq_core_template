@@ -88,6 +88,7 @@ def run_tests(experiment_configs, output_folder):
             # get corresponding spawn-rate
             spawn_rate = spawn_rate_list[users_id]
 
+            locustfile_path = "locustfiles/" + locustfile
             # Construct test_name output files based on test parameters
             locustfile_no_ext = locustfile[:-3]  # remove ".py" extension
             test_name = f"{users}_user_{locustfile_no_ext}"
@@ -97,7 +98,7 @@ def run_tests(experiment_configs, output_folder):
                 Running load-test...
                 Max users: {users}
                 Spawn rate: {spawn_rate}
-                Locustfile: {locustfile}
+                Locustfile: {locustfile_path}
                 Runtime: {run_time}
                 """
             )
@@ -105,7 +106,7 @@ def run_tests(experiment_configs, output_folder):
             # Run load-test (also saves results to file)
             run_single_test(
                 host=host,
-                locustfile=locustfile,
+                locustfile=locustfile_path,
                 users=users,
                 spawn_rate=spawn_rate,
                 run_time=run_time,
