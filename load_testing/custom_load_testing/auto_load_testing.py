@@ -1,16 +1,11 @@
-### Import libraries
 import os
-from dotenv import load_dotenv
-import subprocess
 import shlex
+import subprocess
+
+import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
-import matplotlib.pyplot as plt
 
-
-### Load environment variables from app_secrets.env
-load_dotenv(dotenv_path="../secrets/app_secrets.env", verbose=True)
-# Hosts
 hosts_dict = {
     "LOCAL_HOST": os.getenv("LOCAL_HOST"),
     "STAGING_HOST": os.getenv("STAGING_HOST"),
@@ -38,16 +33,14 @@ def run_single_test(
         None
     """
 
-    # build html output path
     html_output = f"{output_folder}/html_reports/{test_name}_report.html"
-    # make subfolder to store raw test stats results
     os.makedirs(f"{output_folder}/raw/{test_name}", exist_ok=True)
     # "test" filename is used by locust to construct test_stats.csv, test_stats_history.csv, etc.
     output_filepath = f"{output_folder}/raw/{test_name}/test"
 
     # run locust test
     locust_command = shlex.split(
-        # Note: We're not using using --autostart and --autoquit instead of --headless
+        # Note: We are using using --autostart and --autoquit instead of --headless
         # since we want to track our tests on the webUI and the webUI must be enabled
         # for plots to be generated for the Locust HTML reports.
         f"locust --autostart --autoquit 10 \

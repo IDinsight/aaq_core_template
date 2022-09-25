@@ -1,7 +1,10 @@
-import os, sys
+import os
 import string
-import pandas as pd
+import sys
+
 import numpy as np
+import pandas as pd
+
 
 ### Function for loading a question from file ####
 def load_questions(filepath):
@@ -84,8 +87,8 @@ def generate_typo(sentence, p_delete, p_insert, p_replace):
     for i, s in enumerate(sentence):
         p = prob[i]
 
-        # For insertions and replacements, use a character from nearby_keys 
-        # if the current character appears in nearby_keys. 
+        # For insertions and replacements, use a character from nearby_keys
+        # if the current character appears in nearby_keys.
         # If not, use a random ASCII character.
         if p < delete_cutoff:
             pass
@@ -130,4 +133,4 @@ def select_a_question(questions_df, add_typo=False):
     if add_typo:
         question = generate_typo(question, p_delete=0.02, p_insert=0.02, p_replace=0.02)
 
-    return question_msg_id, question, faq_name, urgent
+    return question
