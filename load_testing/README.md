@@ -27,7 +27,7 @@ This submodule extends the core functionality of the `locust` load-testing libra
 5. Run the main script.
 
     ```console
-    python run_load_tests.py
+    python main.py
     ```
 
     This script will loop through each experiment in the config file and its given test configurations and run each parameter combination through `locust`, saving results to file.
@@ -37,11 +37,11 @@ This submodule extends the core functionality of the `locust` load-testing libra
     The script can be run with the following command-line arguments:
     - `--config-file`: JSON file containing configs for tests.
 
-        Default `locust_config.json`.
+        Default `configs/locust_config_default.json`.
 
     - `--output-folder`: Folder to store outputs.
 
-        Default `results`.
+        Default `output_folder`.
 
     - `--analyze-results-only`: If this tag is included, don't run any new tests and analyze previously-run test outputs only. Saved results must exactly correspond to the given config file.
 
@@ -132,7 +132,7 @@ Results from each individual load-testing experiment are also saved under a corr
 ### Example output folder structure
 
 ```console
-📂results
+📂output_folder
 ┣ all_experiments_endoftest_results_summary.csv
 ┣ 📂dev_stepped_multi
 ┃ ┣ 📂html_reports
