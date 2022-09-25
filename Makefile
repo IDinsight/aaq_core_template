@@ -116,6 +116,12 @@ test:
 test-all:
 	pytest tests
 
+profile:
+	pytest -m "not extended" profiling/test_profiling.py::TestAddFaqToDb
+	mkdir -p profiling/results
+	pyinstrument --outfile=profiling/results/profile.html -m pytest -m "not extended" profiling/test_profiling.py::TestMainEndpoints
+	pytest -m "not extended" profiling/test_profiling.py::TestCleanDb
+
 image:
 	# Build docker image
 	cp ./requirements.txt ./core_model/requirements.txt
