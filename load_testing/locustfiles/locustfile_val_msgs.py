@@ -1,14 +1,14 @@
 import os
+import sys
 
 import numpy as np
+from custom_load_testing.question_import import load_questions, select_a_question
 from locust import HttpUser, task
-
-from ..custom_load_testing.question_import import load_questions, select_a_question
 
 INBOUND_CHECK_TOKEN = os.getenv("INBOUND_CHECK_TOKEN")
 
-data_path = "../data/validation_khumo_labelled_aaq.csv"
-questions_df = load_questions(data_path)
+abs_filepath = sys.path[0] + "/../../data/validation_khumo_labelled_aaq.csv"
+questions_df = load_questions(abs_filepath)
 np.random.seed(0)
 
 

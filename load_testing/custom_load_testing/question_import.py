@@ -6,8 +6,7 @@ import numpy as np
 import pandas as pd
 
 
-### Function for loading a question from file ####
-def load_questions(filepath):
+def load_questions(abs_filepath):
     """
     Load questions from file.
     Params:
@@ -17,9 +16,8 @@ def load_questions(filepath):
     """
 
     print("Loading questions from file...")
-    os.chdir(sys.path[0])
-    questions_df = pd.read_csv(filepath, index_col=0)
-    # rename columns to be consistent
+    # os.chdir(sys.path[0])
+    questions_df = pd.read_csv(abs_filepath, index_col=0)
     questions_df.rename(
         {"Question": "question", "FAQ Name": "faq_name", "Urgent": "urgent"},
         axis=1,
@@ -29,7 +27,6 @@ def load_questions(filepath):
     return questions_df
 
 
-### Function for adding typos
 def generate_typo(sentence, p_delete, p_insert, p_replace):
     """
     [From Adam's load-testing]
@@ -113,7 +110,6 @@ def generate_typo(sentence, p_delete, p_insert, p_replace):
     return new_sentence
 
 
-### Select, process, and return a question
 def select_a_question(questions_df, add_typo=False):
     """
     Randomly selects a question from the dataframe and returns the question_msg_id, question, faq_name, urgent.
