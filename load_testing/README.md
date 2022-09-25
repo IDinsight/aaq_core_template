@@ -11,7 +11,7 @@ This submodule extends the core functionality of the `locust` load-testing libra
 
 1. Install libraries in `requirements.txt`
 
-2. Add the relevant host addresses and token to app_secrets.py in repo. Note: it's assumed that the token is the same for all hosts, so change if need be.
+2. Add the host addresses (unused hosts can be blank) and token to the conda environment variables. Note: It's assumed that the token is the same for all hosts.
 
     ```console
     STAGING_HOST=
