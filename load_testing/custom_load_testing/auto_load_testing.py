@@ -81,12 +81,12 @@ def run_tests(experiment_configs, output_folder):
     # loop through locustfile used (i.e. type of request sent)
     for locustfile in locustfile_list:
         # loop through number of users (+ corresponding run-time and spawn-rate)
-        for users_iter, users in enumerate(users_list):
+        for users_id, users in enumerate(users_list):
 
             # get corresponding run-time
-            run_time = run_time_list[users_iter]
+            run_time = run_time_list[users_id]
             # get corresponding spawn-rate
-            spawn_rate = spawn_rate_list[users_iter]
+            spawn_rate = spawn_rate_list[users_id]
 
             # Construct test_name output files based on test parameters
             locustfile_no_ext = locustfile[:-3]  # remove ".py" extension
@@ -182,9 +182,9 @@ def collate_and_plot_all_results(experiment_configs, output_folder):
 
     ### Loop through all tests and collate results (imitates the loop in run_tests())
     # loop through locustfile used
-    for locustfile_iter, locustfile in enumerate(locustfile_list):
+    for locustfile_id, locustfile in enumerate(locustfile_list):
         # loop through number of users
-        for users_iter, users in enumerate(users_list):
+        for users_id, users in enumerate(users_list):
 
             ### A. Collect end-of-test results for this test
 
@@ -235,7 +235,7 @@ def collate_and_plot_all_results(experiment_configs, output_folder):
                 y="50%",
                 label="Median (ms)",
                 legend=None,
-                ax=axes_rt[locustfile_iter, users_iter],
+                ax=axes_rt[locustfile_id, users_id],
             )
             # 95th percentile
             sns.lineplot(
@@ -244,20 +244,20 @@ def collate_and_plot_all_results(experiment_configs, output_folder):
                 y="95%",
                 label="95% (ms)",
                 legend=None,
-                ax=axes_rt[locustfile_iter, users_iter],
+                ax=axes_rt[locustfile_id, users_id],
             )
             # remove axis labels for all subplots
-            axes_rt[locustfile_iter, users_iter].set_xlabel("")
-            axes_rt[locustfile_iter, users_iter].set_ylabel("")
+            axes_rt[locustfile_id, users_id].set_xlabel("")
+            axes_rt[locustfile_id, users_id].set_ylabel("")
             # add number of users to top of each column
-            if locustfile_iter == 0:
-                axes_rt[locustfile_iter, users_iter].set_title(f"{users} users")
+            if locustfile_id == 0:
+                axes_rt[locustfile_id, users_id].set_title(f"{users} users")
             # add locustfile name to left of each row
-            if users_iter == 0:
-                axes_rt[locustfile_iter, users_iter].set_ylabel(locustfile_no_ext)
+            if users_id == 0:
+                axes_rt[locustfile_id, users_id].set_ylabel(locustfile_no_ext)
             # add legend to top left plot only
-            if locustfile_iter == 0 and users_iter == 0:
-                axes_rt[locustfile_iter, users_iter].legend(loc="upper left")
+            if locustfile_id == 0 and users_id == 0:
+                axes_rt[locustfile_id, users_id].legend(loc="upper left")
 
             ## Plot Reqs/s and Errors/s vs time elapsed:
             # Reqs/s
@@ -267,7 +267,7 @@ def collate_and_plot_all_results(experiment_configs, output_folder):
                 y="Requests/s",
                 label="Requests/s",
                 legend=None,
-                ax=axes_reqs[locustfile_iter, users_iter],
+                ax=axes_reqs[locustfile_id, users_id],
             )
             # Errors/s
             sns.lineplot(
@@ -277,24 +277,24 @@ def collate_and_plot_all_results(experiment_configs, output_folder):
                 label="Failures/s",
                 color="red",
                 legend=None,
-                ax=axes_reqs[locustfile_iter, users_iter],
+                ax=axes_reqs[locustfile_id, users_id],
             )
             # remove axis labels for all subplots
-            axes_reqs[locustfile_iter, users_iter].set_xlabel("")
-            axes_reqs[locustfile_iter, users_iter].set_ylabel("")
+            axes_reqs[locustfile_id, users_id].set_xlabel("")
+            axes_reqs[locustfile_id, users_id].set_ylabel("")
             # add number of users to top of each column
-            if locustfile_iter == 0:
-                axes_reqs[locustfile_iter, users_iter].set_title(f"{users} users")
+            if locustfile_id == 0:
+                axes_reqs[locustfile_id, users_id].set_title(f"{users} users")
             # add locustfile name to left of each row
-            if users_iter == 0:
-                axes_reqs[locustfile_iter, users_iter].set_ylabel(locustfile_no_ext)
+            if users_id == 0:
+                axes_reqs[locustfile_id, users_id].set_ylabel(locustfile_no_ext)
             # add legend to top left plot only
-            if locustfile_iter == 0 and users_iter == 0:
-                axes_reqs[locustfile_iter, users_iter].legend(loc="upper left")
+            if locustfile_id == 0 and users_id == 0:
+                axes_reqs[locustfile_id, users_id].legend(loc="upper left")
 
             ## Plot user count vs time elapsed (only if test is ramped)
             # Note: This plot only needs to be added once per column, here we do this during the first locustfile iteration
-            if is_ramped and locustfile_iter == 0:
+            if is_ramped and locustfile_id == 0:
 
                 # For response time plots
                 sns.lineplot(
@@ -304,7 +304,7 @@ def collate_and_plot_all_results(experiment_configs, output_folder):
                     label="Total Users",
                     legend=None,
                     # add plot to the bottom row of the grid
-                    ax=axes_rt[-1, users_iter],
+                    ax=axes_rt[-1, users_id],
                 )
                 # Set bottom row title
                 axes_rt[-1, 0].set_xlabel("")
@@ -316,7 +316,7 @@ def collate_and_plot_all_results(experiment_configs, output_folder):
                     y="User Count",
                     label="Total Users",
                     legend=None,
-                    ax=axes_reqs[-1, users_iter],
+                    ax=axes_reqs[-1, users_id],
                 )
                 # Set bottom row title
                 axes_reqs[-1, 0].set_xlabel("")
