@@ -3,12 +3,10 @@ This script loads a config file, runs multiple locust load tests, plots and writ
 Functionality based on: github.com/mohsenSy/locust-tests-runner/blob/master/locust_run_tests.py
 """
 
-### Import libraries
 import argparse
 import json
 
-### Import custom functions
-import functions_auto_load_testing
+from custom_load_testing.auto_load_testing import run_all_experiments
 
 
 def parse_args():
@@ -24,7 +22,7 @@ def parse_args():
     parser.add_argument(
         "--output-folder",
         action="store",
-        default="results",
+        default="output_folder",
         help="Folder to store outputs",
     )
     parser.add_argument(
@@ -46,22 +44,16 @@ def read_configs(config_file):
     Returns:
         configs (dict): Dictionary of test configs
     """
-
-    try:
-        configs = json.load(open(config_file))
-        return configs
-
-    except FileNotFoundError:
-        raise FileNotFoundError(f"Cannot find file with name {config_file}")
-    except json.decoder.JSONDecodeError:
-        raise Exception("Cannot parse config file")
+    configs = json.load(open(config_file))
+    return configs
 
 
 def main():
     """Run main script function."""
     args = parse_args()
     configs = read_configs(args.config_file)
-    functions_auto_load_testing.run_all_experiments(configs=configs, args=args)
+    run_all_experiments(configs=configs, args=args)
+
 
 if __name__ == "__main__":
     main()
