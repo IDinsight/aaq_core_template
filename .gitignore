@@ -156,7 +156,6 @@ core_model/requirements.txt
 *.terraform/
 !delete_secrets.py
 
-
 # Load testing
 load_testing/output_folder/
 
