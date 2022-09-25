@@ -158,9 +158,7 @@ core_model/requirements.txt
 
 
 # Load testing
-load_testing/old/
-load_testing/results/
-load_testing/results_old/
+load_testing/output_folder/
 
 # profiling
 profiling/*
