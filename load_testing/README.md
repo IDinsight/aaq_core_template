@@ -9,9 +9,11 @@ This submodule extends the core functionality of the `locust` load-testing libra
 
 # How to run
 
-1. Install libraries in `requirements.txt`
+1. Create a new python 3.9 environment
 
-2. Add the host addresses (unused hosts can be blank) and token to the conda environment variables. Note: It's assumed that the token is the same for all hosts.
+2. Install libraries in `requirements.txt`
+
+3. Add the host addresses (unused hosts can be blank) and token to the conda environment variables. Note: It's assumed that the token is the same for all hosts.
 
     ```console
     STAGING_HOST=
@@ -20,11 +22,15 @@ This submodule extends the core functionality of the `locust` load-testing libra
     INBOUND_CHECK_TOKEN=
     ```
 
-3. Create a `data/` folder in the repo root and place the CSV containing validation messages inside (e.g. for MomConnect, use `validation_khumo_labelled_aaq.csv`)
+4. Create a `data/` folder in the repo root and place the CSV containing validation messages inside (e.g. for MomConnect, use `validation_khumo_labelled_aaq.csv`)
 
-4. Set config parameters in `locust_config.json`. This file will be pre-filled but can be modified. See [config](#config-and-experiment-types) section below for details on how this file is formatted.
+5. Config file examples are provided in the `configs/` folder. Either alter parameters in pre-existing files or make your own. 
 
-5. Run the main script.
+    Use `locust_config_complete.json` to run the full suite of load-testing experiments (Caution: Slow). 
+
+    See [config](#config-and-experiment-types) section below for details on how this file is formatted.
+
+6. Run the main script.
 
     ```console
     python main.py
@@ -153,7 +159,7 @@ Results from each individual load-testing experiment are also saved under a corr
 ┃ ┃ ┃ ┗ test_stats_history.csv
 ┃ ┃ ┣ 📂100_user_locustfile_val_msgs
 ┃ ┃ ┗ ┗ ...
-┃ ┣ 📂dev_single_ramped
+┃ ┣ 📂dev_ramped_single
 ┗ ┗ ┗ ...
 ```
 
