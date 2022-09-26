@@ -25,9 +25,15 @@ def test_params(request):
 
 
 @pytest.fixture(scope="session")
-def client(test_params):
+def app_main(test_params):
     app = create_app(test_params)
-    with app.test_client() as client:
+    app.faqt_model.n_top_matches = 3
+    return app
+
+
+@pytest.fixture(scope="session")
+def client(app_main):
+    with app_main.test_client() as client:
         yield client
 
 
