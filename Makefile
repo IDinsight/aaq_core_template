@@ -118,8 +118,8 @@ test-all:
 
 profile:
 	pytest -m "not extended" profiling/test_profiling.py::TestDummyFaqToDb
-	mkdir -p profiling/results
-	pyinstrument --outfile=profiling/results/profile.html -m pytest -m "not extended" profiling/test_profiling.py::TestMainEndpoints
+	mkdir -p profiling/output_folder
+	pyinstrument --outfile=profiling/output_folder/profile.html -m pytest -m "not extended" profiling/test_profiling.py::TestMainEndpoints -s
 	pytest -m "not extended" profiling/test_profiling.py::TestCleanDb
 
 image:
