@@ -160,4 +160,4 @@ core_model/requirements.txt
 load_testing/output_folder/
 
 # profiling
-profiling/*
+profiling
