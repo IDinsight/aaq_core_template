@@ -14,7 +14,7 @@
             "30s"
         ]
     },
-    "simple_staging_ramping_single": {
+    "simple_staging_ramped_single": {
         "host_label": "STAGING_HOST",
         "locustfile_list": [
             "locustfile_same_msgs.py",

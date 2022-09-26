@@ -23,7 +23,7 @@
             "2m"
         ]
     },
-    "staging_ramping_single": {
+    "staging_ramped_single": {
         "host_label": "STAGING_HOST",
         "locustfile_list": [
             "locustfile_same_msgs.py",
@@ -64,7 +64,7 @@
             "2m"
         ]
     },
-    "dev_ramping_single": {
+    "dev_ramped_single": {
         "host_label": "DEV_HOST",
         "locustfile_list": [
             "locustfile_same_msgs.py",

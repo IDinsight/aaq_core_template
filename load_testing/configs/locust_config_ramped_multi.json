@@ -1,5 +1,5 @@
 {
-    "dev_ramping_multi": {
+    "dev_ramped_multi": {
         "host_label": "DEV_HOST",
         "locustfile_list": [
             "locustfile_same_msgs.py",
