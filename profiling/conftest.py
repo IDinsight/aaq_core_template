@@ -31,7 +31,6 @@ def client(test_params):
         yield client
 
 
-# db_engine scope changed to session
 @pytest.fixture(scope="class")
 def db_engine(test_params):
     config = get_config_data(test_params)
