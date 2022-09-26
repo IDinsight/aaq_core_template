@@ -116,11 +116,17 @@ test:
 test-all:
 	pytest tests
 
-profile:
-	pytest -m "not extended" profiling/test_profiling.py::TestDummyFaqToDb
+profile-google:
+	pytest -m "google" profiling/test_profiling.py::TestDummyFaqToDb
 	mkdir -p profiling/output_folder
-	pyinstrument --outfile=profiling/output_folder/profile.html -m pytest -m "not extended" profiling/test_profiling.py::TestMainEndpoints
-	pytest -m "not extended" profiling/test_profiling.py::TestCleanDb
+	pyinstrument --outfile=profiling/output_folder/profile_google.html -m pytest -m "google" profiling/test_profiling.py::TestMainEndpoints
+	pytest -m "google" profiling/test_profiling.py::TestCleanDb
+
+profile-fasttext:
+	pytest -m "fasttext" profiling/test_profiling.py::TestDummyFaqToDb
+	mkdir -p profiling/output_folder
+	pyinstrument --outfile=profiling/output_folder/profile_fasttext.html -m pytest -m "fasttext" profiling/test_profiling.py::TestMainEndpoints
+	pytest -m "fasttext" profiling/test_profiling.py::TestCleanDb
 
 image:
 	# Build docker image

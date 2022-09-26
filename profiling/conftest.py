@@ -9,8 +9,8 @@ from core_model.app import create_app, get_config_data
 
 @pytest.fixture(
     params=[
-        "google_w2v",
-        pytest.param("simple_fasttext_with_faq", marks=pytest.mark.extended),
+        pytest.param("google_w2v", marks=pytest.mark.google),
+        pytest.param("simple_fasttext_with_faq", marks=pytest.mark.fasttext),
     ],
     scope="session",
 )

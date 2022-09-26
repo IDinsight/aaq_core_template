@@ -16,7 +16,10 @@ See this [confluence page](https://idinsight.atlassian.net/wiki/spaces/PD/pages/
 
 ### Run the profilers
 
-Run `make profile`
+Two options:
+
+- `make profile-google` to produce report for just the google model
+- `make profile-fasttext` to produce report for just the custom embeddings model
 
 So that only the endpoints are profiled (and not the SQL injections etc), this command does the following:
 
@@ -31,5 +34,4 @@ Results will be saved in `profiling/output_folder/`
 ## TO-DO
 
 - Add cPython profiling and options to Makefile target to allow for selection of profiler tool. Use [this](https://stackoverflow.com/a/2826068).
-- Add easy functionality to test different models using an argument.
 - Possibly: Separate endpoints so that each endpoint can be tested separately and a different HTML file is created per endpoint.
