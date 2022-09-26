@@ -22,7 +22,7 @@ class TestDummyFaqToDb:
         "faq_threshold": "{0.1, 0.1, 0.1, 0.1}",
     }
 
-    # first clean the db of any faqs added by the profiler
+    # delete pre-existing FAQs
     def test_clean_faq_db(self, db_engine):
         with db_engine.connect() as db_connection:
             t = text("DELETE FROM faqmatches")
@@ -33,17 +33,15 @@ class TestDummyFaqToDb:
             result = db_connection.execute(t)
             assert result.rowcount == 0
 
-    # add faq data to db
+    # add dummy FAQs to db
     @pytest.fixture(scope="class")
     def sample_faq_data(self):
         full_path = Path(__file__).parent / "data/faq_data.yaml"
-        print(full_path)
         with open(full_path) as file:
             yaml_dict = yaml.full_load(file)
         return yaml_dict["faq_refresh_data"]
 
     def test_load_faq_data(self, client, db_engine, sample_faq_data):
-        headers = {"Authorization": "Bearer %s" % os.getenv("INBOUND_CHECK_TOKEN")}
         with db_engine.connect() as db_connection:
             inbound_sql = text(self.insert_faq)
             for i, sample_data in enumerate(sample_faq_data):
@@ -55,13 +53,17 @@ class TestDummyFaqToDb:
             # check that db now has content
             t = text("SELECT * FROM faqmatches")
             result = db_connection.execute(t)
-            assert result.rowcount > 0
+            assert result.rowcount == 6
+
+        # refresh FAQs
+        headers = {"Authorization": "Bearer %s" % os.getenv("INBOUND_CHECK_TOKEN")}
         client.get("/internal/refresh-faqs", headers=headers)
 
 
 class TestMainEndpoints:
     @pytest.fixture(scope="class")
-    def inbound_response_fixture(self, client, db_engine):
+    def inbound_chec_request(self, client):
+
         request_data = {
             "text_to_match": "Profiling test message.",
             "return_scoring": "false",
@@ -69,20 +71,15 @@ class TestMainEndpoints:
         headers = {"Authorization": "Bearer %s" % os.getenv("INBOUND_CHECK_TOKEN")}
         response = client.post("/inbound/check", json=request_data, headers=headers)
 
-        print("yielding response")
-        yield response
+        return response
 
-        with db_engine.connect() as db_connection:
-            t = text("DELETE FROM inbounds")
-            db_connection.execute(t)
+    def test_inbound_endpoint(self, inbound_chec_request):
+        assert inbound_chec_request.status_code == 200
 
-    def test_inbound_endpoint(self, inbound_response_fixture):
-        assert inbound_response_fixture.status_code == 200
+    def test_inbound_feedback(self, client, inbound_chec_request):
 
-    def test_inbound_feedback(self, client, inbound_response_fixture):
-
-        inbound_id = inbound_response_fixture.get_json()["inbound_id"]
-        feedback_secret_key = inbound_response_fixture.get_json()["feedback_secret_key"]
+        inbound_id = inbound_chec_request.get_json()["inbound_id"]
+        feedback_secret_key = inbound_chec_request.get_json()["feedback_secret_key"]
 
         feedback_json = {
             "inbound_id": inbound_id,
@@ -95,8 +92,8 @@ class TestMainEndpoints:
 
         assert response.status_code == 200
 
-    def test_accessing_valid_next_page(self, client, inbound_response_fixture):
-        next_page_url = inbound_response_fixture.get_json()["next_page_url"]
+    def test_accessing_valid_next_page(self, client, inbound_chec_request):
+        next_page_url = inbound_chec_request.get_json()["next_page_url"]
 
         headers = {"Authorization": "Bearer %s" % os.getenv("INBOUND_CHECK_TOKEN")}
         response = client.get(next_page_url, headers=headers)
@@ -107,11 +104,11 @@ class TestMainEndpoints:
 class TestCleanDb:
     def test_clean_faq_db(self, db_engine):
         with db_engine.connect() as db_connection:
-            t = text("DELETE FROM faqmatches " "WHERE faq_author='Profiler author'")
+            t = text("DELETE FROM faqmatches")
             db_connection.execute(t)
 
             # check that db is now empty of faqs added by the profiler
-            t = text("SELECT * FROM faqmatches " "WHERE faq_author='Profiler author'")
+            t = text("SELECT * FROM faqmatches")
             result = db_connection.execute(t)
             assert result.rowcount == 0
 
