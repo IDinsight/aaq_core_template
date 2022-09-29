@@ -496,7 +496,7 @@ def run_all_experiments(configs, args):
             """
         )
 
-        output_folder = f"{args.output_folder}/{experiment_name}"
+        output_folder = f"{args.output}/{experiment_name}"
         if not args.analyze_results_only:
             run_tests(
                 experiment_configs=experiment_configs, output_folder=output_folder
@@ -522,6 +522,6 @@ def run_all_experiments(configs, args):
     print("Saving master summary - all_experiments_endoftest_results_summary.csv...")
     results_summary_df = pd.concat(results_summary_list).reset_index(drop=True)
     results_summary_df.to_csv(
-        f"{args.output_folder}/all_experiments_endoftest_results_summary.csv",
+        f"{args.output}/all_experiments_endoftest_results_summary.csv",
         index=True,
     )

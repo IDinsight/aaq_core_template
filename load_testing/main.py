@@ -14,13 +14,15 @@ def parse_args():
 
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--config-file",
+        "-c",
+        "--config",
         action="store",
         default="configs/locust_config_default.json",
         help="JSON file containing configs for tests",
     )
     parser.add_argument(
-        "--output-folder",
+        "-o",
+        "--output",
         action="store",
         default="output_folder",
         help="Folder to store outputs",
@@ -55,7 +57,7 @@ def read_configs(config_file):
 def main():
     """Run main script function."""
     args = parse_args()
-    configs = read_configs(args.config_file)
+    configs = read_configs(args.config)
     run_all_experiments(configs=configs, args=args)
 
 

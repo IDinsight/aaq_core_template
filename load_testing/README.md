@@ -41,11 +41,13 @@ This submodule extends the core functionality of the `locust` load-testing libra
     > Note: Each experiment can specify multiple values for each parameter, and so multiple load-tests may be run for each experiment.
 
     The script can be run with the following command-line arguments:
-    - `--config-file`: JSON file containing configs for tests.
+    - `--config`: JSON file containing configs for tests.
 
-        Default `configs/locust_config_default.json`.
+        Default `configs/locust_config_both.json`.
 
-    - `--output-folder`: Folder to store outputs.
+        > Note: Use `locust_config_both_full` to run full test suite.
+
+    - `--output`: Folder to store outputs.
 
         Default `output_folder`.
 
