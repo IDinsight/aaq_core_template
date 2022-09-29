@@ -4,7 +4,6 @@ import os
 import pandas as pd
 
 from .plotting import (
-    apply_plot_labels,
     initialize_plot_grid,
     plot_results_vs_users,
     plot_test_stats_vs_time,
@@ -91,9 +90,6 @@ def analyse_test_results(experiment_configs, output_folder):
                 ys=["50%", "95%"],
                 labels=["Median (ms)", "95% (ms)"],
                 ax=ax_rt,
-            )
-            apply_plot_labels(
-                ax=ax_rt,
                 locustfile_id=locustfile_id,
                 locustfile_no_ext=locustfile_no_ext,
                 users_id=users_id,
@@ -106,9 +102,6 @@ def analyse_test_results(experiment_configs, output_folder):
                 ys=["Requests/s", "Failures/s"],
                 labels=["Requests/s", "Failures/s"],
                 ax=ax_reqs,
-            )
-            apply_plot_labels(
-                ax=ax_reqs,
                 locustfile_id=locustfile_id,
                 locustfile_no_ext=locustfile_no_ext,
                 users_id=users_id,
@@ -117,14 +110,11 @@ def analyse_test_results(experiment_configs, output_folder):
 
             # if test is ramped, plot user count vs time elapsed in bottom row
             if is_ramped and locustfile_id == len(locustfile_list) - 1:
-                plot_user_count(
-                    test_stats_history=test_stats_history,
-                    ax=axes_rt[-1, users_id],
-                )
-                plot_user_count(
-                    test_stats_history=test_stats_history,
-                    ax=axes_reqs[-1, users_id],
-                )
+                for axes in [axes_rt, axes_reqs]:
+                    plot_user_count(
+                        test_stats_history=test_stats_history,
+                        ax=axes[-1, users_id],
+                    )
 
     logging.info("Saving stats vs time plots for all tests...")
     os.makedirs(output_folder + "/processed", exist_ok=True)
