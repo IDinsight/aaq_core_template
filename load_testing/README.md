@@ -26,8 +26,6 @@ This submodule extends the core functionality of the `locust` load-testing libra
 
 5. Config file examples are provided in the `configs/` folder. Either alter parameters in pre-existing files or make your own. 
 
-    Use `locust_config_complete.json` to run the full suite of load-testing experiments (Caution: Slow). 
-
     See [config](#config-and-experiment-types) section below for details on how this file is formatted.
 
 6. Run the main script.
@@ -43,9 +41,9 @@ This submodule extends the core functionality of the `locust` load-testing libra
     The script can be run with the following command-line arguments:
     - `--config`: JSON file containing configs for tests.
 
-        Default `configs/locust_config_both.json`.
+        Default `configs/ramped_and_constant.json`.
 
-        > Note: Use `locust_config_both_full` to run full test suite.
+        > Note: Use `full_suite.json` to run full test suite.
 
     - `--output`: Folder to store outputs.
 
@@ -142,7 +140,7 @@ Results from each individual load-testing experiment are also saved under a corr
 ```console
 📂output_folder
 ┣ all_experiments_endoftest_results_summary.csv
-┣ 📂dev_stepped_multi
+┣ 📂dev_constant_multi
 ┃ ┣ 📂html_reports
 ┃ ┃ ┣ 100_user_locustfile_same_msgs_report.html
 ┃ ┃ ┣ ...
@@ -173,7 +171,7 @@ The config file used here is `.json` as opposed to locust's expected `.ini` styl
 
 Each key-value pair here is a load-test experiment, where the key is the experiment name and the value is a dictionary of parameters expected by `locust`.
 
-Each experiment entry reflects the core elements of a standard locust config file but with the key difference that parameters are given as lists as opposed to single values. This allows us to run multiple test configurations per experiment, namely to use different locustfiles (type of requests sent) and numbers of users.
+Each experiment entry reflects the core elements of a [standard locust config file](https://docs.locust.io/en/stable/configuration.html) but with the key difference that parameters are given as lists as opposed to single values. This allows us to run multiple test configurations per experiment, namely to use different locustfiles (type of requests sent) and numbers of users.
 
 ## Experiment types
 
@@ -188,7 +186,7 @@ When multiple request types (via different locustfiles) and numbers of users are
 An example of a config entry for multiple constant load-tests performed on the `STAGING_HOST` is given below:
 
 ```json
-"simple_staging_stepped_multi": {
+"staging_constant_multi": {
     "host_label": "STAGING_HOST",
     "locustfile_list": [
         "locustfile_same_msgs.py",
@@ -220,20 +218,20 @@ Also note that end-of-test results are often unreliable or irrelevant in ramped 
 An example of a config entry for a single ramped load-test is given below. This test is performed on the `STAGING_HOST`, with 2 users spawned per second, up to a maximum of 500 users, with a max run-time of 8 minutes.
 
 ```json
-"simple_staging_ramping_single": {
+"staging_ramped_50": {
     "host_label": "STAGING_HOST",
     "locustfile_list": [
         "locustfile_same_msgs.py",
         "locustfile_val_msgs.py"
     ],
     "users_list": [
-        100
+        50
     ],
     "spawn_rate_list": [
-        2
+        1
     ],
     "run_time_list": [
-        "1m"
+        "40s"
     ]
 }
 ```

@@ -1,18 +1,14 @@
 {
-    "dev_ramped_multi": {
+    "staging_single_user": {
         "host_label": "STAGING_HOST",
         "locustfile_list": [
-            "locustfile_same_msgs.py",
             "locustfile_val_msgs.py"
         ],
         "users_list": [
-            50
-        ],
-        "spawn_rate_list": [
             1
         ],
         "run_time_list": [
-            "40s"
+            "30s"
         ]
     }
 }

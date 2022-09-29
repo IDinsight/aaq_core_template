@@ -1,5 +1,5 @@
 {
-    "simple_staging_stepped_multi": {
+    "staging_constant_multi": {
         "host_label": "STAGING_HOST",
         "locustfile_list": [
             "locustfile_same_msgs.py",
@@ -14,7 +14,7 @@
             "30s"
         ]
     },
-    "simple_staging_ramped_single": {
+    "staging_ramped": {
         "host_label": "STAGING_HOST",
         "locustfile_list": [
             "locustfile_same_msgs.py",

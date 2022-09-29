@@ -1,14 +1,18 @@
 {
-    "simple_staging_single": {
+    "staging_ramped_50": {
         "host_label": "STAGING_HOST",
         "locustfile_list": [
+            "locustfile_same_msgs.py",
             "locustfile_val_msgs.py"
         ],
         "users_list": [
+            50
+        ],
+        "spawn_rate_list": [
             1
         ],
         "run_time_list": [
-            "20s"
+            "40s"
         ]
     }
 }
