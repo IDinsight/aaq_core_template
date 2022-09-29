@@ -155,9 +155,3 @@ core_model/requirements.txt
 *.tfstate.*
 *.terraform/
 !delete_secrets.py
-
-# load-testing
-load_testing
-
-# profiling
-profiling
