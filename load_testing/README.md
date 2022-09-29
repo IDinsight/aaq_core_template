@@ -140,7 +140,7 @@ Results from each individual load-testing experiment are also saved under a corr
 ```console
 📂output_folder
 ┣ all_experiments_endoftest_results_summary.csv
-┣ 📂dev_constant_multi
+┣ 📂staging_constant_multi
 ┃ ┣ 📂html_reports
 ┃ ┃ ┣ 100_user_locustfile_same_msgs_report.html
 ┃ ┃ ┣ ...
@@ -159,7 +159,7 @@ Results from each individual load-testing experiment are also saved under a corr
 ┃ ┃ ┃ ┗ test_stats_history.csv
 ┃ ┃ ┣ 📂100_user_locustfile_val_msgs
 ┃ ┃ ┗ ┗ ...
-┃ ┣ 📂dev_ramped_single
+┃ ┣ 📂staging_ramped
 ┗ ┗ ┗ ...
 ```
 
