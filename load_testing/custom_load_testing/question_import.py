@@ -6,18 +6,20 @@ import numpy as np
 import pandas as pd
 
 
-def load_questions(abs_filepath):
-    """
-    Load questions from file.
-    Params:
-        filepath: path to CSV file containing questions
-    Returns:
-        questions_df (pd.DataFrame): dataframe of questions loaded from file
-    """
+def load_questions(filepath):
+    """Load questions from file.
 
+    Parameters
+    ----------
+    filepath : str
+
+    Returns
+    -------
+    pd.DataFrame
+
+    """
     print("Loading questions from file...")
-    # os.chdir(sys.path[0])
-    questions_df = pd.read_csv(abs_filepath, index_col=0)
+    questions_df = pd.read_csv(filepath, index_col=0)
     questions_df.rename(
         {"Question": "question", "FAQ Name": "faq_name", "Urgent": "urgent"},
         axis=1,
@@ -32,13 +34,21 @@ def generate_typo(sentence, p_delete, p_insert, p_replace):
     [From Adam's load-testing]
     Generate typos in sentence, character by character using given with probabilities.
 
-    Args:
-        sentence (str): sentence to generate typos in
-        p_delete (float): probability of deleting character
-        p_insert (float): probability of inserting character (50% probability of inserting character before or after)
-        p_replace (float): probability of replacing character
-    Returns:
-        sentence (str): sentence with typos
+    Parameters
+    ----------
+    sentence : str
+        sentence to generate typos in
+    p_delete : float
+        probability of deleting character
+    p_insert : float
+        probability of inserting character (50% probability of inserting character before or after)
+    p_replace : float
+        probability of replacing character
+
+    Returns
+    -------
+    str
+
     """
 
     nearby_keys = {
@@ -111,17 +121,19 @@ def generate_typo(sentence, p_delete, p_insert, p_replace):
 
 
 def select_a_question(questions_df, add_typo=False):
-    """
-    Randomly selects a question from the dataframe and returns the question_msg_id, question, faq_name, urgent.
+    """Randomly selects a question from the dataframe and returns the question
 
-    Args:
-        questions_df (pd.DataFrame): dataframe of questions
-        add_typo (bool): whether to add typos to the question
-    Returns:
-        question_msg_id (str): message ID of question
-        question (str): question (with added typos if add_typo=True)
-        faq_name (str): FAQ name
-        urgent (bool): whether question is urgent
+    Parameters
+    ----------
+    questions_df : pd.DataFrame
+        dataframe of questions
+    add_typo :
+        (Default value = False)
+
+    Returns
+    -------
+    str
+
     """
     df_val_row = questions_df.sample(1).values[0]
     question_msg_id, question, faq_name, urgent = df_val_row

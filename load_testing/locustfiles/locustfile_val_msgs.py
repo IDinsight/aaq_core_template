@@ -7,17 +7,18 @@ from locust import HttpUser, task
 
 INBOUND_CHECK_TOKEN = os.getenv("INBOUND_CHECK_TOKEN")
 
-abs_filepath = sys.path[0] + "/../../data/validation_khumo_labelled_aaq.csv"
-questions_df = load_questions(abs_filepath)
+filepath = sys.path[0] + "/../../data/validation_khumo_labelled_aaq.csv"
+questions_df = load_questions(filepath)
 np.random.seed(0)
 
 
 class APIUser(HttpUser):
     @task
     def ask_a_question(self):
-        """
-        Sends a question to the API.
+        """Sends a question to the API.
+
         Experiment 2 - load a question from the validation dataset.
+
         """
         question = select_a_question(questions_df, add_typo=False)
         self.client.post(

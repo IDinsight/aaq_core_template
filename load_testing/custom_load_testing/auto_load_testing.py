@@ -16,23 +16,28 @@ hosts_dict = {
 def run_single_test(
     host, locust_file, users, spawn_rate, run_time, output_folder, test_name
 ):
-    """
-    Runs a single locust test.
+    """Runs a single locust test.
 
     This function takes locust parameters and runs a locust load test, saving the results to the output_folder.
 
-    Args:
-        host (str): host to test
-        locust_file (str): locust_file to use
-        users (int): number of users to simulate
-        spawn_rate (int): number of users to spawn per second
-        run_time (str): time to run the test for
-        output_folder (str): The name of output folder
-        test_name (str): The name of the test
-    Returns:
-        None
-    """
+    Parameters
+    ----------
+    host : str
+        host to test
+    locust_file : str
+        locust_file to use
+    users : int
+        number of users to simulate
+    spawn_rate : int
+        number of users to spawn per second
+    run_time : str
+        time to run the test for
+    output_folder : str
+        Path to output folder
+    test_name : str
+        The name of test
 
+    """
     html_output = f"{output_folder}/html_reports/{test_name}_report.html"
     os.makedirs(f"{output_folder}/raw/{test_name}", exist_ok=True)
     # "test" filename is used by locust as a prefix
@@ -53,16 +58,16 @@ def run_single_test(
 
 
 def run_tests(experiment_configs, output_folder):
-    """
-    Takes a dict of experiment parameters and cycles through all values for all parameters, running a load-test for each combination.
+    """Takes a dict of experiment parameters and cycles through all values for all parameters, running a load-test for each combination.
 
-    Args:
-        experiment_configs (dict): dict of experiment parameters, where keys are parameter names and values are lists of parameter values
-        output_folder (str): The name of output folder that results should be saved to
-    Returns:
-        None
-    """
+    Parameters
+    ----------
+    experiment_configs : dict
+        dict of experiment parameters, where keys are parameter names and values are lists of parameter values
+    output_folder : str
+        Path to output folder
 
+    """
     host = hosts_dict[experiment_configs.get("host_label")]
     locustfile_list = experiment_configs.get("locustfile_list")
     users_list = experiment_configs.get("users_list")
@@ -113,21 +118,25 @@ def run_tests(experiment_configs, output_folder):
 
 
 def collate_and_plot_all_results(experiment_configs, output_folder):
-    """
-    This function loads results from previously-run tests and collates and plots them.
+    """Loads results from previously-run tests and collates and plots them.
 
     Saves the following to file:
     - all_response_times_vs_time.png: Grid of plots of response times for each test vs time elapsed
     - all_reqs_per_sec_vs_time.png: Grid of plots of reqs/sec and errors/sec for each test vs time elapsed
     - endoftest_results_all.csv: results_df CSV file containing the end-of-test locust stats for each test (also returned by function)
 
-    Args:
-        experiment_configs (dict): dict of experiment parameters, where keys are parameter names and values are lists of parameter values
-        output_folder (str): The name of output folder that results were saved to
-    Returns:
-        results_df (pd.DataFrame): dataframe containing the end-of-test locust stats for each test
-    """
+    Parameters
+    ----------
+    experiment_configs : dict
+        dict of experiment parameters, where keys are parameter names and values are lists of parameter values
+    output_folder : str
+        Path to output folder
 
+    Returns
+    -------
+    pd.DataFrame
+
+    """
     users_list = experiment_configs.get("users_list")
     locustfile_list = experiment_configs.get("locustfile_list")
 
@@ -173,7 +182,7 @@ def collate_and_plot_all_results(experiment_configs, output_folder):
     for locust_file_id, locust_file in enumerate(locustfile_list):
         for users_id, users in enumerate(users_list):
 
-            ## A. Collect end-of-test results for this test
+            # A. Collect end-of-test results for this test
 
             # Read results from test_stats_history.csv from the relevant subfolder
             locust_file_no_ext = locust_file[:-3]
@@ -194,7 +203,7 @@ def collate_and_plot_all_results(experiment_configs, output_folder):
             test_results_chosen.loc["User Count"] = users  # add correct n_users info
             result_df_list.append(test_results_chosen)
 
-            ## B. Collect failures for this test (if any)
+            # B. Collect failures for this test (if any)
 
             test_failures = pd.read_csv(
                 f"{output_folder}/raw/{test_name}/test_failures.csv", header=0
@@ -204,9 +213,9 @@ def collate_and_plot_all_results(experiment_configs, output_folder):
                 test_failures["User Count"] = users
                 failures_df_list.append(test_failures)
 
-            ## C. Plots
+            # C. Plots
 
-            ## Plot Response Times vs time elapsed:
+            # Plot Response Times vs time elapsed:
             # 50th percentile (Median)
             sns.lineplot(
                 data=test_results,
@@ -238,7 +247,7 @@ def collate_and_plot_all_results(experiment_configs, output_folder):
             if locust_file_id == 0 and users_id == 0:
                 axes_rt[locust_file_id, users_id].legend(loc="upper left")
 
-            ## Plot Reqs/s and Errors/s vs time elapsed:
+            # Plot Reqs/s and Errors/s vs time elapsed:
             # Reqs/s
             sns.lineplot(
                 data=test_results,
@@ -271,7 +280,7 @@ def collate_and_plot_all_results(experiment_configs, output_folder):
             if locust_file_id == 0 and users_id == 0:
                 axes_reqs[locust_file_id, users_id].legend(loc="upper left")
 
-            ## if test is ramped, plot user count vs time elapsed
+            # if test is ramped, plot user count vs time elapsed
             # Note: This plot only needs to be added once per column, hence locust_file_id == 0.
             if is_ramped and locust_file_id == 0:
 
@@ -353,20 +362,20 @@ def collate_and_plot_all_results(experiment_configs, output_folder):
 
 
 def plot_endoftest_results_vs_users(results_df, output_folder):
-    """
-    Plots endoftest results vs n_users for each locust_file used. Saves the following to file:
+    """Plots endoftest results vs n_users for each locust_file used. Saves the following to file:
 
     - endoftest_response_times_vs_users.png: Response times vs. number of users per locust_file (type of request)
     - endoftest_reqs_per_sec_vs_users.png: Requests/s vs. number of users per locust_file (type of request)
 
-    Args:
-        results_df (pandas.DataFrame): Results dataframe from process_results()
-        output_folder (str): Path to output folder
-    Returns:
-        None
-    """
+    Parameters
+    ----------
+    results_df : pandas.DataFrame
+        Results dataframe from process_results()
+    output_folder : str
+        Path to output folder
 
-    ## Plot median response time vs number of users, colored by locust_file
+    """
+    # Plot median response time vs number of users, colored by locust_file
     f, axes = plt.subplots(2, 1, figsize=(6, 6), constrained_layout=True)
     sns.lineplot(
         data=results_df,
@@ -390,7 +399,7 @@ def plot_endoftest_results_vs_users(results_df, output_folder):
         f"{output_folder}/processed/endoftest_response_times_vs_users.png", dpi=300
     )
 
-    ## Plot max reqs/s vs number of users, colored by locust_file
+    # Plot max reqs/s vs number of users, colored by locust_file
     f, axes = plt.subplots(2, 1, figsize=(6, 6), constrained_layout=True)
     sns.lineplot(
         data=results_df, x="User Count", y="Requests/s", hue="locust_file", ax=axes[0]
@@ -412,18 +421,24 @@ def plot_endoftest_results_vs_users(results_df, output_folder):
 
 
 def calculate_endoftest_results_summary(results_df, experiment_name, output_folder):
-    """
-    Collects the minimum response time (mean, median) and max requests achieved by the server across any number of users, per locust_file.
+    """Collects the minimum response time (mean, median) and max requests achieved by the server across any number of users, per locust_file.
 
     - endoftest_results_summary.csv: CSV of final combined results for each locust_file (i.e. request type)
 
-    Args:
-        results_df (pandas.DataFrame): Results dataframe from process_results()
-        output_folder (str): Path to output folder
-    Returns:
-        results_df_summary (pandas.DataFrame): Summary dataframe of results
-    """
+    Parameters
+    ----------
+    results_df : pandas.DataFrame
+        Results dataframe from process_results()
+    experiment_name : str
+        Name of experiment
+    output_folder : str
+        Path to output folder
 
+    Returns
+    -------
+    pandas.DataFrame
+
+    """
     # Minimum response time (mean, median) and max requests achieved by the server
     results_summary = results_df.groupby("locust_file").agg(
         {
@@ -459,14 +474,15 @@ def calculate_endoftest_results_summary(results_df, experiment_name, output_fold
 
 
 def run_all_experiments(configs, args):
-    """
-    Runs all experiments specified in configs and saves results to output folder.
+    """Runs all experiments specified in configs and saves results to output folder.
 
-    Args:
-        configs (list): List of dicts, each dict containing the following keys:
-        args (argparse.Namespace): Arguments from argparse
-    Returns:
-        None
+    Parameters
+    ----------
+    configs : list of dicts
+        List of dicts containing experiment configurations
+    args : dict
+        Arguments from argparse
+
     """
 
     results_summary_list = []

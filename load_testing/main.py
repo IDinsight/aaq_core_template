@@ -36,13 +36,17 @@ def parse_args():
 
 
 def read_configs(config_file):
-    """
-    Read test configs from the file.
+    """Read test configs from the file.
 
-    Args:
-        config_file (str): JSON file containing configs for tests
-    Returns:
-        configs (dict): Dictionary of test configs
+    Parameters
+    ----------
+    config_file : str
+
+    Returns
+    -------
+    configs : dict
+        Dictionary of test configs
+
     """
     configs = json.load(open(config_file))
     return configs

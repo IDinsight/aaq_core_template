@@ -10,11 +10,11 @@ np.random.seed(0)
 class APIUser(HttpUser):
     @task
     def ask_a_question(self):
-        """
-        Sends a question to the API.
-        Experiment 1 - send the same question repeatedly.
-        """
+        """Sends a question to the API.
 
+        Experiment 1 - send the same question repeatedly.
+
+        """
         question = "Test question."
         self.client.post(
             "/inbound/check",
