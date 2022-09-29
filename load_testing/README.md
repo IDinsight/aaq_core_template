@@ -69,7 +69,7 @@ Results are saved to file at 4 stages:
 When all experiments are completed, a master summary CSV file is produced and placed directly into the root `output_folder/` called:
 
 ```console
-all_experiments_endoftest_results_summary.csv
+combined_experiment_results.csv
 ```
 
 > Note: End-of-test results are not reliable for ramped tests - see [ramped load-tests](#ramped-load-tests))
@@ -100,20 +100,20 @@ Results from each individual load-testing experiment are also saved under a corr
     Grid of response time and requests/sec progression plots for each test, similar to plots from the HTML report. Rows = locustfile used. Columns = number of users.
 
     ```console
-    all_response_times_vs_time.png
-    all_reqs_per_sec_vs_time.png
+    per_test_response_time_vs_time.png
+    per_test_reqs_sec_vs_time.png
     ```
 
     End-of-test results for all tests:
 
     ```console
-    endoftest_results_all.csv
+    per_test_final_results.csv
     ```
 
     If there have been any failed requests, the following is also output which details the count and type of failures that occured:
 
     ```console
-    failures_all.csv
+    per_test_failures.csv
     ```
 
     Presenting summarized results
@@ -123,14 +123,14 @@ Results from each individual load-testing experiment are also saved under a corr
     For each locustfile used (i.e. request type sent), present the minimum end-of-test response time and maximum reqs/sec achieved across all user counts:
 
     ```console
-    endoftest_results_summary.csv
+    experiment_results.csv
     ```
 
     Plots showing how end-of-test response times and reqs/sec differ for different user loads, disaggregated by locustfile used:
 
     ```console
-    endoftest_response_times_vs_users.png
-    endoftest_reqs_per_sec_vs_users.png
+    per_locustfile_response_times_vs_users.png
+    per_locustfile_reqs_sec_vs_users.png
     ```
 
     > Note: These plots are not produced if multiple n_users were not tested.
@@ -142,17 +142,17 @@ Results from each individual load-testing experiment are also saved under a corr
 ┣ all_experiments_endoftest_results_summary.csv
 ┣ 📂staging_constant_multi
 ┃ ┣ 📂html_reports
-┃ ┃ ┣ 100_user_locustfile_same_msgs_report.html
-┃ ┃ ┣ ...
+┃ ┃ ┣ 10_user_locustfile_same_msgs_report.html
+┃ ┃ ┗ ...
 ┃ ┣ 📂processed
-┃ ┃ ┣ all_reqs_per_sec_vs_time.png
-┃ ┃ ┣ all_response_times_vs_time.png
-┃ ┃ ┣ endoftest_reqs_per_sec_vs_users.png
-┃ ┃ ┣ endoftest_response_times_vs_users.png
-┃ ┃ ┣ endoftest_results_all.csv
-┃ ┃ ┗ endoftest_results_summary.csv
+┃ ┃ ┣ experiment_results.csv
+┃ ┃ ┣ per_locustfile_reqs_sec_vs_users.png
+┃ ┃ ┣ per_locustfile_response_times_vs_users.png
+┃ ┃ ┣ per_test_final_results.csv
+┃ ┃ ┣ per_test_reqs_sec_vs_time.png
+┃ ┃ ┗ per_test_response_time_vs_time.png
 ┃ ┣ 📂raw
-┃ ┃ ┣ 📂100_user_locustfile_same_msgs
+┃ ┃ ┣ 10_user_locustfile_same_msgs_report
 ┃ ┃ ┃ ┣ test_exceptions.csv
 ┃ ┃ ┃ ┣ test_failures.csv
 ┃ ┃ ┃ ┣ test_stats.csv
