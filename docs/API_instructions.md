@@ -1,4 +1,4 @@
-Aug 30, 2022
+Sep 29, 2022
 
 CURRENT VERSION: aaq_core_template:v1.1.0
 # API Instructions for AAQ Core App (Template)
@@ -29,12 +29,12 @@ Requests to all the endpoints below (except `/healthcheck`) must be authenticate
 #### Response
 |Param|Type|Description|
 |---|---|---|
-|`top_responses`|list[list[string]]|List of top matches, each match is a list [title, content].|
+|`top_responses`|list[list[string]]|List of top matches, each match is a list `[faq_id, faq_title, faq_content]`.|
 |`inbound_id`|integer|ID of inbound query, to be used when submitting feedback|
 |`feedback_secret_key`|string|Secret key attached to inbound query, to be used when submitting feedback|
 |`inbound_secret_key`|string|Secret key attached to inbound query, to be used for requesting paginated results|
 |`next_page_url`|string|*This field is returned only if another page exists.* The path to request the next page of results. This must be appended to the host address.|
-|`scoring`|dict|Scoring metadata, only returned if "return_scoring" == "true" in the request. Includes the spell-corrected query that we processed, under key spell_corrected|
+|`scoring`|dict|Scoring metadata for each FAQ, keyed by `faq_id`. This is only returned if "return_scoring" == "true" in the request. Includes the spell-corrected query that we processed, under key spell_corrected|
 |`spell_corrected`|string|Spell corrected and preprocessed form of the inbound message. Useful for debugging.|
 
 ##### Example
@@ -43,9 +43,9 @@ This example assumes number of top matches to be returned is 3, return_scoring =
 ```json
 {
   "top_responses": [
-    ["FAQ #2 Title", "This is FAQ #2\"s content."],
-    ["FAQ #1 Title", "This is FAQ #1\"s content."],
-    ["FAQ #0 Title", "This is FAQ #0\"s content."]
+    ["789", "FAQ #2 Title", "This is FAQ #2\"s content."],
+    ["788", "FAQ #1 Title", "This is FAQ #1\"s content."],
+    ["787", "FAQ #0 Title", "This is FAQ #0\"s content."]
   ],
   "inbound_id": 1234,
   "feedback_secret_key": "feedback_secret_123",
@@ -75,7 +75,7 @@ This example assumes number of top matches to be returned is 3, return_scoring =
       "overall_score": "0.20052412152290344"
     },
     // ... more FAQs
-    "spell_corrected": "love going hiking What pack lunch",
+    "spell_corrected": "love going hiking What pack lunch"
   }
 }
 ```
@@ -95,11 +95,11 @@ All of the following are included in the paths in `next_page_url`/`prev_page_url
 #### Response
 |Param|Type|Description|
 |---|---|---|
-|`top_responses`|list[list[string]]|List of matches for this page. Each match is a list [title, content].|
+|`top_responses`|list[list[string]]|List of matches for this page. Each match is a list `[faq_id, faq_title, faq_content]`.|
 |`inbound_id`|integer|ID of inbound query|
 |`feedback_secret_key`|string|Secret key attached to inbound query, to be used when submitting feedback|
 |`inbound_secret_key`|string|Secret key attached to inbound query, to be used for requesting paginated results|
-|`scoring`|dict|Scoring metadata, only returned if "return_scoring" == "true" in the request. Includes the spell-corrected query that we processed, under key spell_corrected|
+|`scoring`|dict|Scoring metadata for each FAQ, keyed by `faq_id`. This is only returned if "return_scoring" == "true" in the request. Includes the spell-corrected query that we processed, under key spell_corrected|
 |`next_page_url`|string|*This field is returned only if the next page exists.* The path to request the next page of results. This must be appended to the host address. |
 |`prev_page_url`|string|*This field is returned only if a previous page exists.* The path to request the previous page of results. This must be appended to the host address. |
 
@@ -108,9 +108,9 @@ This example shows the page 2 response. Here we assume that the number of respon
 ```json
 {
   "top_responses": [
-    ["FAQ #4 Title", "This is FAQ #2\"s content."],
-    ["FAQ #3 Title", "This is FAQ #1\"s content."],
-    ["FAQ #5 Title", "This is FAQ #0\"s content."]
+    ["791", "FAQ #4 Title", "This is FAQ #2\"s content."],
+    ["790", "FAQ #3 Title", "This is FAQ #1\"s content."],
+    ["792", "FAQ #5 Title", "This is FAQ #0\"s content."]
   ],
   "inbound_id": 1234,
   "feedback_secret_key": "feedback_secret_123",
