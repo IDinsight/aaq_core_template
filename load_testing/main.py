@@ -17,7 +17,7 @@ def parse_args():
         "-c",
         "--config",
         action="store",
-        default="configs/locust_config_default.json",
+        default="configs/ramped_and_constant.json",
         help="JSON file containing configs for tests",
     )
     parser.add_argument(
