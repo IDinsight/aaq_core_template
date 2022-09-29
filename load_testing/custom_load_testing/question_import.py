@@ -1,9 +1,10 @@
-import os
+import logging
 import string
-import sys
 
 import numpy as np
 import pandas as pd
+
+logging.basicConfig(level=logging.INFO)
 
 
 def load_questions(filepath):
@@ -18,7 +19,7 @@ def load_questions(filepath):
     pd.DataFrame
 
     """
-    print("Loading questions from file...")
+    logging.info("Loading questions from file...")
     questions_df = pd.read_csv(filepath, index_col=0)
     questions_df.rename(
         {"Question": "question", "FAQ Name": "faq_name", "Urgent": "urgent"},

@@ -1,3 +1,4 @@
+import logging
 import os
 import shlex
 import subprocess
@@ -5,6 +6,8 @@ import subprocess
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
+
+logging.basicConfig(level=logging.INFO)
 
 hosts_dict = {
     "LOCAL_HOST": os.getenv("LOCAL_HOST"),
@@ -63,7 +66,7 @@ def run_tests(experiment_configs, output_folder):
     Parameters
     ----------
     experiment_configs : dict
-        dict of experiment parameters, where keys are parameter names and values are lists of parameter values
+        dict of experiment parameters from the config file
     output_folder : str
         Path to output folder
 
@@ -90,7 +93,7 @@ def run_tests(experiment_configs, output_folder):
             locust_file_no_ext = locust_file[:-3]
             test_name = f"{users}_user_{locust_file_no_ext}"
 
-            print(
+            logging.info(
                 f"""
                 Running load-test...
                 Max users: {users}
@@ -110,9 +113,9 @@ def run_tests(experiment_configs, output_folder):
                 test_name=test_name,
             )
 
-            print(f"Finished load-test {test_name}.")
+            logging.info(f"Finished load-test {test_name}.")
 
-    print(
+    logging.info(
         f"### All tests complete. Raw results and HTML reports saved to {output_folder} ###"
     )
 
@@ -304,7 +307,7 @@ def collate_and_plot_all_results(experiment_configs, output_folder):
                 )
                 axes_reqs[-1, 0].set_xlabel("")
 
-    print("Saving stats vs time plots for all tests...")
+    logging.info("Saving stats vs time plots for all tests...")
     os.makedirs(output_folder + "/processed", exist_ok=True)
     f_rt.savefig(f"{output_folder}/processed/all_response_times_vs_time.png")
     f_reqs.savefig(f"{output_folder}/processed/all_reqs_per_sec_vs_time.png")
@@ -342,7 +345,7 @@ def collate_and_plot_all_results(experiment_configs, output_folder):
         inplace=True,
         ignore_index=True,
     )
-    print("Saving endoftest_results_all.csv...")
+    logging.info("Saving endoftest_results_all.csv...")
     results_df.to_csv(
         f"{output_folder}/processed/endoftest_results_all.csv", index=False
     )
@@ -353,10 +356,10 @@ def collate_and_plot_all_results(experiment_configs, output_folder):
         failures_df = failures_df[
             ["locust_file", "User Count", "Method", "Name", "Error", "Occurrences"]
         ]
-        print("Saving failures_all.csv...")
+        logging.info("Saving failures_all.csv...")
         failures_df.to_csv(f"{output_folder}/processed/failures_all.csv", index=False)
     else:
-        print("No failures encountered during tests. Skipping failures_all.csv.")
+        logging.info("No failures encountered during tests. Skipping failures_all.csv.")
 
     return results_df
 
@@ -465,7 +468,7 @@ def calculate_endoftest_results_summary(results_df, experiment_name, output_fold
     results_summary.reset_index(inplace=True)
     results_summary.insert(0, "Experiment Name", experiment_name)
 
-    print("Saving endoftest_results_summary.csv...")
+    logging.info("Saving endoftest_results_summary.csv...")
     results_summary.to_csv(
         f"{output_folder}/processed/endoftest_results_summary.csv", index=True
     )
@@ -488,7 +491,7 @@ def run_all_experiments(configs, args):
     results_summary_list = []
     for experiment_name, experiment_configs in configs.items():
 
-        print(
+        logging.info(
             f"""
             ####################################################
             ### Running experiment {experiment_name} ###
@@ -519,7 +522,9 @@ def run_all_experiments(configs, args):
             )
 
     # Combine summary results across all experiments and save to file
-    print("Saving master summary - all_experiments_endoftest_results_summary.csv...")
+    logging.info(
+        "Saving master summary - all_experiments_endoftest_results_summary.csv..."
+    )
     results_summary_df = pd.concat(results_summary_list).reset_index(drop=True)
     results_summary_df.to_csv(
         f"{args.output}/all_experiments_endoftest_results_summary.csv",
