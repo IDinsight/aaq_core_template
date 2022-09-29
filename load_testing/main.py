@@ -6,7 +6,7 @@ Functionality based on: github.com/mohsenSy/locust-tests-runner/blob/master/locu
 import argparse
 import json
 
-from custom_load_testing.auto_load_testing import run_all_experiments
+from custom_load_testing import analysis, testing
 
 
 def parse_args():
@@ -37,28 +37,15 @@ def parse_args():
     return args
 
 
-def read_configs(config_file):
-    """Read test configs from the file.
-
-    Parameters
-    ----------
-    config_file : str
-
-    Returns
-    -------
-    configs : dict
-        Dictionary of test configs
-
-    """
-    configs = json.load(open(config_file))
-    return configs
-
-
 def main():
     """Run main script function."""
     args = parse_args()
-    configs = read_configs(args.config)
-    run_all_experiments(configs=configs, args=args)
+    configs = json.load(open(args.config))
+
+    if not args.analyze_results_only:
+        testing.run_all_experiments(configs=configs, args=args)
+
+    analysis.run_all_analysis(configs=configs, args=args)
 
 
 if __name__ == "__main__":
