@@ -58,7 +58,9 @@ def combine_final_test_results(final_test_results_list):
 
     Returns
     -------
-    final_test_results : pandas.DataFrame"""
+    final_test_results : pandas.DataFrame
+
+    """
 
     final_test_results = pd.concat(final_test_results_list, axis=1).T
     final_test_results = final_test_results[

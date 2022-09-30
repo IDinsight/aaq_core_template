@@ -162,6 +162,10 @@ def run_all_analysis(configs, args):
     args : dict
         Arguments from argparse
 
+    Returns
+    -------
+    None
+
     """
     experiment_results_list = []
     for experiment_name, experiment_configs in configs.items():

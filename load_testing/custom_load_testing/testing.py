@@ -48,6 +48,10 @@ def run_single_test(
     test_name : str
         The name of test
 
+    Returns
+    -------
+    None
+
     """
     output_files_root = output_subfolder + "/test"
 
@@ -76,6 +80,10 @@ def run_tests(experiment_configs, output_folder, hosts_dict):
         dict of experiment parameters from the config file
     output_folder : str
         Path to output folder
+
+    Returns
+    -------
+    None
 
     """
     host = hosts_dict[experiment_configs.get("host_label")]
@@ -140,6 +148,10 @@ def run_all_experiments(configs, args):
         List of dicts containing experiment configs
     args : dict
         Arguments from argparse
+
+    Returns
+    -------
+    None
 
     """
     for experiment_name, experiment_configs in configs.items():

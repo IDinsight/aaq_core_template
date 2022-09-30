@@ -21,6 +21,10 @@ def initialize_plot_grid(locustfile_list, users_list, is_ramped):
     axes : numpy.ndarray
         array of axes objects
 
+    Returns
+    -------
+    None
+
     """
 
     figsize_x = max(2.5 * len(users_list), 6)
@@ -70,6 +74,10 @@ def plot_test_stats_vs_time(
         index of number of users in users_list
     users : int
         number of users
+
+    Returns
+    -------
+    None
 
     """
     for y, label in zip(ys, labels):
@@ -121,6 +129,10 @@ def plot_results_vs_users(final_test_results, y, filename, output_folder):
         Column to use as y-axis
     filename : str
         Name of file to save plot to
+
+    Returns
+    -------
+    None
 
     """
     # Plot y vs number of users, colored by locustfile
