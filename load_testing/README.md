@@ -1,4 +1,3 @@
-
 # Load Testing
 
 This is the readme for AAQ Load Testing.
@@ -13,7 +12,8 @@ This submodule extends the core functionality of the `locust` load-testing libra
 
 2. Install libraries in `requirements.txt`
 
-3. Add the host addresses (unused hosts can be blank) and token to the conda environment variables. Note: It's assumed that the token is the same for all hosts.
+3. Add the host addresses (unused hosts can be blank) and token as environment variables. If using conda, you may wish to add this to the [`env_var.sh`](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#macos-and-linux) file.
+   Note: It's assumed that the token is the same for all hosts.
 
     ```console
     STAGING_HOST=
@@ -24,7 +24,7 @@ This submodule extends the core functionality of the `locust` load-testing libra
 
 4. Create a `data/` folder in the repo root and place the CSV containing validation messages inside (e.g. for MomConnect, use `validation_khumo_labelled_aaq.csv`)
 
-5. Config file examples are provided in the `configs/` folder. Either alter parameters in pre-existing files or make your own. 
+5. Config file examples are provided in the `configs/` folder. Either alter parameters in pre-existing files or make your own.
 
     See [config](#config-and-experiment-types) section below for details on how this file is formatted.
 
@@ -39,6 +39,7 @@ This submodule extends the core functionality of the `locust` load-testing libra
     > Note: Each experiment can specify multiple values for each parameter, and so multiple load-tests may be run for each experiment.
 
     The script can be run with the following command-line arguments:
+
     - `--config`: JSON file containing configs for tests.
 
         Default `configs/ramped_and_constant.json`.
@@ -87,7 +88,7 @@ Results from each individual load-testing experiment are also saved under a corr
 
 2. `html_reports/`: At the end of each test, an HTML report made by Locust is saved here. Each report includes final stats and load-test progression plots.
 
-3. `processed/`: Once all tests have concluded, the raw stats for all tests  are read, collated, plotted and saved here by the main script.
+3. `processed/`: Once all tests have concluded, the raw stats for all tests are read, collated, plotted and saved here by the main script.
 
     > Note: End-of-test results are not reliable for ramped tests - see [ramped load-tests](#ramped-load-tests))
 
@@ -95,7 +96,7 @@ Results from each individual load-testing experiment are also saved under a corr
 
     Presenting info for all tests
 
-    ---
+    ***
 
     Grid of response time and requests/sec progression plots for each test, similar to plots from the HTML report. Rows = locustfile used. Columns = number of users.
 
@@ -118,7 +119,7 @@ Results from each individual load-testing experiment are also saved under a corr
 
     Presenting summarized results
 
-    ---
+    ***
 
     For each locustfile used (i.e. request type sent), present the minimum end-of-test response time and maximum reqs/sec achieved across all user counts:
 
@@ -177,7 +178,7 @@ Each experiment entry reflects the core elements of a [standard locust config fi
 
 This submodule is designed to be able to run two types of experiments: constant and ramped load-tests. As many experiments can be added to the config file as necessary - the script will execute one after the other.
 
-### *Constant load-tests*
+### _Constant load-tests_
 
 Constant load-tests initiate the max number of users from the start and sustain the load for the given run-time.
 
@@ -207,7 +208,7 @@ An example of a config entry for multiple constant load-tests performed on the `
 
 In this example, the main script will run locust load-tests for each locustfile and number of users combination.
 
-### *Ramped load-tests*
+### _Ramped load-tests_
 
 Ramped load-tests gradually increase number of users based on a given spawn-rate, up to a given max number of users, for a given run-time.
 

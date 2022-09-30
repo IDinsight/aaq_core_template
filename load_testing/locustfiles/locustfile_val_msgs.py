@@ -1,15 +1,17 @@
 import os
-import sys
+from pathlib import Path
 
 import numpy as np
 from custom_load_testing.question_import import load_questions, select_a_question
 from locust import HttpUser, task
 
 INBOUND_CHECK_TOKEN = os.getenv("INBOUND_CHECK_TOKEN")
+DATA_FILE = os.getenv("LOADTEST_DATA_FILE")
+SEED = 0
 
-filepath = sys.path[0] + "/../../data/validation_khumo_labelled_aaq.csv"
-questions_df = load_questions(filepath)
-np.random.seed(0)
+np.random.seed(SEED)
+data_path = Path(__file__).parents[2] / "data" / DATA_FILE
+questions_df = load_questions(data_path)
 
 
 class APIUser(HttpUser):

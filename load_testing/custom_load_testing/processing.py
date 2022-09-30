@@ -111,7 +111,7 @@ def calculate_per_experiment_results(
 
     Parameters
     ----------
-    results_df : pandas.DataFrame
+    final_test_results : pandas.DataFrame
         Results dataframe from process_results()
     experiment_name : str
         Name of experiment
