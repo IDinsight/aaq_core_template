@@ -85,8 +85,9 @@ def get_config_data(params):
 
     config["PREPROCESSING_PARAMS"] = load_parameters("preprocessing")
     # saved for reference
-    config["MATCHING_MODEL"] = load_parameters("matching_model")
-    config["MODEL_PARAMS"] = load_parameters("model_params")
+    model_name = load_parameters("matching_model")
+    config["MODEL_PARAMS"] = load_parameters("model_params")[model_name]
+    config["MATCHING_MODEL"] = model_name
 
     faq_matching_config = load_parameters("faq_match")
     config.update(faq_matching_config)
