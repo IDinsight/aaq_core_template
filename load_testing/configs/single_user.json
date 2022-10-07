@@ -1,8 +1,8 @@
 {
     "staging_single_user": {
-        "host_label": "STAGING_HOST",
+        "host_label": "STAGING_URL",
         "locustfile_list": [
-            "locustfile_val_msgs.py"
+            "val_msgs.py"
         ],
         "users_list": [
             1

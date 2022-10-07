@@ -24,7 +24,7 @@ def parse_args():
         "-o",
         "--output",
         action="store",
-        default="output_folder",
+        default="outputs",
         help="Folder to store outputs",
     )
     parser.add_argument(

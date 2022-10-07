@@ -10,7 +10,7 @@ DATA_FILE = os.getenv("LOADTEST_DATA_FILE")
 SEED = 0
 
 np.random.seed(SEED)
-data_path = Path(__file__).parents[2] / "data" / DATA_FILE
+data_path = Path(__file__).parents[1] / "data" / DATA_FILE
 questions_df = load_questions(data_path)
 
 

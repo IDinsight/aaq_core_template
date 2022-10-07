@@ -21,6 +21,8 @@ def process_test_result(test_stats_history, locustfile, users):
     To-Do:
     Automate this check. Requires a way to robustly determine when the
     response times have flattened.
+    Or throw a warning saying it may not have flattened and you may wish
+    to run it longer.
 
     Parameters
     ----------

@@ -9,7 +9,5 @@ fsspec[s3]==2022.3.0
 # load-testing
 locust==2.12.1
 argparse==1.4.0
-numpy==1.22.2
-pandas>=1.2.3
 seaborn==0.12.0
 matplotlib==3.6.0

@@ -12,17 +12,21 @@ This submodule extends the core functionality of the `locust` load-testing libra
 
 2. Install libraries in `requirements.txt`
 
-3. Add the host addresses (unused hosts can be blank) and token as environment variables. If using conda, you may wish to add this to the [`env_var.sh`](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#macos-and-linux) file.
-   Note: It's assumed that the token is the same for all hosts.
+3. Add the API addresses (unused addresses can be blank) and token as environment variables. If using conda, you may wish to add this to the [`env_var.sh`](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#macos-and-linux) file.
+
+    >Notes: URLs expected as `PROTOCOL://HOST:PORT`. Token assumed to be the same for all hosts.
 
     ```console
-    STAGING_HOST=
-    DEV_HOST=
-    LOCAL_HOST=
+    STAGING_URL=
+    DEV_URL=
+    LOCAL_URL=
     INBOUND_CHECK_TOKEN=
+    LOADTEST_DATA_FILE=
     ```
 
-4. Create a `data/` folder in the repo root and place the CSV containing validation messages inside (e.g. for MomConnect, use `validation_khumo_labelled_aaq.csv`)
+4. Create a `data/` folder in the load_testing folder and place the CSV containing validation messages inside and store its name inside the env variable `LOADTEST_DATA_FILE`  (e.g. for MomConnect, use `validation_khumo_labelled_aaq.csv`)
+
+    >Note: This data folder and the `LOADTEST_DATA_FILE` environment variables are used by the default locustfiles to send API requests. If you've written your own locustfiles with their own imports you may skip these steps.
 
 5. Config file examples are provided in the `configs/` folder. Either alter parameters in pre-existing files or make your own.
 
@@ -48,7 +52,7 @@ This submodule extends the core functionality of the `locust` load-testing libra
 
     - `--output`: Folder to store outputs.
 
-        Default `output_folder`.
+        Default `outputs`.
 
     - `--analyze-results-only`: If this tag is included, don't run any new tests and analyze previously-run test outputs only. Saved results must exactly correspond to the given config file.
 
@@ -67,7 +71,7 @@ Results are saved to file at 4 stages:
 3. End of each experiment's set of test runs
 4. End of all experiments
 
-When all experiments are completed, a master summary CSV file is produced and placed directly into the root `output_folder/` called:
+When all experiments are completed, a master summary CSV file is produced and placed directly into the root `outputs/` called:
 
 ```console
 combined_experiment_results.csv
@@ -139,11 +143,11 @@ Results from each individual load-testing experiment are also saved under a corr
 ### Example output folder structure
 
 ```console
-📂output_folder
+📂outputs
 ┣ all_experiments_endoftest_results_summary.csv
 ┣ 📂staging_constant_multi
 ┃ ┣ 📂html_reports
-┃ ┃ ┣ 10_user_locustfile_same_msgs_report.html
+┃ ┃ ┣ 10_user_same_msgs_report.html
 ┃ ┃ ┗ ...
 ┃ ┣ 📂processed
 ┃ ┃ ┣ experiment_results.csv
@@ -153,12 +157,12 @@ Results from each individual load-testing experiment are also saved under a corr
 ┃ ┃ ┣ per_test_reqs_sec_vs_time.png
 ┃ ┃ ┗ per_test_response_time_vs_time.png
 ┃ ┣ 📂raw
-┃ ┃ ┣ 10_user_locustfile_same_msgs_report
+┃ ┃ ┣ 10_user_same_msgs_report
 ┃ ┃ ┃ ┣ test_exceptions.csv
 ┃ ┃ ┃ ┣ test_failures.csv
 ┃ ┃ ┃ ┣ test_stats.csv
 ┃ ┃ ┃ ┗ test_stats_history.csv
-┃ ┃ ┣ 📂100_user_locustfile_val_msgs
+┃ ┃ ┣ 📂100_user_val_msgs
 ┃ ┃ ┗ ┗ ...
 ┃ ┣ 📂staging_ramped
 ┗ ┗ ┗ ...
@@ -184,14 +188,14 @@ Constant load-tests initiate the max number of users from the start and sustain 
 
 When multiple request types (via different locustfiles) and numbers of users are specificed, the constant load-tests experiment outputs a grid of results that allows us to compare response times and requests/sec under stable load conditions.
 
-An example of a config entry for multiple constant load-tests performed on the `STAGING_HOST` is given below:
+An example of a config entry for multiple constant load-tests performed on the `STAGING_URL` is given below:
 
 ```json
 "staging_constant_multi": {
-    "host_label": "STAGING_HOST",
+    "host_label": "STAGING_URL",
     "locustfile_list": [
-        "locustfile_same_msgs.py",
-        "locustfile_val_msgs.py"
+        "same_msgs.py",
+        "val_msgs.py"
     ],
     "users_list": [
         1,
@@ -216,14 +220,14 @@ A ramped load-test is helpful in estimating the point at which a server starts t
 
 Also note that end-of-test results are often unreliable or irrelevant in ramped load-tests (e.g. median and average response time values). A constant load-test is more suited to extracting stable response time results and can be repeated for any number of users as required.
 
-An example of a config entry for a single ramped load-test is given below. This test is performed on the `STAGING_HOST`, with 2 users spawned per second, up to a maximum of 500 users, with a max run-time of 8 minutes.
+An example of a config entry for a single ramped load-test is given below. This test is performed on the `STAGING_URL`, with 2 users spawned per second, up to a maximum of 500 users, with a max run-time of 8 minutes.
 
 ```json
 "staging_ramped_50": {
-    "host_label": "STAGING_HOST",
+    "host_label": "STAGING_URL",
     "locustfile_list": [
-        "locustfile_same_msgs.py",
-        "locustfile_val_msgs.py"
+        "same_msgs.py",
+        "val_msgs.py"
     ],
     "users_list": [
         50

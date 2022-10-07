@@ -157,7 +157,4 @@ core_model/requirements.txt
 !delete_secrets.py
 
 # Load testing
-load_testing/output_folder/
-
-# profiling
-profiling/
+load_testing/outputs/

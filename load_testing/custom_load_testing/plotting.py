@@ -90,17 +90,13 @@ def plot_test_stats_vs_time(
             ax=ax,
         )
 
-    # remove x-axis label
     ax.set_xlabel("")
-    # add number of users as title if subplot is in top row.
     if locustfile_id == 0:
         ax.set_title(f"{users} users")
-    # add locustfile name as y-axis label if subplot is in first column.
     if users_id == 0:
         ax.set_ylabel(locustfile_no_ext)
     else:
         ax.set_ylabel("")
-    # only add legend if subplot is the top left plot.
     if locustfile_id == 0 and users_id == 0:
         ax.legend(loc="upper left")
 

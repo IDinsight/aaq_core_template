@@ -1,10 +1,10 @@
 {
     "staging_constant_multi": {
-        "host_label": "STAGING_HOST",
+        "host_label": "STAGING_URL",
         "locustfile_list": [
-            "locustfile_same_msgs.py",
-            "locustfile_val_msgs.py",
-            "locustfile_val_msgs_spell.py"
+            "same_msgs.py",
+            "val_msgs.py",
+            "val_msgs_spell.py"
         ],
         "users_list": [
             1,
@@ -24,11 +24,11 @@
         ]
     },
     "staging_ramped_single": {
-        "host_label": "STAGING_HOST",
+        "host_label": "STAGING_URL",
         "locustfile_list": [
-            "locustfile_same_msgs.py",
-            "locustfile_val_msgs.py",
-            "locustfile_val_msgs_spell.py"
+            "same_msgs.py",
+            "val_msgs.py",
+            "val_msgs_spell.py"
         ],
         "users_list": [
             500
@@ -41,11 +41,11 @@
         ]
     },
     "dev_constant_multi": {
-        "host_label": "DEV_HOST",
+        "host_label": "DEV_URL",
         "locustfile_list": [
-            "locustfile_same_msgs.py",
-            "locustfile_val_msgs.py",
-            "locustfile_val_msgs_spell.py"
+            "same_msgs.py",
+            "val_msgs.py",
+            "val_msgs_spell.py"
         ],
         "users_list": [
             1,
@@ -65,11 +65,11 @@
         ]
     },
     "dev_ramped_single": {
-        "host_label": "DEV_HOST",
+        "host_label": "DEV_URL",
         "locustfile_list": [
-            "locustfile_same_msgs.py",
-            "locustfile_val_msgs.py",
-            "locustfile_val_msgs_spell.py"
+            "same_msgs.py",
+            "val_msgs.py",
+            "val_msgs_spell.py"
         ],
         "users_list": [
             500

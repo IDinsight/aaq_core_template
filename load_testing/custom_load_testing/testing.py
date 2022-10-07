@@ -5,11 +5,13 @@ import subprocess
 
 logging.basicConfig(level=logging.INFO)
 
-hosts_dict = {
-    "LOCAL_HOST": os.getenv("LOCAL_HOST"),
-    "STAGING_HOST": os.getenv("STAGING_HOST"),
-    "DEV_HOST": os.getenv("DEV_HOST"),
-}
+hosts_dict = {}
+for URL_label in ["LOCAL_URL", "STAGING_URL", "DEV_URL"]:
+    URL = os.getenv(URL_label)
+    if URL is None:
+        logging.warning(f"Could not find {URL_label} in env vars.")
+    else:
+        hosts_dict[URL_label] = URL
 
 
 def run_single_test(
@@ -90,7 +92,8 @@ def run_tests(experiment_configs, output_folder, hosts_dict):
     locustfile_list = experiment_configs.get("locustfile_list")
     users_list = experiment_configs.get("users_list")
     run_time_list = experiment_configs.get("run_time_list")
-    # Note: default spawn-rate = n users, up to max 100 users/sec.
+    # Note: default spawn-rate = n users, up to max 100 users/sec
+    # as per locust's recommendations.
     spawn_rate_list = experiment_configs.get(
         "spawn_rate_list",
         [min(users, 100) for users in users_list],
