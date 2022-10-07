@@ -26,7 +26,7 @@ repos:
   hooks:
     - id: interrogate
       name: interrogate
-      exclude: ^(docs|playground|tests|validation)
+      exclude: ^(docs|playground|tests|validation|load_testing/locustfiles)
       entry: interrogate
       args: [-v, --fail-under=95, --ignore-module]
 
