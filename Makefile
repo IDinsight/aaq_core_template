@@ -118,14 +118,14 @@ test-all:
 
 profile-google:
 	pytest -m "google" profiling/test_profiling.py::TestDummyFaqToDb
-	mkdir -p profiling/output_folder
-	pyinstrument --outfile=profiling/output_folder/profile_google.html -m pytest -m "google" profiling/test_profiling.py::TestMainEndpoints
+	mkdir -p profiling/outputs
+	pyinstrument --outfile=profiling/outputs/profile_google.html -m pytest -m "google" profiling/test_profiling.py::TestMainEndpoints
 	pytest -m "google" profiling/test_profiling.py::TestCleanDb
 
 profile-fasttext:
 	pytest -m "fasttext" profiling/test_profiling.py::TestDummyFaqToDb
-	mkdir -p profiling/output_folder
-	pyinstrument --outfile=profiling/output_folder/profile_fasttext.html -m pytest -m "fasttext" profiling/test_profiling.py::TestMainEndpoints
+	mkdir -p profiling/outputs
+	pyinstrument --outfile=profiling/outputs/profile_fasttext.html -m pytest -m "fasttext" profiling/test_profiling.py::TestMainEndpoints
 	pytest -m "fasttext" profiling/test_profiling.py::TestCleanDb
 
 image:

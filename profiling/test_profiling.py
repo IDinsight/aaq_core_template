@@ -62,7 +62,7 @@ class TestDummyFaqToDb:
 
 class TestMainEndpoints:
     @pytest.fixture(scope="class")
-    def inbound_chec_request(self, client):
+    def inbound_check_request(self, client):
 
         request_data = {
             "text_to_match": "Profiling test message.",
@@ -73,13 +73,13 @@ class TestMainEndpoints:
 
         return response
 
-    def test_inbound_endpoint(self, inbound_chec_request):
-        assert inbound_chec_request.status_code == 200
+    def test_inbound_endpoint(self, inbound_check_request):
+        assert inbound_check_request.status_code == 200
 
-    def test_inbound_feedback(self, client, inbound_chec_request):
+    def test_inbound_feedback(self, client, inbound_check_request):
 
-        inbound_id = inbound_chec_request.get_json()["inbound_id"]
-        feedback_secret_key = inbound_chec_request.get_json()["feedback_secret_key"]
+        inbound_id = inbound_check_request.get_json()["inbound_id"]
+        feedback_secret_key = inbound_check_request.get_json()["feedback_secret_key"]
 
         feedback_json = {
             "inbound_id": inbound_id,
@@ -92,8 +92,8 @@ class TestMainEndpoints:
 
         assert response.status_code == 200
 
-    def test_accessing_valid_next_page(self, client, inbound_chec_request):
-        next_page_url = inbound_chec_request.get_json()["next_page_url"]
+    def test_accessing_valid_next_page(self, client, inbound_check_request):
+        next_page_url = inbound_check_request.get_json()["next_page_url"]
 
         headers = {"Authorization": "Bearer %s" % os.getenv("INBOUND_CHECK_TOKEN")}
         response = client.get(next_page_url, headers=headers)

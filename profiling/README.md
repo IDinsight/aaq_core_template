@@ -12,7 +12,11 @@ See this [confluence page](https://idinsight.atlassian.net/wiki/spaces/PD/pages/
 
 2. Set secrets. Note: Set database secrets to the test database.
 
-3. Make a folder `profiling/data/` and place `faq_data.yaml` here (same data used in `validation/`)
+3. Symlink `tests/data/faq_data.yaml` to `profiling/data/faq_data.yaml` using:
+
+    ```console
+    ln -s $(pwd)/tests/data/faq_data.yaml profiling/data
+    ```
 
 ### Run the profilers
 
@@ -29,7 +33,7 @@ So that only the endpoints are profiled (and not the SQL injections etc), this c
 
 > Note: Since we only add 6 FAQs to the database, we set `top_n_responses=3` in `conftest.py` so that multiple pages of results are created and the `pagination` endpoint can be tested. This is the same as the other pytests in the repo.
 
-Results will be saved in `profiling/output_folder/`
+Results will be saved in `profiling/outputs/`
 
 ## TO-DO
 
