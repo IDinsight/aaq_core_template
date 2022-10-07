@@ -50,7 +50,7 @@ def plot_test_stats_vs_time(
     labels,
     ax,
     locustfile_id,
-    locustfile_no_ext,
+    locustfile,
     users_id,
     users,
 ):
@@ -68,8 +68,8 @@ def plot_test_stats_vs_time(
         subplot to plot on
     locustfile_id : int
         index of locustfile in locustfile_list
-    locustfile_no_ext : str
-        name of locustfile without extension
+    locustfile: str
+        name of locustfile
     users_id : int
         index of number of users in users_list
     users : int
@@ -94,7 +94,7 @@ def plot_test_stats_vs_time(
     if locustfile_id == 0:
         ax.set_title(f"{users} users")
     if users_id == 0:
-        ax.set_ylabel(locustfile_no_ext)
+        ax.set_ylabel(locustfile[:-3])
     else:
         ax.set_ylabel("")
     if locustfile_id == 0 and users_id == 0:
