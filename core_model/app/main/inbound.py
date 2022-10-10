@@ -114,12 +114,14 @@ def prepare_scoring_as_json(scoring_output):
     Convert scoring so it can be saved as JSON in Db. Also save spell corrected
     terms.
     """
-    for id in scoring_output:
-        scoring_output[id]["overall_score"] = str(scoring_output[id]["overall_score"])
+    for faq_id in scoring_output:
+        scoring_output[faq_id]["overall_score"] = str(
+            scoring_output[faq_id]["overall_score"]
+        )
 
         # Convert scoring[faq.faq_id] to have string values (to save in DB as JSON)
-        scoring_output[id]["tag_cs"] = {
-            key: str(val) for key, val in scoring_output[id]["tag_cs"].items()
+        scoring_output[faq_id]["tag_cs"] = {
+            key: str(val) for key, val in scoring_output[faq_id]["tag_cs"].items()
         }
 
     return scoring_output
