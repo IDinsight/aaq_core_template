@@ -4,26 +4,59 @@ Tests `inbound/check`, `feedback`, and `pagination` endpoints and saves results 
 
 See this [confluence page](https://idinsight.atlassian.net/wiki/spaces/PD/pages/2055798825/Code+Profiling+Tools) for details about the tools.
 
-## How to run
+# How to run
 
-### Setup
+## Setup
 
-1. Run `setup-dev`
+1. Run `make setup-dev`
 
-2. Set secrets. Note: Set database secrets to the test database.
+2. Install `faqt` through `pip install git+https://@github.com/IDinsight/faqt.git@v0.1.0`
 
-3. Symlink `tests/data/faq_data.yaml` to `profiling/data/faq_data.yaml` using:
+3. Set the following secrets as environment variables (e.g. using `env_vars.sh` for `conda`)
+
+    ```console
+    INBOUND_CHECK_TOKEN=
+    PG_ENDPOINT=
+    PG_PASSWORD=
+    TOKEN_MACHINE_USER=
+    PROMETHEUS_MULTIPROC_DIR=
+    ```
+
+4. Decide whether you want to test real FAQs in the Dev DB or want to use dummy test FAQs through Test DB.
+
+## Dev DB - use real FAQs
+
+1. In `profiling/configs/base.yaml`, set the following to the dev database:
+
+    ```console
+    PG_USERNAME=
+    PG_DATABASE=
+    ```
+
+2. Run either of the following commands:
+
+    - `make profile-dev-google` to produce report for just the google model
+    - `make profile-dev-fasttext` to produce report for just the custom embeddings model
+
+## Test DB - Add and use dummy FAQs
+
+1. In `profiling/configs/base.yaml`, set the following to the test database:
+
+    ```console
+    PG_USERNAME=
+    PG_DATABASE=
+    ```
+
+2. Symlink `tests/data/faq_data.yaml` to `profiling/data/faq_data.yaml` using:
 
     ```console
     ln -s $(pwd)/tests/data/faq_data.yaml profiling/data
     ```
 
-### Run the profilers
+3. Run either of the following commands:
 
-Two options:
-
-- `make profile-google` to produce report for just the google model
-- `make profile-fasttext` to produce report for just the custom embeddings model
+- `make profile-test-google` to produce report for just the google model
+- `make profile-test-fasttext` to produce report for just the custom embeddings model
 
 So that only the endpoints are profiled (and not the SQL injections etc), this command does the following:
 

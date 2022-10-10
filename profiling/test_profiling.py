@@ -25,7 +25,7 @@ class TestDummyFaqToDb:
     # delete pre-existing FAQs
     def test_clean_faq_db(self, db_engine):
         with db_engine.connect() as db_connection:
-            t = text("DELETE FROM faqmatches")
+            t = text("DELETE FROM faqmatches")  # "WHERE faq_author='Profiler author'"
             db_connection.execute(t)
 
             # check that db is now empty of faqs added by the profiler
@@ -108,7 +108,7 @@ class TestCleanDb:
             db_connection.execute(t)
 
             # check that db is now empty of faqs added by the profiler
-            t = text("SELECT * FROM faqmatches")
+            t = text("SELECT * FROM faqmatches " "WHERE faq_author='Profiler author'")
             result = db_connection.execute(t)
             assert result.rowcount == 0
 
