@@ -4,9 +4,7 @@ Create and initialise the app. Uses Blueprints to define view.
 import os
 from functools import partial
 
-from faqt.model import KeyedVectorsScorer
-from faqt.preprocessing import preprocess_text_for_word_embedding
-from faqt.scoring_functions import cs_nearest_k_percent_average
+from faqt import StepwiseKeyedVectorsScorer, preprocess_text_for_word_embedding
 from flask import Flask
 from hunspell import Hunspell
 
@@ -84,11 +82,15 @@ def get_config_data(params):
     """
 
     config = DefaultEnvDict()
-    app_config = load_parameters("score_reduction")
-    text_preprocessor_config = load_parameters("preprocessing")
-    config["matching_model"] = load_parameters("matching_model")
-    config.update(app_config)
-    config.update(text_preprocessor_config)
+
+    config["PREPROCESSING_PARAMS"] = load_parameters("preprocessing")
+    # saved for reference
+    model_name = load_parameters("matching_model")
+    config["MODEL_PARAMS"] = load_parameters("model_params")[model_name]
+    config["MATCHING_MODEL"] = model_name
+
+    faq_matching_config = load_parameters("faq_match")
+    config.update(faq_matching_config)
     config.update(params)
 
     config["SQLALCHEMY_DATABASE_URI"] = get_postgres_uri(
@@ -115,13 +117,13 @@ def load_embeddings(name_of_model_in_data_source):
     model_filename = data_sources[model_to_use_name]["filename"]
     model_type = data_sources[model_to_use_name]["type"]
 
-    w2v_model = load_word_embeddings_bin(
+    word_embedding_model = load_word_embeddings_bin(
         model_folder,
         model_filename,
         model_type,
     )
 
-    return w2v_model
+    return word_embedding_model
 
 
 def create_faqt_model(config):
@@ -129,23 +131,24 @@ def create_faqt_model(config):
     Create a new instance of the faqt class.
     """
 
-    gensim_keyed_vector = load_embeddings(config["matching_model"])
-    faqs_params = load_parameters("faq_match")
+    gensim_keyed_vector = load_embeddings(config["MATCHING_MODEL"])
     custom_wvs = load_custom_wvs()
     tags_guiding_typos = load_tags_guiding_typos()
     hunspell = Hunspell()
 
-    scoring_function_args = config["scoring_function_args"]
-    n_top_matches = faqs_params["n_top_matches_per_page"]
+    params = config["MODEL_PARAMS"]
 
-    return KeyedVectorsScorer(
+    return StepwiseKeyedVectorsScorer(
         gensim_keyed_vector,
+        tag_scoring_method=params["tag_scoring_method"],
+        tag_scoring_kwargs=params["tag_scoring_kwargs"],
+        score_reduction_method=params["score_reduction_method"],
+        score_reduction_kwargs=params["tag_scoring_kwargs"],
+        weighting_method=params["weighting_method"],
+        weighting_kwargs=params["weighting_kwargs"],
         glossary=custom_wvs,
         hunspell=hunspell,
         tags_guiding_typos=tags_guiding_typos,
-        n_top_matches=n_top_matches,
-        scoring_function=cs_nearest_k_percent_average,
-        scoring_func_kwargs=scoring_function_args,
     )
 
 
@@ -184,6 +187,10 @@ def refresh_faqs(app):
         faqs = FAQModel.query.all()
     faqs.sort(key=lambda x: x.faq_id)
     app.faqs = add_faq_weight_share(faqs)
-    app.faqt_model.set_tags([faq.faq_tags for faq in faqs])
+
+    tagsets = [faq.faq_tags for faq in faqs]
+    weights = [faq.faq_weight_share for faq in faqs]
+
+    app.faqt_model.set_contents(tagsets, weights)
 
     return len(faqs)

@@ -13,6 +13,44 @@ from gensim.models import KeyedVectors
 from gensim.models.fasttext import load_facebook_vectors
 
 
+def load_fasttext(folder, filename):
+    """Load fasttext word embedding"""
+    if os.getenv("GITHUB_ACTIONS") == "true":
+        bucket = os.getenv("WORD2VEC_BINARY_BUCKET")
+        s3 = boto3.resource("s3")
+
+        with tempfile.NamedTemporaryFile() as tf:
+            s3.Bucket(bucket).download_file(filename, tf.name)
+            model = load_facebook_vectors(tf.name)
+    else:
+        full_path = Path(__file__).parents[3] / "data" / folder / filename
+        model = load_facebook_vectors(full_path)
+
+    return model
+
+
+def load_w2v_binary(folder, filename):
+    """load word2vec binary"""
+    if os.getenv("GITHUB_ACTIONS") == "true":
+        bucket = os.getenv("WORD2VEC_BINARY_BUCKET")
+        path = f"s3://{bucket}/{filename}"
+    else:
+        path = Path(__file__).parents[3] / "data" / folder / filename
+
+    model = KeyedVectors.load_word2vec_format(
+        path,
+        binary=True,
+    )
+
+    return model
+
+
+MODEL_LOADING_FUNCS = {
+    "w2v": load_w2v_binary,
+    "fasttext": load_fasttext,
+}
+
+
 def load_word_embeddings_bin(folder, filename, model_type):
     """
     Load pretrained word2vec or fasttext model from either local mount or S3
@@ -20,48 +58,16 @@ def load_word_embeddings_bin(folder, filename, model_type):
 
     TODO: make into a pure function and take ENV as input
     TODO: Change env var to be VECTORS_BINARY_BUCKET since it is no longer just W2V
-    TODO: Refactor to reduce repetition. Break into functions. See:
-    https://github.com/IDinsight/aaq_core_template/pull/17#discussion_r945825199
     """
+    if model_type not in MODEL_LOADING_FUNCS:
+        raise ValueError(
+            f"Invalid `model_type`! Choose from {list(MODEL_LOADING_FUNCS.keys())}"
+        )
 
-    if model_type == "fasttext":
-        if os.getenv("GITHUB_ACTIONS") == "true":
-            bucket = os.getenv("WORD2VEC_BINARY_BUCKET")
-            s3 = boto3.resource("s3")
-            with tempfile.NamedTemporaryFile() as tf:
-                s3.Bucket(bucket).download_file(filename, tf.name)
-                model = load_facebook_vectors(tf.name)
-        else:
-            full_path = Path(__file__).parents[3] / "data" / folder / filename
-            model = load_facebook_vectors(full_path)
-    elif model_type == "w2v":
-        if os.getenv("GITHUB_ACTIONS") == "true":
-            bucket = os.getenv("WORD2VEC_BINARY_BUCKET")
-            model = KeyedVectors.load_word2vec_format(
-                f"s3://{bucket}/{filename}", binary=True
-            )
-        else:
-            full_path = Path(__file__).parents[3] / "data" / folder / filename
-            model = KeyedVectors.load_word2vec_format(
-                full_path,
-                binary=True,
-            )
-    else:
-        raise NotImplementedError('model_type should be either "fasttext" or "w2v"')
+    load_function = MODEL_LOADING_FUNCS[model_type]
+    model = load_function(folder, filename)
 
     return model
-
-
-def load_yaml_data(folder, filename):
-    """
-    Load generic yaml files from data and return dictionary
-    """
-    full_path = Path(__file__).parents[3] / "data/{}/{}".format(folder, filename)
-
-    with open(full_path) as file:
-        yaml_dict = yaml.full_load(file)
-
-    return yaml_dict
 
 
 def load_yaml_config(filename, config_subfolder=None):
@@ -103,15 +109,6 @@ def load_parameters(key=None):
         params = params[key]
 
     return params
-
-
-def load_databases(env):
-    """
-    Load databases
-    """
-    databases = load_yaml_config("databases.yml")[env]
-    secrets = load_yaml_config("databases_secrets.yml", "secrets")[env]
-    return databases, secrets
 
 
 def load_pairwise_entities():

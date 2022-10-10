@@ -3,6 +3,7 @@
 ##############################################################################
 import os
 from base64 import b64encode
+from collections import defaultdict
 from datetime import datetime
 from math import ceil
 
@@ -12,7 +13,6 @@ from sqlalchemy.orm.attributes import flag_modified
 from ..data_models import Inbound
 from ..database_sqlalchemy import db
 from ..prometheus_metrics import metrics
-from ..src import scoring_functions
 from . import main
 from .auth import auth
 
@@ -74,21 +74,22 @@ def inbound_check():
         return_scoring = False
 
     processed_message = current_app.text_preprocessor(incoming["text_to_match"])
-    word_vector_scores, spell_corrected = current_app.faqt_model.score(
-        processed_message
+    result = current_app.faqt_model.score_contents(
+        processed_message, return_spell_corrected=True, return_tag_scores=True
     )
 
-    scoring_output = scoring_functions.get_faq_scores_for_message(
-        processed_message,
-        current_app.faqs,
-        word_vector_scores,
-        current_app.config["REDUCTION_FUNCTION"],
-        **current_app.config["REDUCTION_FUNCTION_ARGS"],
+    word_vector_scores = result["overall_scores"]
+    spell_corrected = result["spell_corrected"]
+    tag_scores = result["tag_scores"]
+
+    max_pages = ceil(
+        len(word_vector_scores) / current_app.config["N_TOP_MATCHES_PER_PAGE"]
     )
-    max_pages = ceil(len(scoring_output) / current_app.faqt_model.n_top_matches)
 
     secret_keys = generate_secret_keys()
-    scoring_output = prepare_scoring_as_json(scoring_output)
+    scoring_output = prepare_scoring_as_json(
+        current_app.faqs, word_vector_scores, tag_scores
+    )
     json_return = prepare_return_json(scoring_output, secret_keys, return_scoring, 1)
     scoring_output["spell_corrected"] = " ".join(spell_corrected)
     inbound_id = save_inbound_to_db(incoming, scoring_output, json_return, secret_keys)
@@ -109,19 +110,32 @@ def generate_secret_keys():
     return request_keys
 
 
-def prepare_scoring_as_json(scoring_output):
+def prepare_scoring_as_json(faqs, overall_scores, tag_scores):
     """
-    Convert scoring so it can be saved as JSON in Db. Also save spell corrected
+    Convert scores so it can be saved as JSON in Db. Also save spell corrected
     terms.
     """
-    for faq_id in scoring_output:
-        scoring_output[faq_id]["overall_score"] = str(
-            scoring_output[faq_id]["overall_score"]
+    scoring_output = defaultdict(dict)
+
+    if len(overall_scores) == 0 or len(tag_scores) == 0:
+        return scoring_output
+
+    n_faqs = len(faqs)
+
+    if not all(len(x) == n_faqs for x in [overall_scores, tag_scores]):
+        raise ValueError(
+            f"Lengths of `faqs`, `overall_scores`, `tag_scores` must all "
+            f"be equal but got lengths {n_faqs}, {len(overall_scores)}, "
+            f"{len(tag_scores)}."
         )
 
+    for i, faq in enumerate(faqs):
+        scoring_output[faq.faq_id]["overall_score"] = str(overall_scores[i])
+        scoring_output[faq.faq_id]["faq_title"] = faq.faq_title
+        scoring_output[faq.faq_id]["faq_content_to_send"] = faq.faq_content_to_send
         # Convert scoring[faq.faq_id] to have string values (to save in DB as JSON)
-        scoring_output[faq_id]["tag_cs"] = {
-            key: str(val) for key, val in scoring_output[faq_id]["tag_cs"].items()
+        scoring_output[faq.faq_id]["tag_cs"] = {
+            key: str(val) for key, val in tag_scores[i].items()
         }
 
     return scoring_output
@@ -192,11 +206,11 @@ def prepare_return_json(scoring_output, keys, return_scoring, page_number):
     scoring_output: Dict
         With spell_correct
     """
-    items_per_page = current_app.faqt_model.n_top_matches
+    items_per_page = current_app.config["N_TOP_MATCHES_PER_PAGE"]
     if page_number < 1:
         top_matches_list = []
     else:
-        top_matches_list = scoring_functions.get_top_n_matches(
+        top_matches_list = get_top_n_matches(
             scoring_output, items_per_page, (page_number - 1) * items_per_page
         )
 
@@ -208,6 +222,44 @@ def prepare_return_json(scoring_output, keys, return_scoring, page_number):
         json_return["scoring"] = scoring_output
 
     return json_return
+
+
+def get_top_n_matches(scoring, n_top_matches, start_idx=0):
+    """
+    Gives a list of scores for each FAQ, return the top `n_top_matches` FAQs
+
+    Parameters
+    ----------
+    scoring: Dict[int, Dict]
+        Dict with faq_id as key and faq details and scores as values.
+        See return value of `get_faq_scores_for_message`. Assumes that `scoring`
+        is sorted from highest score to lowest score.
+    n_top_matches: int
+        the number of top matches to return
+    start_idx: int, optional
+        takes the `n_top_matches` starting the `start_idx`
+
+    Returns
+    -------
+    List[Tuple(int, str)]
+        A list of tuples of (faq_id, faq_content_to_send)._
+    """
+    matched_faq_titles = set()
+    # Sort and copy over top matches
+    top_matches_list = []
+    sorted_scoring = sorted(
+        scoring, key=lambda x: float(scoring[x]["overall_score"]), reverse=True
+    )
+    for id in sorted_scoring[start_idx:]:
+        if scoring[id]["faq_title"] not in matched_faq_titles:
+            top_matches_list.append(
+                (scoring[id]["faq_title"], scoring[id]["faq_content_to_send"])
+            )
+            matched_faq_titles.add(scoring[id]["faq_title"])
+
+        if len(matched_faq_titles) == n_top_matches:
+            break
+    return top_matches_list
 
 
 def finalise_return_json(json_return, inbound_id, current_page, max_pages):
@@ -312,7 +364,7 @@ def inbound_results_page(inbound_id, page_number):
 
     scoring_output = orig_inbound.model_scoring
     _ = scoring_output.pop("spell_corrected")
-    max_pages = ceil(len(scoring_output) / current_app.faqt_model.n_top_matches)
+    max_pages = ceil(len(scoring_output) / current_app.config["N_TOP_MATCHES_PER_PAGE"])
 
     if (page_number > max_pages) or (page_number < 1):
         return (
