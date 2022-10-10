@@ -9,6 +9,7 @@ fsspec[s3]==2022.3.0
 # profiling
 pyinstrument==4.3.0
 pytest-profiling==1.7.0
+gprof2dot==2022.7.29
 # load-testing
 locust==2.12.1
 argparse==1.4.0

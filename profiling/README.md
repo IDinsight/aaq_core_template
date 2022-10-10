@@ -22,7 +22,13 @@ See this [confluence page](https://idinsight.atlassian.net/wiki/spaces/PD/pages/
     PROMETHEUS_MULTIPROC_DIR=
     ```
 
-4. Decide whether you want to test real FAQs in the Dev DB or want to use dummy test FAQs through Test DB.
+4. Install `graphviz` using
+
+    ```
+    brew install graphviz
+    ```
+
+5. Decide whether you want to test real FAQs in the Dev DB or want to use dummy test FAQs through Test DB.
 
 ## Dev DB - use real FAQs
 

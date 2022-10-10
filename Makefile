@@ -117,29 +117,32 @@ test-all:
 	pytest tests
 
 profile-dev-google:
-    mkdir -p profiling/outputs/dev
-    pyinstrument --outfile=profiling/outputs/dev/profile_google.html -m pytest -m "google" profiling/test_profiling.py::TestMainEndpoints
-    pytest --profile-svg --pstats-dir="profiling/outputs/dev/cprofile/google/" -m "google" profiling/test_profiling.py::TestMainEndpoints
+	mkdir -p profiling/outputs/dev
+	pyinstrument --outfile=profiling/outputs/dev/profile_google.html -m pytest -m "google" profiling/test_profiling.py::TestMainEndpoints
+	pytest --profile-svg --pstats-dir="profiling/outputs/dev/cprofile/google/" -m "google" profiling/test_profiling.py::TestMainEndpoints
+	gprof2dot -f pstats profiling/outputs/dev/cprofile/google/combined.prof | dot -Tsvg -o profiling/outputs/dev/cprofile/google/combined.svg
 
 profile-dev-fasttext:
-    mkdir -p profiling/outputs/dev
-    pyinstrument --outfile=profiling/outputs/dev/profile_fasttext.html -m pytest -m "fasttext" profiling/test_profiling.py::TestMainEndpoints
-    pytest --profile-svg --pstats-dir="profiling/outputs/dev/cprofile/fasttext/" -m "fasttext" profiling/test_profiling.py::TestMainEndpoints
+	mkdir -p profiling/outputs/dev
+	pyinstrument --outfile=profiling/outputs/dev/profile_fasttext.html -m pytest -m "fasttext" profiling/test_profiling.py::TestMainEndpoints
+	pytest --profile-svg --pstats-dir="profiling/outputs/dev/cprofile/fasttext/" -m "fasttext" profiling/test_profiling.py::TestMainEndpoints
+	gprof2dot -f pstats profiling/outputs/dev/cprofile/fasttext/combined.prof | dot -Tsvg -o profiling/outputs/dev/cprofile/fasttext/combined.svg
 
 profile-test-google:
-    pytest -m "google" profiling/test_profiling.py::TestDummyFaqToDb
-    mkdir -p profiling/outputs/test
-    pyinstrument --outfile=profiling/outputs/test/profile_google.html -m pytest -m "google" profiling/test_profiling.py::TestMainEndpoints
-    pytest --profile-svg --pstats-dir="profiling/outputs/test/cprofile/google/" -m "google" profiling/test_profiling.py::TestMainEndpoints
-    pytest -m "google" profiling/test_profiling.py::TestCleanDb
+	pytest -m "google" profiling/test_profiling.py::TestDummyFaqToDb
+	mkdir -p profiling/outputs/test
+	pyinstrument --outfile=profiling/outputs/test/profile_google.html -m pytest -m "google" profiling/test_profiling.py::TestMainEndpoints
+	pytest --profile-svg --pstats-dir="profiling/outputs/test/cprofile/google/" -m "google" profiling/test_profiling.py::TestMainEndpoints
+	gprof2dot -f pstats profiling/outputs/test/cprofile/google/combined.prof | dot -Tsvg -o profiling/outputs/test/cprofile/google/combined.svg
+	pytest -m "google" profiling/test_profiling.py::TestCleanDb
 
 profile-test-fasttext:
-    pytest -m "fasttext" profiling/test_profiling.py::TestDummyFaqToDb
-    mkdir -p profiling/outputs/test
-    pyinstrument --outfile=profiling/outputs/test/profile_fasttext.html -m pytest -m "fasttext" profiling/test_profiling.py::TestMainEndpoints
-    pytest --profile-svg --pstats-dir="profiling/outputs/test/cprofile/fasttext/" -m "fasttext" profiling/test_profiling.py::TestMainEndpoints
-    pytest -m "fasttext" profiling/test_profiling.py::TestCleanDb
-
+	pytest -m "fasttext" profiling/test_profiling.py::TestDummyFaqToDb
+	mkdir -p profiling/outputs/test
+	pyinstrument --outfile=profiling/outputs/test/profile_fasttext.html -m pytest -m "fasttext" profiling/test_profiling.py::TestMainEndpoints
+	pytest --profile-svg --pstats-dir="profiling/outputs/test/cprofile/fasttext/" -m "fasttext" profiling/test_profiling.py::TestMainEndpoints
+	gprof2dot -f pstats profiling/outputs/test/cprofile/fasttext/combined.prof | dot -Tsvg -o profiling/outputs/test/cprofile/fasttext/combined.svg
+	pytest -m "fasttext" profiling/test_profiling.py::TestCleanDb
 
 image:
 	# Build docker image
