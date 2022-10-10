@@ -76,5 +76,4 @@ Results will be saved in `profiling/outputs/`
 
 ## TO-DO
 
-- Add cPython profiling and options to Makefile target to allow for selection of profiler tool. Use [this](https://stackoverflow.com/a/2826068).
 - Possibly: Separate endpoints so that each endpoint can be tested separately and a different HTML file is created per endpoint.
