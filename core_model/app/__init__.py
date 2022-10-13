@@ -4,7 +4,7 @@ Create and initialise the app. Uses Blueprints to define view.
 import os
 from functools import partial
 
-from faqt import StepwiseKeyedVectorsScorer, preprocess_text_for_word_embedding
+from faqt import WMDScorer, preprocess_text_for_word_embedding
 from flask import Flask
 from hunspell import Hunspell
 
@@ -137,13 +137,9 @@ def create_faqt_model(config):
 
     params = config["MODEL_PARAMS"]
 
-    return StepwiseKeyedVectorsScorer(
+    return WMDScorer(
         gensim_keyed_vector,
         tokenizer=get_text_preprocessor(),
-        tag_scoring_method=params["tag_scoring_method"],
-        tag_scoring_kwargs=params["tag_scoring_kwargs"],
-        score_reduction_method=params["score_reduction_method"],
-        score_reduction_kwargs=params["tag_scoring_kwargs"],
         weighting_method=params["weighting_method"],
         weighting_kwargs=params["weighting_kwargs"],
         glossary=custom_wvs,
