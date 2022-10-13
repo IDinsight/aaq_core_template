@@ -79,10 +79,8 @@ def check_new_tags():
     json_return["top_matches_for_each_query"] = []
 
     for query_to_check in req_json["queries_to_check"]:
-        processed_message = current_app.text_preprocessor(query_to_check)
-
         result = current_app.faqt_model.score_contents(
-            processed_message, return_tag_scores=True
+            query_to_check, return_tag_scores=True
         )
 
         matched_faq_titles = set()
