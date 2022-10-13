@@ -32,7 +32,7 @@ def generate_message(result, test_params):
 
     if (os.environ.get("GITHUB_ACTIONS") == "true") & (result < threshold_criteria):
 
-        current_branch = os.environ.get("BRANCH")
+        current_branch = os.environ.get("BRANCH_NAME")
         repo_name = os.environ.get("REPO")
         commit = os.environ.get("HASH")
 
@@ -158,7 +158,7 @@ class TestPerformance:
                     "faq_tags": row["faq_tags"],
                     "added_utc": "2022-04-14",
                     "author": "Validation author",
-                    "content": "{}",
+                    "content": row["faq_content_to_send"],
                     "threshold": "{0.1, 0.1, 0.1, 0.1}",
                 }
                 for idx, row in self.faq_df.iterrows()

@@ -7,8 +7,6 @@ on:
 jobs:
   ValidateModels:
     runs-on: ubuntu-latest
-    outputs:
-      env-name: ${{ steps.env-name.outputs.environment }}
     steps:
       - uses: actions/checkout@v3
         with:

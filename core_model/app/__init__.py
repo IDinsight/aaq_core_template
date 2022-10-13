@@ -184,9 +184,9 @@ def refresh_faqs(app):
     faqs.sort(key=lambda x: x.faq_id)
     app.faqs = add_faq_weight_share(faqs)
 
-    tagsets = [faq.faq_tags for faq in faqs]
+    content = [faq.faq_content_to_send for faq in faqs]
     weights = [faq.faq_weight_share for faq in faqs]
 
-    app.faqt_model.set_contents(tagsets, weights)
+    app.faqt_model.set_contents(content, weights)
 
     return len(faqs)
