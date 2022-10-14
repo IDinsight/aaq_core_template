@@ -7,9 +7,10 @@ from datetime import datetime
 import boto3
 import pandas as pd
 import pytest
-from core_model.app.main import inbound
 from nltk.corpus import stopwords
 from sqlalchemy import text
+
+from core_model.app.main import inbound
 
 # This is required to allow multithreading to work
 stopwords.ensure_loaded()
@@ -133,7 +134,8 @@ class TestPerformance:
         }
         headers = {"Authorization": "Bearer %s" % os.getenv("INBOUND_CHECK_TOKEN")}
         response = client.post("/inbound/check", json=request_data, headers=headers)
-        top_faq_names = [x[0] for x in response.get_json()["top_responses"]]
+        top_responses = response.get_json()["top_responses"]
+        top_faq_names = set(x[1] for x in top_responses)
         return row[test_params["TRUE_FAQ_COL"]] in top_faq_names
 
     @pytest.fixture(scope="class")
@@ -184,12 +186,13 @@ class TestPerformance:
         monkeypatch.setattr(inbound, "save_inbound_to_db", lambda *x, **y: 123)
 
         validation_df = self.get_validation_data(test_params)
-        responses = [
-            self.submit_one_inbound(x, client, faq_data, test_params)
-            for _, x in validation_df.iterrows()
-        ]
-        results = list(responses)
+
+        def submit_one_inbound(x):
+            return self.submit_one_inbound(x, client, faq_data, test_params)
+
+        results = validation_df.apply(submit_one_inbound, axis=1).tolist()
         top_k_accuracy = sum(results) / len(results)
+
         content = generate_message(top_k_accuracy, test_params)
 
         if (os.environ.get("GITHUB_ACTIONS") == "true") & (
