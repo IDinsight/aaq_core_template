@@ -76,6 +76,7 @@ class TestFaqWeights:
                     inbound_sql,
                     title=f"Pytest title #{i}",
                     faq_tags=tags,
+                    content=" ".join(tags),
                     faq_weight=weight,
                     **self.faq_other_params,
                 )
