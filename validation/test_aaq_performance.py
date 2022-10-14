@@ -185,7 +185,7 @@ class TestPerformance:
         validation_df = self.get_validation_data(test_params)
 
         def submit_one_inbound(x):
-            return self.submit_one_inbound(x, client, faq_data, test_params)
+            return self.submit_one_inbound(x, client, test_params)
 
         results = validation_df.apply(submit_one_inbound, axis=1).tolist()
         top_k_accuracy = sum(results) / len(results)
