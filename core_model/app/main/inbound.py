@@ -419,23 +419,28 @@ def get_top_n_matches(scoring, n_top_matches, start_idx=0):
 
     Returns
     -------
-    List[Tuple(int, str)]
-        A list of tuples of (faq_id, faq_content_to_send)._
+    List[Tuple(str, str, str)]
+        A list of tuples of (faq_id, faq_content_to_send, faq_title).
     """
-    matched_faq_titles = set()
+    matched_faq_ids = set()
     # Sort and copy over top matches
     top_matches_list = []
     sorted_scoring = sorted(
         scoring, key=lambda x: float(scoring[x]["overall_score"]), reverse=True
     )
-    for id in sorted_scoring[start_idx:]:
-        if scoring[id]["faq_title"] not in matched_faq_titles:
-            top_matches_list.append(
-                (scoring[id]["faq_title"], scoring[id]["faq_content_to_send"])
-            )
-            matched_faq_titles.add(scoring[id]["faq_title"])
 
-        if len(matched_faq_titles) == n_top_matches:
+    for faq_id in sorted_scoring[start_idx:]:
+        if faq_id not in matched_faq_ids:
+            top_matches_list.append(
+                (
+                    str(faq_id),
+                    scoring[faq_id]["faq_title"],
+                    scoring[faq_id]["faq_content_to_send"],
+                )
+            )
+            matched_faq_ids.add(faq_id)
+
+        if len(matched_faq_ids) == n_top_matches:
             break
     return top_matches_list
 
