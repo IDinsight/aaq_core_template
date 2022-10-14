@@ -47,23 +47,11 @@ inbound_check_fields = api.model(
 )
 
 # Outbound fields
-wild_tags = fields.Wildcard(fields.String)
-wildcard_fields = {"*": wild_tags}
 scoring_vals = api.model(
     "faq_score",
     {
         "faq_title": fields.String,
         "faq_content_to_send": fields.String,
-        "tag_cs": fields.Nested(
-            api.model("tags", wildcard_fields),
-            description="Shows the similarity score for each tag in faq",
-            example={
-                "rock": "0.16521704",
-                "guitar": "0.22060609",
-                "melody": "0.28887382",
-                "chord": "0.1924967",
-            },
-        ),
         "overall_score": fields.String(),
     },
 )
@@ -79,23 +67,11 @@ wild_faq_id = fields.Wildcard(
         "787": {
             "faq_title": "FAQ #0 Title",
             "faq_content_to_send": 'This is FAQ #0"s content.',
-            "tag_cs": {
-                "rock": "0.16521704",
-                "guitar": "0.22060609",
-                "melody": "0.28887382",
-                "chord": "0.1924967",
-            },
             "overall_score": "0.19100773334503174",
         },
         "788": {
             "faq_title": "FAQ #1 Title",
             "faq_content_to_send": 'This is FAQ #1"s content.',
-            "tag_cs": {
-                "cheese": "0.2986467",
-                "tomato": "0.188639",
-                "bread": "0.37089044",
-                "mustard": "0.14920337",
-            },
             "overall_score": "0.20052412152290344",
         },
     },
