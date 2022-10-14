@@ -3,6 +3,7 @@ from pathlib import Path
 import pytest
 import sqlalchemy
 import yaml
+from sqlalchemy.pool import NullPool
 
 from core_model.app import create_app, get_config_data
 from core_model.app.main import inbound
@@ -46,5 +47,5 @@ def client(app_main):
 def db_engine(test_params):
     config = get_config_data(test_params)
     uri = config["SQLALCHEMY_DATABASE_URI"]
-    engine = sqlalchemy.create_engine(uri, pool_pre_ping=True)
+    engine = sqlalchemy.create_engine(uri, poolclass=NullPool)
     yield engine
