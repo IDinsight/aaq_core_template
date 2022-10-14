@@ -33,7 +33,6 @@ class TestFaqWeights:
     faq_other_params = {
         "added_utc": "2022-04-14",
         "author": "Pytest author",
-        "content": "{}",
         "threshold": "{0.1, 0.1, 0.1, 0.1}",
     }
 
@@ -50,6 +49,7 @@ class TestFaqWeights:
                     inbound_sql,
                     title=f"Pytest title #{i}",
                     faq_tags=tags,
+                    content=" ".join(tags),
                     **self.faq_other_params,
                 )
         client.get("/internal/refresh-faqs", headers=headers)
