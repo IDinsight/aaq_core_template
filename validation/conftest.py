@@ -19,7 +19,7 @@ def monkeysession():
 
 @pytest.fixture(scope="session")
 def patch_inbound_db(monkeysession):
-    monkeysession.setattr(inbound, "save_inbound_to_db", lambda *x: 123)
+    monkeysession.setattr(inbound, "save_inbound_to_db", lambda *x, **y: 123)
 
 
 @pytest.fixture(scope="session")

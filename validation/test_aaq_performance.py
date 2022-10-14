@@ -10,8 +10,6 @@ import pytest
 from nltk.corpus import stopwords
 from sqlalchemy import text
 
-from core_model.app.main import inbound
-
 # This is required to allow multithreading to work
 stopwords.ensure_loaded()
 
@@ -124,7 +122,7 @@ class TestPerformance:
 
         return faq_df
 
-    def submit_one_inbound(self, row, client, faq_data, test_params):
+    def submit_one_inbound(self, row, client, test_params):
         """
         Single request to /inbound/check
         """
@@ -179,11 +177,10 @@ class TestPerformance:
 
         client.get("/internal/refresh-faqs", headers=headers)
 
-    def test_top_k_performance(self, monkeypatch, client, faq_data, test_params):
+    def test_top_k_performance(self, client, faq_data, test_params):
         """
         Test if top k faqs contain the true FAQ
         """
-        monkeypatch.setattr(inbound, "save_inbound_to_db", lambda *x, **y: 123)
 
         validation_df = self.get_validation_data(test_params)
 
