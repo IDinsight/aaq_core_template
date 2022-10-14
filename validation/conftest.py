@@ -46,5 +46,5 @@ def client(app_main):
 def db_engine(test_params):
     config = get_config_data(test_params)
     uri = config["SQLALCHEMY_DATABASE_URI"]
-    engine = sqlalchemy.create_engine(uri)
+    engine = sqlalchemy.create_engine(uri, pool_pre_ping=True)
     yield engine
