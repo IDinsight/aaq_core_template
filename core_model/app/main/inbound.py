@@ -83,10 +83,7 @@ class InboundCheck(Resource):
         incoming = request.json
         if "return_scoring" in incoming:
             return_scoring = incoming["return_scoring"]
-            if (return_scoring is True) or (return_scoring == "true"):
-                return_scoring = True
-            else:
-                return_scoring = False
+            return_scoring = (return_scoring is True) or (return_scoring == "true")
         else:
             return_scoring = False
 
