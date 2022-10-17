@@ -90,9 +90,10 @@ class InboundCheck(Resource):
         else:
             return_scoring = False
 
-        processed_message = current_app.text_preprocessor(incoming["text_to_match"])
         result = current_app.faqt_model.score_contents(
-            processed_message, return_spell_corrected=True, return_tag_scores=True
+            incoming["text_to_match"],
+            return_spell_corrected=True,
+            return_tag_scores=True,
         )
         word_vector_scores = result["overall_scores"]
         spell_corrected = result["spell_corrected"]

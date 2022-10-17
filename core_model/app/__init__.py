@@ -71,7 +71,6 @@ def setup(app, params):
     metrics.init_app(app)
 
     app.faqt_model = create_faqt_model(config)
-    app.text_preprocessor = get_text_preprocessor()
 
     refresh_faqs(app)
 
@@ -140,6 +139,7 @@ def create_faqt_model(config):
 
     return StepwiseKeyedVectorsScorer(
         gensim_keyed_vector,
+        tokenizer=get_text_preprocessor(),
         tag_scoring_method=params["tag_scoring_method"],
         tag_scoring_kwargs=params["tag_scoring_kwargs"],
         score_reduction_method=params["score_reduction_method"],
