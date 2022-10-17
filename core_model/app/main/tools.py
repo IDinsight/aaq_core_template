@@ -93,7 +93,6 @@ def check_new_tags():
                     [
                         faq.faq_title,
                         "%0.4f" % score,
-                        list(result["tag_scores"][i].keys()),
                     ]
                 )
                 matched_faq_titles.add(faq.faq_title)

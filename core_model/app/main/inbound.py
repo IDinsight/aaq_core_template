@@ -83,10 +83,7 @@ class InboundCheck(Resource):
         incoming = request.json
         if "return_scoring" in incoming:
             return_scoring = incoming["return_scoring"]
-            if (return_scoring is True) or (return_scoring == "true"):
-                return_scoring = True
-            else:
-                return_scoring = False
+            return_scoring = (return_scoring is True) or (return_scoring == "true")
         else:
             return_scoring = False
 
@@ -97,7 +94,7 @@ class InboundCheck(Resource):
         )
         word_vector_scores = result["overall_scores"]
         spell_corrected = result["spell_corrected"]
-        tag_scores = result["tag_scores"]
+        tag_scores = []  # result["tag_scores"]
 
         max_pages = ceil(
             len(word_vector_scores) / current_app.config["N_TOP_MATCHES_PER_PAGE"]
@@ -296,16 +293,15 @@ def prepare_scoring_as_json(faqs, overall_scores, tag_scores):
     """
     scoring_output = defaultdict(dict)
 
-    if len(overall_scores) == 0 or len(tag_scores) == 0:
+    if len(overall_scores) == 0 and len(tag_scores) == 0:
         return scoring_output
 
     n_faqs = len(faqs)
 
-    if not all(len(x) == n_faqs for x in [overall_scores, tag_scores]):
+    if len(overall_scores) != n_faqs:
         raise ValueError(
-            f"Lengths of `faqs`, `overall_scores`, `tag_scores` must all "
-            f"be equal but got lengths {n_faqs}, {len(overall_scores)}, "
-            f"{len(tag_scores)}."
+            f"Lengths of `faqs` and `overall_scores` must "
+            f"be equal but got lengths {n_faqs} and {len(overall_scores)}, "
         )
 
     for i, faq in enumerate(faqs):
@@ -313,9 +309,6 @@ def prepare_scoring_as_json(faqs, overall_scores, tag_scores):
         scoring_output[faq.faq_id]["faq_title"] = faq.faq_title
         scoring_output[faq.faq_id]["faq_content_to_send"] = faq.faq_content_to_send
         # Convert scoring[faq.faq_id] to have string values (to save in DB as JSON)
-        scoring_output[faq.faq_id]["tag_cs"] = {
-            key: str(val) for key, val in tag_scores[i].items()
-        }
 
     return scoring_output
 

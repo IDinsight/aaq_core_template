@@ -10,8 +10,6 @@ import pytest
 from nltk.corpus import stopwords
 from sqlalchemy import text
 
-from core_model.app.main import inbound
-
 # This is required to allow multithreading to work
 stopwords.ensure_loaded()
 
@@ -32,7 +30,7 @@ def generate_message(result, test_params):
 
     if (os.environ.get("GITHUB_ACTIONS") == "true") & (result < threshold_criteria):
 
-        current_branch = os.environ.get("BRANCH")
+        current_branch = os.environ.get("BRANCH_NAME")
         repo_name = os.environ.get("REPO")
         commit = os.environ.get("HASH")
 
@@ -124,7 +122,7 @@ class TestPerformance:
 
         return faq_df
 
-    def submit_one_inbound(self, row, client, faq_data, test_params):
+    def submit_one_inbound(self, row, client, test_params):
         """
         Single request to /inbound/check
         """
@@ -158,7 +156,7 @@ class TestPerformance:
                     "faq_tags": row["faq_tags"],
                     "added_utc": "2022-04-14",
                     "author": "Validation author",
-                    "content": "{}",
+                    "content": row["faq_content_to_send"],
                     "threshold": "{0.1, 0.1, 0.1, 0.1}",
                 }
                 for idx, row in self.faq_df.iterrows()
@@ -179,16 +177,15 @@ class TestPerformance:
 
         client.get("/internal/refresh-faqs", headers=headers)
 
-    def test_top_k_performance(self, monkeypatch, client, faq_data, test_params):
+    def test_top_k_performance(self, client, faq_data, test_params):
         """
         Test if top k faqs contain the true FAQ
         """
-        monkeypatch.setattr(inbound, "save_inbound_to_db", lambda *x, **y: 123)
 
         validation_df = self.get_validation_data(test_params)
 
         def submit_one_inbound(x):
-            return self.submit_one_inbound(x, client, faq_data, test_params)
+            return self.submit_one_inbound(x, client, test_params)
 
         results = validation_df.apply(submit_one_inbound, axis=1).tolist()
         top_k_accuracy = sum(results) / len(results)
