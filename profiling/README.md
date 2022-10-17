@@ -10,7 +10,7 @@ See this [confluence page](https://idinsight.atlassian.net/wiki/spaces/PD/pages/
 
 1. Run `make setup-dev`
 
-2. Install `faqt` through `pip install git+https://@github.com/IDinsight/faqt.git@v0.1.0`
+2. Install `faqt` through `pip install git+https://@github.com/IDinsight/faqt.git@v1.0.0`
 
 3. Set the following secrets as environment variables (e.g. using `env_vars.sh` for `conda`)
 
