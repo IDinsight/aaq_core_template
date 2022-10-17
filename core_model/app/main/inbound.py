@@ -94,7 +94,7 @@ class InboundCheck(Resource):
         )
         word_vector_scores = result["overall_scores"]
         spell_corrected = result["spell_corrected"]
-        tag_scores = {}  # result["tag_scores"]
+        tag_scores = []  # result["tag_scores"]
 
         max_pages = ceil(
             len(word_vector_scores) / current_app.config["N_TOP_MATCHES_PER_PAGE"]
