@@ -19,7 +19,7 @@ RUN apt-get-install.sh python3-dev \
 
 COPY requirements.txt /requirements.txt
 RUN pip install -r /requirements.txt
-RUN pip install "git+https://${TOKEN_MACHINE_USER}@github.com/IDinsight/faqt.git@6df0a94e7c33f7cc887741b216c3912dcc89e738"
+RUN pip install "git+https://${TOKEN_MACHINE_USER}@github.com/IDinsight/faqt.git@149747be1f2b7600555eeb7a19b4c4c20068dc07"
 RUN useradd -ms /bin/bash -d ${HOME_DIR} container_user
 RUN chown -R container_user: ${HOME_DIR}
 
