@@ -13,6 +13,6 @@ psycopg2-binary==2.8.6
 pyyaml==5.4.1
 scipy==1.8.0
 sentry-sdk[flask]==1.5.12
-itsdangerous==2.0.1git+https://github.com/path/to/package-two@master
+itsdangerous==2.0.1
 prometheus-flask-exporter==0.20.1
 boto3==1.24.25
