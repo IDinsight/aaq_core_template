@@ -64,14 +64,14 @@ def check_new_tags():
         faq_id="TEMP",
         faq_title="*** NEW TAGS MATCHED ***",
         faq_tags=req_json["tags_to_check"],
-        faq_content_to_send="",
+        faq_content_to_send=" ".join(req_json["tags_to_check"]),
         faq_weight=1,
     )
     original_faqs = current_app.faqs
     with_temp_faqs = original_faqs + [temp_faq]
     with_temp_faqs = faq_weights.add_faq_weight_share(with_temp_faqs)
     current_app.faqt_model.set_contents(
-        [faq.faq_tags for faq in with_temp_faqs],
+        [faq.faq_content_to_send for faq in with_temp_faqs],
         [faq.faq_weight_share for faq in with_temp_faqs],
     )
 
@@ -90,10 +90,7 @@ def check_new_tags():
             faq = with_temp_faqs[i]
             if faq.faq_title not in matched_faq_titles:
                 top_matches.append(
-                    [
-                        faq.faq_title,
-                        "%0.4f" % score,
-                    ]
+                    [faq.faq_title, "%0.4f" % score, faq.faq_content_to_send]
                 )
                 matched_faq_titles.add(faq.faq_title)
 
@@ -103,7 +100,7 @@ def check_new_tags():
         json_return["top_matches_for_each_query"].append(top_matches)
 
     current_app.faqt_model.set_contents(
-        [faq.faq_tags for faq in original_faqs],
+        [faq.faq_content_to_send for faq in original_faqs],
         [faq.faq_weight_share for faq in original_faqs],
     )
 
