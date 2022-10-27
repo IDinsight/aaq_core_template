@@ -27,6 +27,7 @@ def generate_message(result, test_params):
 
     threshold_criteria = test_params["THRESHOLD_CRITERIA"]
     dataset = test_params["VALIDATION_DATA_PREFIX"]
+    model = test_params.get("MATCHING_MODEL", "same as app config")
 
     if (os.environ.get("GITHUB_ACTIONS") == "true") & (result < threshold_criteria):
 
@@ -36,8 +37,9 @@ def generate_message(result, test_params):
 
         val_message = (
             "[Alert] Accuracy using dataset {dataset} was:\n\n"
-            "{accuracy}\n\n"
+            "{accuracy:.2f}\n\n"
             "For commit tag = {commit_tag}\n"
+            "Using model {model}\n"
             "On branch {branch}\n"
             "Repo {repo_name}\n\n"
             "The threshold criteria was {threshold_criteria}"
@@ -45,6 +47,7 @@ def generate_message(result, test_params):
             accuracy=result,
             dataset=dataset,
             commit_tag=commit,
+            model=model,
             branch=current_branch,
             repo_name=repo_name,
             threshold_criteria=threshold_criteria,
@@ -52,11 +55,13 @@ def generate_message(result, test_params):
     else:
         val_message = (
             "[Alert] Accuracy using dataset {dataset} was:\n\n"
-            "{accuracy}\n\n"
+            "{accuracy:.2f}\n\n"
+            "Using model {model}\n"
             "The test threshold was {threshold_criteria}"
         ).format(
             accuracy=result,
             dataset=dataset,
+            model=model,
             threshold_criteria=threshold_criteria,
         )
 

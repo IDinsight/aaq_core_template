@@ -8,4 +8,4 @@ TRUE_FAQ_COL: "FAQ Name"
 QUERY_COL: "Question"
 VALIDATION_DATA_PREFIX: mc_validation/validation_khumo_labelled_aaq.csv
 VALIDATION_FAQ_PREFIX: mc_validation/praekelt_mc_faqs.csv
-matching_model: google_news_pretrained
+# MATCHING_MODEL: simple_fasttext_with_faq # commented out to use matching_model from app config
