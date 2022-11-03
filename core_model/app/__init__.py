@@ -9,7 +9,7 @@ from flask import Flask
 from hunspell import Hunspell
 
 from .data_models import FAQModel
-from .database_sqlalchemy import db
+from .database_sqlalchemy import db, migrate
 from .prometheus_metrics import metrics
 from .src.faq_weights import add_faq_weight_share
 from .src.utils import (
@@ -69,6 +69,7 @@ def setup(app, params):
 
     db.init_app(app)
     metrics.init_app(app)
+    migrate.init_app(app, db)
 
     app.faqt_model = create_faqt_model(config)
 
