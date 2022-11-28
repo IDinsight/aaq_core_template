@@ -73,8 +73,6 @@ def setup(app, params):
 
     app.faqt_model = create_faqt_model(config)
 
-    refresh_faqs(app)
-
 
 def get_config_data(params):
     """
