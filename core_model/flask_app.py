@@ -5,7 +5,7 @@ import logging
 import os
 
 import sentry_sdk
-from app import create_app, db
+from app import create_app, db, refresh_faqs
 from app.data_models import FAQModel, Inbound
 from sentry_sdk.integrations.flask import FlaskIntegration
 from sentry_sdk.integrations.logging import LoggingIntegration
@@ -18,6 +18,7 @@ sentry_sdk.init(
 )
 
 app = create_app()
+refresh_faqs(app)
 
 
 @app.shell_context_processor
