@@ -1,8 +1,11 @@
 name: Docker Make and Push Release Image and Deploy to staging
 on:
-  release:
-    # Only use the types keyword to narrow down the activity types that will trigger your workflow.
-    types: [published]
+  push:
+    branches:
+      - "PNC-728-load-secrets"
+  # release:
+  #   # Only use the types keyword to narrow down the activity types that will trigger your workflow.
+  #   types: [published]
 
 jobs:
   DockerMakeAndPushRelease:
@@ -107,6 +110,16 @@ jobs:
         run: sleep 300s
         shell: bash
 
+      - name: Get secrets by name and by ARN
+        uses: aws-actions/aws-secretsmanager-get-secrets@v1
+        with:
+          secret-ids: |
+            CORE_, arn:aws:secretsmanager:af-south-1:678681925278:secret:aaq-template-core-secrets-F64A4Z
+            GLOBAL_, arn:aws:secretsmanager:af-south-1:678681925278:secret:aaq-template-global-secrets-HEQCSO
+            STG_DB_, arn:aws:secretsmanager:af-south-1:678681925278:secret:aaq-db-Vt5ojc
+          parse-json-secrets: true
+
+      # ----------------- Comment out if using Github Actions Secrets --------------- #
       - name: Deploy using ECS CLI
         env:
           PORT: 9902
@@ -114,19 +127,41 @@ jobs:
           IMAGE_NAME: ${{ steps.vars.outputs.IMAGE_NAME }}
 
           # app secrets
-          INBOUND_CHECK_TOKEN: ${{ secrets.GA_INBOUND_CHECK_TOKEN }}
-          ENABLE_FAQ_REFRESH_CRON: ${{ secrets.GA_ENABLE_FAQ_REFRESH_CRON}}
-          PROMETHEUS_MULTIPROC_DIR: ${{ secrets.GA_PROMETHEUS_MULTIPROC_DIR }}
+          INBOUND_CHECK_TOKEN: ${{ env.CORE_INBOUND_CHECK_TOKEN }}
+          ENABLE_FAQ_REFRESH_CRON: ${{ env.CORE_ENABLE_FAQ_REFRESH_CRON}}
+          PROMETHEUS_MULTIPROC_DIR: ${{ env.CORE_PROMETHEUS_MULTIPROC_DIR }}
           # database secrets
-          PG_ENDPOINT: ${{ secrets.GA_PG_ENDPOINT }}
+          PG_ENDPOINT: ${{ env.STG_DB_PG_ENDPOINT }}
           PG_PORT: 5432
           PG_USERNAME: "flask"
-          PG_PASSWORD: ${{ secrets.GA_PG_PASSWORD }}
+          PG_PASSWORD: ${{ env.STG_DB_PG_PASSWORD }}
           # sentry config
-          SENTRY_DSN: ${{ secrets.GA_SENTRY_DSN }}
-          SENTRY_ENVIRONMENT: ${{ secrets.GA_SENTRY_ENVIRONMENT }}
-          SENTRY_TRACES_SAMPLE_RATE: ${{ secrets.GA_SENTRY_TRACES_SAMPLE_RATE }}
+          SENTRY_DSN: ${{ env.GLOBAL_SENTRY_DSN }}
+          SENTRY_ENVIRONMENT: "staging"
+          SENTRY_TRACES_SAMPLE_RATE: ${{ env.GLOBAL_SENTRY_TRACES_SAMPLE_RATE }}
+      # ----------------------------------------------------------------------------- #
 
+      # ----------------- Uncomment if using Github Actions Secrets ----------------- #
+      # - name: Deploy using ECS CLI
+      #   env:
+      #     PORT: 9902
+      #     AWS_REGION: ${{ secrets.AWS_REGION }}
+      #     IMAGE_NAME: ${{ steps.vars.outputs.IMAGE_NAME }}
+
+      #     # app secrets
+      #     INBOUND_CHECK_TOKEN: ${{ secrets.GA_INBOUND_CHECK_TOKEN }}
+      #     ENABLE_FAQ_REFRESH_CRON: ${{ secrets.GA_ENABLE_FAQ_REFRESH_CRON}}
+      #     PROMETHEUS_MULTIPROC_DIR: ${{ secrets.GA_PROMETHEUS_MULTIPROC_DIR }}
+      #     # database secrets
+      #     PG_ENDPOINT: ${{ secrets.GA_PG_ENDPOINT }}
+      #     PG_PORT: 5432
+      #     PG_USERNAME: "flask"
+      #     PG_PASSWORD: ${{ secrets.GA_PG_PASSWORD }}
+      #     # sentry config
+      #     SENTRY_DSN: ${{ secrets.GA_SENTRY_DSN }}
+      #     SENTRY_ENVIRONMENT: ${{ secrets.GA_SENTRY_ENVIRONMENT }}
+      #     SENTRY_TRACES_SAMPLE_RATE: ${{ secrets.GA_SENTRY_TRACES_SAMPLE_RATE }}
+      # ----------------------------------------------------------------------------- #
         run: |
           ecs-cli configure \
           --cluster ${PROJECT_SHORT_NAME}-cluster \
