@@ -3,15 +3,18 @@
 
 # Ask A Question (AAQ) Core Template Repository
 
-This is the readme for the AAQ Template Core App repository. To start development on a new AAQ solution, clone or fork this and follow the setup instructions below.
+This template provides a ready-to-use solution for an FAQ-matching application that can
+be used by an existing chat service. It uses FAQ-matching models from the 
+[FAQT](https://github.com/IDinsight/faqt) library.
+
+This module is the core application that receives inbound messages in json, matches them
+to FAQs in the database, and returns the the top N matches as json.
+
+![AAQ Core app](docs/readme/images/aaq_template-core.png)
+
+To start development on a new AAQ solution, clone or fork this and follow the setup instructions below.
 
 Ensure to pull in new features from this repository regularly.
-
-## What is this?
-
-This module is the core application that receives inbound messages in json, matches them to FAQs in the database, and returns the the top N matches as json.
-
-![Message Stream Diagram](./docs/readme/images/nlp_stream.png)
 
 ## Setup
 
