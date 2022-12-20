@@ -76,13 +76,6 @@ The `project_config.cfg` in the root directory should be updated with your proje
 * `AWS_PROFILE_NAME`: Name of AWS profile (stored in `~/.aws/credentials`) with appropriate permissions to create the resources
 
 ### Initialise
-
-#### Create a Postgres Db instance
-
-In past projects, this has been Postgres on RDS. You don't need to create any databases at this point. We'll create that in one of the steps below.
-
-Note the connection details for the DB and the password for the `postgres` user. We'll need them in the [section](#enter_details_in_secrets_file) below.
-
 #### Run `make setup-dev`
 
 This command does the following:
@@ -92,7 +85,14 @@ This command does the following:
 3. Installs pre-commit hooks
 4. Creates secrets files in `./secrets/`
 
-#### Enter details in secrets file
+#### Setup the database (manual)
+
+To set it up using terraform, see [Setup the database (using
+terraform)](#setup-the-database-using-terraform).
+
+In past projects, this has been Postgres on RDS. 
+
+Note the connection details for the DB and the password for the `postgres` user.
 
 You should edit each of the files in `./secrets` and set the correct parameters.
 
@@ -104,14 +104,27 @@ You should edit each of the files in `./secrets` and set the correct parameters.
 
 -   Other files should be updated before you can test the instance.
 
-#### Run `make setup-db-all`
-
-This command does the following:
+Run `make setup-db-all`. This command does the following:
 
 1. Creates the dev and test user
 2. Creates the dev and test databases
 3. Creates a new schema (based on `$PROJECT_SHORT_NAME`) and sets as default
 4. Creates the tables needed for the app
+
+
+#### Setup the database (using terraform)
+To do this using terraform, follow the instructions in  [`infrastructure/README.md`](https://github.com/IDinsight/aaq_core_template/tree/main/infrastructure).
+
+Note the DB connection details and DB secrets, and save them in the following files:
+
+- Save the dev DB details in `secrets/database_secrets.env`
+
+- Save the test DB details in `tests/config.yaml`. This file is used by `pytest` and is required to run tests locally.
+
+- Save the test DB details `validation/config.yaml`. This is used by the validation
+  script.
+
+You should edit each of the files in `./secrets` and set the correct parameters.
 
 #### Run `make setup-ecr`
 
@@ -140,14 +153,12 @@ You only need to copy the binaries for the model you wish to use. The model can 
 1. Setup `coveralls`
 2. Setup auto deployment on EC2 (using webhooks or other)
 3. Update this file!
-
--   Remove irrelevant content (all the template text)
--   Update the badges at the top of this file
-
+4. Remove irrelevant content (all the template text)
+5. Update the badges at the top of this file
 6. Setup application monitoring
-7. Setup other apps as necessary,
+7. Setup other apps as necessary
 
-## Running Project
+## Running the project
 
 **Note: Ensure you have updated all the secrets in the files under `/secrets/`.**
 

@@ -63,6 +63,9 @@ Use the `<PROJECT_SHORT_NAME>-keyfile.pem` created in step 2.1 for `ssh`/`scp` c
 
 ## 5. Update your Github Actions secrets
 
+### If you are loading secrets directly from AWS Secrets Manager
+
+### If you are using Github Actions secrets
 In the environment `staging`,
 
 -   Create or update AWS secrets `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` with the values saved
