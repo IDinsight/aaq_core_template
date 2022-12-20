@@ -85,35 +85,12 @@ This command does the following:
 3. Installs pre-commit hooks
 4. Creates secrets files in `./secrets/`
 
-#### Setup the database (manual)
+#### Set up infrastructure using terraform
 
-To set it up using terraform, see [Setup the database (using
-terraform)](#setup-the-database-using-terraform).
+Follow the instructions in  [`infrastructure/README.md`](https://github.com/IDinsight/aaq_core_template/tree/main/infrastructure).
 
-In past projects, this has been Postgres on RDS. 
-
-Note the connection details for the DB and the password for the `postgres` user.
-
-You should edit each of the files in `./secrets` and set the correct parameters.
-
--   `database_secrets.env` is the most important one to complete right now as these details will be used to create tables in the next step. You can set whatever username (usually `flask`) and password you prefer. These details will be used to create the role.
-
--   `tests/config.yaml` should be updated. This file is used by `pytest` and is required to run tests locally.
-
--   `validation/config.yaml` should also be updated. This is used by the validation script.
-
--   Other files should be updated before you can test the instance.
-
-Run `make setup-db-all`. This command does the following:
-
-1. Creates the dev and test user
-2. Creates the dev and test databases
-3. Creates a new schema (based on `$PROJECT_SHORT_NAME`) and sets as default
-4. Creates the tables needed for the app
-
-
-#### Setup the database (using terraform)
-To do this using terraform, follow the instructions in  [`infrastructure/README.md`](https://github.com/IDinsight/aaq_core_template/tree/main/infrastructure).
+#### Set up secrets and test configs
+Edit each of the files in `./secrets` and set the correct parameters.
 
 Note the DB connection details and DB secrets, and save them in the following files:
 
@@ -123,8 +100,6 @@ Note the DB connection details and DB secrets, and save them in the following fi
 
 - Save the test DB details `validation/config.yaml`. This is used by the validation
   script.
-
-You should edit each of the files in `./secrets` and set the correct parameters.
 
 #### Run `make setup-ecr`
 
