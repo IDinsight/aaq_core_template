@@ -42,7 +42,7 @@ You must
 ### To connect to the PostgreSQL database
 
 To connect to the PostgreSQL database created as part of deployment, obtain the database credentials (host, username and
-password) from the secrets
+password) from the AWS Secrets Manager:
 
 -   staging admin user: `<PROJECT_SHORT_NAME>-db`
 -   dev admin user: `<PROJECT_SHORT_NAME>-dev-db`
@@ -53,11 +53,13 @@ password) from the secrets
 
 There is no aws cli set up so we have to do this manually for now.
 
-Use the `<PROJECT_SHORT_NAME>-keyfile.pem` to ssh/scp.
+Use the `<PROJECT_SHORT_NAME>-keyfile.pem` created in step 2.1 for `ssh`/`scp` commands.
 
 1. In the `<PROJECT_SHORT_NAME>-server` for staging and `<PROJECT_SHORT_NAME>-server-dev` for dev/testing ensure there
-   is a folder called `data`. Create necessary child directories and sudo chmod-them to 766.
-2. In your local machine where the models are stored, scp the models.
+   is a folder called `data`. Create necessary child directories (you may want to modify
+   core_model/app/config/data_sources.yml file according to your directory structure) and apply `sudo chmod
+   766` to the directories.
+2. In your local machine where the models are stored, `scp` the models.
 
 ## 5. Update your Github Actions secrets
 
