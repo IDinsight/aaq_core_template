@@ -26,42 +26,43 @@ If you clone this, please setup a new repository for future commits and add this
 
 1. Clone this repo
 
-```
-git clone git@github.com:IDinsight/aaq_core_template.git <project_name>
-```
+    ```
+    git clone git@github.com:IDinsight/aaq_core_template.git <project_name>
+    ```
 
 2. Switch to <project_name> folder and change remote name to `template`
 
-```
-git remote rename origin template
-```
+    ```
+    git remote rename origin template
+    ```
 
 3. Create a new repo in Github
 4. Add it as remote for local repo
 
-```
-git remote add origin git@github.com:IDinsight/<project_name>.git
-```
+    ```
+    git remote add origin git@github.com:IDinsight/<project_name>.git
+    ```
 
 5. Set local to track that remote
 
-```
-git push -u origin main
-```
+    ```
+    git push -u origin main
+    ```
 
 6. You may also wish to [set your environment variables](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#setting-environment-variables) for the conda environment. This will allow you to run and test locally. Here are the variables you should set
 
-```
-export PG_ENDPOINT=
-export PG_PORT=
-export PG_DATABASE=
-export PG_USERNAME=
-export PG_PASSWORD=
+    ```
+    export PG_ENDPOINT=
+    export PG_PORT=
+    export PG_DATABASE=
+    export PG_USERNAME=
+    export PG_PASSWORD=
 
-export INBOUND_CHECK_TOKEN=
-export TOKEN_MACHINE_USER=
-export PROMETHEUS_MULTIPROC_DIR=
-```
+    export INBOUND_CHECK_TOKEN=
+    export TOKEN_MACHINE_USER=
+    export PROMETHEUS_MULTIPROC_DIR=
+    ```
+    See `docs/deployment_instructions.md` for more detailed explanations of each secret environment variable.
 
 ### Configure project details
 
@@ -101,6 +102,8 @@ Note the DB connection details and DB secrets, and save them in the following fi
 - Save the test DB details `validation/config.yaml`. This is used by the validation
   script.
 
+See `docs/deployment_instructions.md` for more detailed explanations on each secret environment variable.
+
 #### Run `make setup-ecr`
 
 This creates the ECR repository for the project to store docker images.
@@ -128,10 +131,10 @@ You only need to copy the binaries for the model you wish to use. The model can 
 1. Setup `coveralls`
 2. Setup auto deployment on EC2 (using webhooks or other)
 3. Update this file!
-4. Remove irrelevant content (all the template text)
-5. Update the badges at the top of this file
-6. Setup application monitoring
-7. Setup other apps as necessary
+    - Remove irrelevant content (all the template text)
+    - Update the badges at the top of this file
+4. Setup application monitoring
+5. Setup other apps as necessary
 
 ## Running the project
 

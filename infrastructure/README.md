@@ -93,10 +93,6 @@ To remove the resources created by terraform run `make tf-destroy`.
 This first removes the project resources by running `terraform destroy` and then permanently deletes the secrets using
 the python script `infrastructure/delete_secrets.py` because `terraform destroy` only schedules secrets to be deleted.
 
-## 2. To removes the Terraform backend
+## 2. To remove the Terraform backend
 
 To remove the Terraform backend as well run `make tf-backend-destroy`
-
-## 4. To obtain Github Actions user credentials
-
-Github Actions user credentials are stored in a secret called `<PROJECT_SHORT_NAME>-staging-ga-user-credentials`.
