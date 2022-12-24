@@ -43,16 +43,16 @@ jobs:
         uses: aws-actions/aws-secretsmanager-get-secrets@v1
         with:
           secret-ids: |
-            CORE_, arn:aws:secretsmanager:af-south-1:678681925278:secret:aaq-template-core-secrets-F64A4Z
-            GLOBAL_, arn:aws:secretsmanager:af-south-1:678681925278:secret:aaq-template-global-secrets-HEQCSO
+            aaq-template-core-secrets
+            aaq-template-global-secrets
           parse-json-secrets: true
 
       - name: Run Unit Tests # Uses env variables loaded from AWS secrets
         env:
-          PG_ENDPOINT: ${{env.GLOBAL_PG_ENDPOINT}}
-          PG_PASSWORD: ${{env.GLOBAL_PG_PASSWORD}}
-          INBOUND_CHECK_TOKEN: ${{env.CORE_INBOUND_CHECK_TOKEN}}
-          WORD2VEC_BINARY_BUCKET: ${{env.CORE_WORD2VEC_BINARY_BUCKET}}
+          PG_ENDPOINT: ${{env.AAQ_TEMPLATE_GLOBAL_SECRETS_PG_ENDPOINT}}
+          PG_PASSWORD: ${{env.AAQ_TEMPLATE_GLOBAL_SECRETS_PG_PASSWORD}}
+          INBOUND_CHECK_TOKEN: ${{env.AAQ_TEMPLATE_CORE_SECRETS_INBOUND_CHECK_TOKEN}}
+          WORD2VEC_BINARY_BUCKET: ${{env.AAQ_TEMPLATE_CORE_SECRETS_WORD2VEC_BINARY_BUCKET}}
           PROMETHEUS_MULTIPROC_DIR: /tmp
         run: |
           coverage run -m pytest tests -m "not extended" --durations=0
@@ -60,19 +60,19 @@ jobs:
 
       - name: Run Validation Tests
         env:
-          VALIDATION_BUCKET: ${{env.CORE_VALIDATION_BUCKET}}
-          VALIDATION_DATA_PREFIX: ${{env.CORE_VALIDATION_DATA_PREFIX}}
-          VALIDATION_FAQ_PREFIX: ${{env.CORE_VALIDATION_FAQ_PREFIX}}
+          VALIDATION_BUCKET: ${{env.AAQ_TEMPLATE_CORE_SECRETS_VALIDATION_BUCKET}}
+          VALIDATION_DATA_PREFIX: ${{env.AAQ_TEMPLATE_CORE_SECRETS_VALIDATION_DATA_PREFIX}}
+          VALIDATION_FAQ_PREFIX: ${{env.AAQ_TEMPLATE_CORE_SECRETS_VALIDATION_FAQ_PREFIX}}
           REPO: ${{ github.repository }}
           BRANCH_NAME: ${{ github.head_ref || github.ref_name }} 
           HASH: ${{ github.sha }}
           REF: ${{ github.ref }}
           PROMETHEUS_MULTIPROC_DIR: /tmp
-          PG_ENDPOINT: ${{env.GLOBAL_PG_ENDPOINT}}
-          PG_PASSWORD: ${{env.GLOBAL_PG_PASSWORD}}
-          INBOUND_CHECK_TOKEN: ${{env.CORE_INBOUND_CHECK_TOKEN}}
-          WORD2VEC_BINARY_BUCKET: ${{env.CORE_WORD2VEC_BINARY_BUCKET}}
-        if: "${{ (env.CORE_VALIDATION_BUCKET != '') && (env.CORE_VALIDATION_DATA_PREFIX != '') && (env.CORE_VALIDATION_FAQ_PREFIX != '')}}"
+          PG_ENDPOINT: ${{env.AAQ_TEMPLATE_GLOBAL_SECRETS_PG_ENDPOINT}}
+          PG_PASSWORD: ${{env.AAQ_TEMPLATE_GLOBAL_SECRETS_PG_PASSWORD}}
+          INBOUND_CHECK_TOKEN: ${{env.AAQ_TEMPLATE_CORE_SECRETS_INBOUND_CHECK_TOKEN}}
+          WORD2VEC_BINARY_BUCKET: ${{env.AAQ_TEMPLATE_CORE_SECRETS_WORD2VEC_BINARY_BUCKET}}
+        if: "${{ (env.AAQ_TEMPLATE_CORE_SECRETS_VALIDATION_BUCKET != '') && (env.AAQ_TEMPLATE_CORE_SECRETS_VALIDATION_DATA_PREFIX != '') && (env.AAQ_TEMPLATE_CORE_SECRETS_VALIDATION_FAQ_PREFIX != '')}}"
         run: |
           # for testing
           python -m pytest validation

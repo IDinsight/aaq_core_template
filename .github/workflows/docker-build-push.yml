@@ -10,7 +10,7 @@ on:
 jobs:
   DockerMakeAndPushRelease:
     name: Build docker image and push to ECR
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     environment: staging
     env:
       IMAGE_NAME: ${{ github.event.repository.name }}:${{ github.event.release.tag_name }}
