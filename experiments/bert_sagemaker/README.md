@@ -1,6 +1,9 @@
 # BERT Sagemaker Notebooks
 
-This is the folder synced with [AAQ BERT Sagemaker notebook instance](https://af-south-1.console.aws.amazon.com/sagemaker/home?region=af-south-1#/notebook-instances/aaq-bert-experiment).
+This is the folder synced with [AAQ BERT Sagemaker notebook
+instance](https://af-south-1.console.aws.amazon.com/sagemaker/home?region=af-south-1#/notebook-instances/aaq-bert-experiment).
+When experimenting on the Sagemaker instance, make sure to upload your changes in
+`aaq_core_template/experiments/bert_sagemaker`. (After applying `nbstripout`.)
 
 ## Notebooks
 There are two notebooks for each experiment:
