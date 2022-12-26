@@ -40,7 +40,7 @@ def healthcheck():
     if not current_app.faqs:
         return "No FAQs in database", 500
 
-    if "test" not in current_app.faqt_model.w2v_model:
+    if "test" not in current_app.faqt_model.word_embedding_model:
         return "Model failure - the word 'test' is not in the model", 500
 
     engine = sa.create_engine(current_app.config["SQLALCHEMY_DATABASE_URI"])

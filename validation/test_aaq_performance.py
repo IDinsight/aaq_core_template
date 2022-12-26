@@ -7,7 +7,6 @@ from datetime import datetime
 import boto3
 import pandas as pd
 import pytest
-from core_model.app.main import inbound
 from nltk.corpus import stopwords
 from sqlalchemy import text
 
@@ -28,17 +27,19 @@ def generate_message(result, test_params):
 
     threshold_criteria = test_params["THRESHOLD_CRITERIA"]
     dataset = test_params["VALIDATION_DATA_PREFIX"]
+    model = test_params.get("MATCHING_MODEL", "same as app config")
 
     if (os.environ.get("GITHUB_ACTIONS") == "true") & (result < threshold_criteria):
 
-        current_branch = os.environ.get("BRANCH")
+        current_branch = os.environ.get("BRANCH_NAME")
         repo_name = os.environ.get("REPO")
         commit = os.environ.get("HASH")
 
         val_message = (
             "[Alert] Accuracy using dataset {dataset} was:\n\n"
-            "{accuracy}\n\n"
+            "{accuracy:.2f}\n\n"
             "For commit tag = {commit_tag}\n"
+            "Using model {model}\n"
             "On branch {branch}\n"
             "Repo {repo_name}\n\n"
             "The threshold criteria was {threshold_criteria}"
@@ -46,6 +47,7 @@ def generate_message(result, test_params):
             accuracy=result,
             dataset=dataset,
             commit_tag=commit,
+            model=model,
             branch=current_branch,
             repo_name=repo_name,
             threshold_criteria=threshold_criteria,
@@ -53,11 +55,13 @@ def generate_message(result, test_params):
     else:
         val_message = (
             "[Alert] Accuracy using dataset {dataset} was:\n\n"
-            "{accuracy}\n\n"
+            "{accuracy:.2f}\n\n"
+            "Using model {model}\n"
             "The test threshold was {threshold_criteria}"
         ).format(
             accuracy=result,
             dataset=dataset,
+            model=model,
             threshold_criteria=threshold_criteria,
         )
 
@@ -123,7 +127,7 @@ class TestPerformance:
 
         return faq_df
 
-    def submit_one_inbound(self, row, client, faq_data, test_params):
+    def submit_one_inbound(self, row, client, test_params):
         """
         Single request to /inbound/check
         """
@@ -133,7 +137,8 @@ class TestPerformance:
         }
         headers = {"Authorization": "Bearer %s" % os.getenv("INBOUND_CHECK_TOKEN")}
         response = client.post("/inbound/check", json=request_data, headers=headers)
-        top_faq_names = [x[0] for x in response.get_json()["top_responses"]]
+        top_responses = response.get_json()["top_responses"]
+        top_faq_names = set(x[1] for x in top_responses)
         return row[test_params["TRUE_FAQ_COL"]] in top_faq_names
 
     @pytest.fixture(scope="class")
@@ -156,7 +161,7 @@ class TestPerformance:
                     "faq_tags": row["faq_tags"],
                     "added_utc": "2022-04-14",
                     "author": "Validation author",
-                    "content": "{}",
+                    "content": row["faq_content_to_send"],
                     "threshold": "{0.1, 0.1, 0.1, 0.1}",
                 }
                 for idx, row in self.faq_df.iterrows()
@@ -177,19 +182,19 @@ class TestPerformance:
 
         client.get("/internal/refresh-faqs", headers=headers)
 
-    def test_top_k_performance(self, monkeypatch, client, faq_data, test_params):
+    def test_top_k_performance(self, client, faq_data, test_params):
         """
         Test if top k faqs contain the true FAQ
         """
-        monkeypatch.setattr(inbound, "save_inbound_to_db", lambda *x, **y: 123)
 
         validation_df = self.get_validation_data(test_params)
-        responses = [
-            self.submit_one_inbound(x, client, faq_data, test_params)
-            for _, x in validation_df.iterrows()
-        ]
-        results = list(responses)
+
+        def submit_one_inbound(x):
+            return self.submit_one_inbound(x, client, test_params)
+
+        results = validation_df.apply(submit_one_inbound, axis=1).tolist()
         top_k_accuracy = sum(results) / len(results)
+
         content = generate_message(top_k_accuracy, test_params)
 
         if (os.environ.get("GITHUB_ACTIONS") == "true") & (

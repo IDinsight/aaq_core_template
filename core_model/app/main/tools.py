@@ -4,12 +4,12 @@
 import os
 from functools import wraps
 
-from faqt.model.embeddings import model_search_word
+from faqt.model.faq_matching.keyed_vectors_scoring import model_search_word
 from flask import abort, current_app, jsonify, request
 
 from ..data_models import TemporaryModel
 from ..prometheus_metrics import metrics
-from ..src import faq_weights, scoring_functions
+from ..src import faq_weights
 from . import main
 from .auth import auth
 
@@ -64,54 +64,45 @@ def check_new_tags():
         faq_id="TEMP",
         faq_title="*** NEW TAGS MATCHED ***",
         faq_tags=req_json["tags_to_check"],
-        faq_content_to_send="",
+        faq_content_to_send=" ".join(req_json["tags_to_check"]),
         faq_weight=1,
     )
     original_faqs = current_app.faqs
     with_temp_faqs = original_faqs + [temp_faq]
     with_temp_faqs = faq_weights.add_faq_weight_share(with_temp_faqs)
-    current_app.faqt_model.set_tags([faq.faq_tags for faq in with_temp_faqs])
+    current_app.faqt_model.set_contents(
+        [faq.faq_content_to_send for faq in with_temp_faqs],
+        [faq.faq_weight_share for faq in with_temp_faqs],
+    )
 
     json_return = {}
     json_return["top_matches_for_each_query"] = []
 
     for query_to_check in req_json["queries_to_check"]:
-        processed_message = current_app.text_preprocessor(query_to_check)
-
-        word_vector_scores, spell_corrected = current_app.faqt_model.score(
-            processed_message
-        )
-
-        scoring = scoring_functions.get_faq_scores_for_message(
-            processed_message,
-            with_temp_faqs,
-            word_vector_scores,
-            current_app.config["REDUCTION_FUNCTION"],
-            **current_app.config["REDUCTION_FUNCTION_ARGS"],
+        result = current_app.faqt_model.score_contents(
+            query_to_check, return_tag_scores=True
         )
 
         matched_faq_titles = set()
         top_matches = []
 
-        for id in sorted(
-            scoring, key=lambda x: scoring[x]["overall_score"], reverse=True
-        ):
-            if scoring[id]["faq_title"] not in matched_faq_titles:
+        for i, score in enumerate(sorted(result["overall_scores"], reverse=True)):
+            faq = with_temp_faqs[i]
+            if faq.faq_title not in matched_faq_titles:
                 top_matches.append(
-                    [
-                        scoring[id]["faq_title"],
-                        "%0.4f" % scoring[id]["overall_score"],
-                        list(scoring[id]["tag_cs"].keys()),
-                    ]
+                    [faq.faq_title, "%0.4f" % score, faq.faq_content_to_send]
                 )
-                matched_faq_titles.add(scoring[id]["faq_title"])
+                matched_faq_titles.add(faq.faq_title)
 
-            if len(matched_faq_titles) == current_app.faqt_model.n_top_matches:
+            if len(matched_faq_titles) == current_app.config["N_TOP_MATCHES_PER_PAGE"]:
                 break
 
         json_return["top_matches_for_each_query"].append(top_matches)
 
-    current_app.faqt_model.set_tags([faq.faq_tags for faq in original_faqs])
+    current_app.faqt_model.set_contents(
+        [faq.faq_content_to_send for faq in original_faqs],
+        [faq.faq_weight_share for faq in original_faqs],
+    )
 
     # Flask automatically calls jsonify
     return json_return
@@ -144,7 +135,7 @@ def validate_tags():
         if (
             model_search_word(
                 tag,
-                current_app.faqt_model.w2v_model,
+                current_app.faqt_model.word_embedding_model,
                 current_app.faqt_model.glossary,
             )
             is None

@@ -3,9 +3,10 @@ from pathlib import Path
 import pytest
 import sqlalchemy
 import yaml
+from sqlalchemy import text
+
 from core_model import app
 from core_model.app import create_app, get_config_data, load_embeddings
-from sqlalchemy import text
 
 
 @pytest.fixture(
@@ -47,7 +48,6 @@ def patchbinary(monkeysession, embedding_bin):
 @pytest.fixture(scope="session")
 def app_main(test_params, patchbinary):
     app = create_app(test_params)
-    app.faqt_model.n_top_matches = 3
     return app
 
 

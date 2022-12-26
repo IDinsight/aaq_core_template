@@ -61,11 +61,24 @@ class TestInboundMessage:
 
         assert len(json_data["top_responses"]) == 3
 
-    def test_inbound_endpoint_works(self, client):
+    def test_inbound_endpoint_works_on_regular_message(self, client):
         request_data = {
             "text_to_match": """ I'm worried about the vaccines. Can I have some
         information? \U0001f600
         πλέων ἐπὶ οἴνοπα πόντον ἐπ᾽ ἀλλοθρόους ἀνθρώπους, ἐς Τεμέσην""",
+            "return_scoring": "true",
+        }
+        headers = {"Authorization": "Bearer %s" % os.getenv("INBOUND_CHECK_TOKEN")}
+        response = client.post("/inbound/check", json=request_data, headers=headers)
+        json_data = response.get_json()
+        assert "inbound_id" in json_data
+        assert "scoring" in json_data
+        assert "top_responses" in json_data
+        assert "feedback_secret_key" in json_data
+
+    def test_inbound_endpoint_works_on_empty_tokens(self, client):
+        request_data = {
+            "text_to_match": "?",  # gets preprocessed to []
             "return_scoring": "true",
         }
         headers = {"Authorization": "Bearer %s" % os.getenv("INBOUND_CHECK_TOKEN")}

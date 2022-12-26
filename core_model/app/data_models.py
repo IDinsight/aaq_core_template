@@ -12,17 +12,17 @@ class Inbound(db.Model):
 
     __tablename__ = "inbounds"
 
-    inbound_id = db.Column(db.Integer(), primary_key=True)
-    inbound_secret_key = db.Column(db.String())
-    feedback_secret_key = db.Column(db.String())
-    inbound_text = db.Column(db.String())
+    inbound_id = db.Column(db.Integer(), primary_key=True, nullable=False)
+    inbound_secret_key = db.Column(db.String(), nullable=False)
+    feedback_secret_key = db.Column(db.String(), nullable=False)
+    inbound_text = db.Column(db.String(), nullable=False)
     inbound_metadata = db.Column(db.JSON())
-    inbound_utc = db.Column(db.DateTime())
+    inbound_utc = db.Column(db.DateTime(), nullable=False)
 
-    model_scoring = db.Column(db.JSON())
+    model_scoring = db.Column(db.JSON(), nullable=False)
 
-    returned_content = db.Column(db.JSON())
-    returned_utc = db.Column(db.DateTime())
+    returned_content = db.Column(db.JSON(), nullable=False)
+    returned_utc = db.Column(db.DateTime(), nullable=False)
     returned_feedback = db.Column(db.JSON())
 
     def __repr__(self):
@@ -37,15 +37,15 @@ class FAQModel(db.Model):
 
     __tablename__ = "faqmatches"
 
-    faq_id = db.Column(db.Integer, primary_key=True)
-    faq_added_utc = db.Column(db.DateTime())
+    faq_id = db.Column(db.Integer, primary_key=True, nullable=False)
+    faq_added_utc = db.Column(db.DateTime(), nullable=False)
     faq_updated_utc = db.Column(db.DateTime())
-    faq_author = db.Column(db.String())
-    faq_title = db.Column(db.String())
-    faq_content_to_send = db.Column(db.String())
+    faq_author = db.Column(db.String(), nullable=False)
+    faq_title = db.Column(db.String(), nullable=False)
+    faq_content_to_send = db.Column(db.String(), nullable=False)
     faq_tags = db.Column(db.ARRAY(db.String()))
     faq_thresholds = db.Column(db.ARRAY(db.Float()))
-    faq_weight = db.Column(db.Integer())
+    faq_weight = db.Column(db.Integer(), nullable=False)
 
     def __repr__(self):
         """Pretty print"""

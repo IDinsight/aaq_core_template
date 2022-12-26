@@ -116,6 +116,26 @@ test:
 test-all:
 	pytest tests
 
+profile-dev-google:
+	mkdir -p profiling/outputs
+	pyinstrument --outfile=profiling/outputs/profile_google.html -m pytest -m "google" profiling/test_profiling.py::TestMainEndpoints
+
+profile-dev-fasttext:
+	mkdir -p profiling/outputs
+	pyinstrument --outfile=profiling/outputs/profile_fasttext.html -m pytest -m "fasttext" profiling/test_profiling.py::TestMainEndpoints
+
+profile-test-google:
+	pytest -m "google" profiling/test_profiling.py::TestDummyFaqToDb
+	mkdir -p profiling/outputs
+	pyinstrument --outfile=profiling/outputs/profile_google.html -m pytest -m "google" profiling/test_profiling.py::TestMainEndpoints
+	pytest -m "google" profiling/test_profiling.py::TestCleanDb
+
+profile-test-fasttext:
+	pytest -m "fasttext" profiling/test_profiling.py::TestDummyFaqToDb
+	mkdir -p profiling/outputs
+	pyinstrument --outfile=profiling/outputs/profile_fasttext.html -m pytest -m "fasttext" profiling/test_profiling.py::TestMainEndpoints
+	pytest -m "fasttext" profiling/test_profiling.py::TestCleanDb
+
 image:
 	# Build docker image
 	cp ./requirements.txt ./core_model/requirements.txt
