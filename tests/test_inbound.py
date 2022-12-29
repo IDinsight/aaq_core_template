@@ -6,9 +6,9 @@ from sqlalchemy import text
 
 insert_faq = (
     "INSERT INTO faqmatches ("
-    "faq_tags, faq_author, faq_title, faq_content_to_send, "
+    "faq_tags,faq_questions, faq_author, faq_title, faq_content_to_send, "
     "faq_added_utc, faq_thresholds) "
-    "VALUES (:faq_tags, :author, :title, :content, :added_utc, :threshold)"
+    "VALUES (:faq_tags, :faq_questions, :author, :title, :content, :added_utc, :threshold)"
 )
 faq_tags = [
     """{"rock", "guitar", "melody", "chord"}""",
@@ -22,6 +22,7 @@ faq_other_params = {
     "added_utc": "2022-04-14",
     "author": "Pytest author",
     "threshold": "{0.1, 0.1, 0.1, 0.1}",
+    "faq_questions": """{"Dummmy question 1", "Dummmy question 2", "Dummmy question 3", "Dummmy question 4","Dummmy question 5","Dummy question 6"}""",
 }
 
 
@@ -94,13 +95,14 @@ class TestInboundMessage:
 class TestInboundFeedback:
     insert_inbound = (
         "INSERT INTO inbounds ("
-        "inbound_text, feedback_secret_key, inbound_metadata, "
+        "inbound_text, feedback_secret_key, inbound_secret_key,inbound_metadata, "
         "inbound_utc, model_scoring, returned_content, returned_utc) "
-        "VALUES ('i am 12. Can i get the vaccine?', :secret_key, :metadata, :utc, "
+        "VALUES ('i am 12. Can i get the vaccine?', :feedback_secret_key, :inbound_secret_key,:metadata, :utc, "
         ":score, :content, :r_utc)"
     )
     inbound_other_params = {
-        "secret_key": "abc123",
+        "feedback_secret_key": "abc123",
+        "inbound_secret_key": "abc456",
         "metadata": "{}",
         "utc": "2021-05-19",
         "score": "{}",
