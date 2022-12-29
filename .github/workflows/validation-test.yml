@@ -9,7 +9,7 @@ on:
 
 jobs:
   ValidateModels:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.03
     steps:
       - uses: actions/checkout@v3
         with:
