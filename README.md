@@ -8,7 +8,7 @@ be used by an existing chat service. It uses FAQ-matching models from the
 [FAQT](https://github.com/IDinsight/faqt) library.
 
 This module is the core application that receives inbound messages in json, matches them
-to FAQs in the database, and returns the the top N matches as json.
+to FAQs in the database, and returns the top N matches as json.
 
 ![AAQ Core app](docs/readme/images/aaq_template-core.png)
 
