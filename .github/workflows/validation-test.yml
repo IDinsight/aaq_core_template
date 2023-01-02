@@ -15,12 +15,11 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install Dependencies with Apt Get
-        run: |
-          sudo apt-get update
-          sudo apt-get install python3.9 jq -y
-
-      - name: Install libraries
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+          
+      - name: Install Python libraries
         run: |
           pip install -r requirements.txt
           pip install -r requirements_github_actions.txt
@@ -43,16 +42,16 @@ jobs:
         uses: aws-actions/aws-secretsmanager-get-secrets@v1
         with:
           secret-ids: |
-            aaq-template-core-secrets
-            aaq-template-global-secrets
+            CORE, arn:aws:secretsmanager:af-south-1:678681925278:secret:aaq-template-core-secrets-F64A4Z
+            GLOBAL, arn:aws:secretsmanager:af-south-1:678681925278:secret:aaq-template-global-secrets-HEQCSO
           parse-json-secrets: true
 
       - name: Run Unit Tests # Uses env variables loaded from AWS secrets
         env:
           PG_ENDPOINT: ${{env.AAQ_TEMPLATE_GLOBAL_SECRETS_PG_ENDPOINT}}
           PG_PASSWORD: ${{env.AAQ_TEMPLATE_GLOBAL_SECRETS_PG_PASSWORD}}
-          INBOUND_CHECK_TOKEN: ${{env.AAQ_TEMPLATE_CORE_SECRETS_INBOUND_CHECK_TOKEN}}
-          WORD2VEC_BINARY_BUCKET: ${{env.AAQ_TEMPLATE_CORE_SECRETS_WORD2VEC_BINARY_BUCKET}}
+          INBOUND_CHECK_TOKEN: ${{env.CORE_INBOUND_CHECK_TOKEN}}
+          WORD2VEC_BINARY_BUCKET: ${{env.CORE_WORD2VEC_BINARY_BUCKET}}
           PROMETHEUS_MULTIPROC_DIR: /tmp
         run: |
           coverage run -m pytest tests -m "not extended" --durations=0
@@ -60,9 +59,9 @@ jobs:
 
       - name: Run Validation Tests
         env:
-          VALIDATION_BUCKET: ${{env.AAQ_TEMPLATE_CORE_SECRETS_VALIDATION_BUCKET}}
-          VALIDATION_DATA_PREFIX: ${{env.AAQ_TEMPLATE_CORE_SECRETS_VALIDATION_DATA_PREFIX}}
-          VALIDATION_FAQ_PREFIX: ${{env.AAQ_TEMPLATE_CORE_SECRETS_VALIDATION_FAQ_PREFIX}}
+          VALIDATION_BUCKET: ${{env.CORE_VALIDATION_BUCKET}}
+          VALIDATION_DATA_PREFIX: ${{env.CORE_VALIDATION_DATA_PREFIX}}
+          VALIDATION_FAQ_PREFIX: ${{env.CORE_VALIDATION_FAQ_PREFIX}}
           REPO: ${{ github.repository }}
           BRANCH_NAME: ${{ github.head_ref || github.ref_name }} 
           HASH: ${{ github.sha }}
@@ -70,9 +69,9 @@ jobs:
           PROMETHEUS_MULTIPROC_DIR: /tmp
           PG_ENDPOINT: ${{env.AAQ_TEMPLATE_GLOBAL_SECRETS_PG_ENDPOINT}}
           PG_PASSWORD: ${{env.AAQ_TEMPLATE_GLOBAL_SECRETS_PG_PASSWORD}}
-          INBOUND_CHECK_TOKEN: ${{env.AAQ_TEMPLATE_CORE_SECRETS_INBOUND_CHECK_TOKEN}}
-          WORD2VEC_BINARY_BUCKET: ${{env.AAQ_TEMPLATE_CORE_SECRETS_WORD2VEC_BINARY_BUCKET}}
-        if: "${{ (env.AAQ_TEMPLATE_CORE_SECRETS_VALIDATION_BUCKET != '') && (env.AAQ_TEMPLATE_CORE_SECRETS_VALIDATION_DATA_PREFIX != '') && (env.AAQ_TEMPLATE_CORE_SECRETS_VALIDATION_FAQ_PREFIX != '')}}"
+          INBOUND_CHECK_TOKEN: ${{env.CORE_INBOUND_CHECK_TOKEN}}
+          WORD2VEC_BINARY_BUCKET: ${{env.CORE_WORD2VEC_BINARY_BUCKET}}
+        if: "${{ (env.CORE_VALIDATION_BUCKET != '') && (env.CORE_VALIDATION_DATA_PREFIX != '') && (env.CORE_VALIDATION_FAQ_PREFIX != '')}}"
         run: |
           # for testing
           python -m pytest validation
