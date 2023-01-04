@@ -44,7 +44,7 @@ class FAQModel(db.Model):
     faq_title = db.Column(db.String(), nullable=False)
     faq_content_to_send = db.Column(db.String(), nullable=False)
     faq_tags = db.Column(db.ARRAY(db.String()))
-    faq_tags = db.Column(db.ARRAY(db.String()), nullable=False)
+    faq_questions = db.Column(db.ARRAY(db.String()), nullable=False)
     faq_thresholds = db.Column(db.ARRAY(db.Float()))
     faq_weight = db.Column(db.Integer(), nullable=False)
 
