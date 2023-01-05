@@ -27,3 +27,7 @@ simple_fasttext_with_faq:
   filename: simple_fasttext_with_faq.bin
   folder: custom_word_embeddings
   type: fasttext
+huggingface_model:
+  filename: huggingface_model.tar.gz
+  folder: sequence_classification_models
+  type: bert

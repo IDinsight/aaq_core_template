@@ -4,7 +4,7 @@ Create and initialise the app. Uses Blueprints to define view.
 import os
 from functools import partial
 
-from faqt import WMDScorer, preprocess_text_for_word_embedding
+from faqt import QuestionAnswerBERTScorer, WMDScorer, preprocess_text_for_word_embedding
 from flask import Flask
 from hunspell import Hunspell
 
@@ -14,9 +14,11 @@ from .prometheus_metrics import metrics
 from .src.faq_weights import add_faq_weight_share
 from .src.utils import (
     DefaultEnvDict,
+    download_bert_model,
     get_postgres_uri,
     load_custom_wvs,
     load_data_sources,
+    load_model_or_model_path,
     load_pairwise_entities,
     load_parameters,
     load_tags_guiding_typos,
@@ -102,6 +104,26 @@ def get_config_data(params):
     return config
 
 
+def load_model(model_name):
+    """
+    Load embeddings model or model path based on model name. `model_name`
+    must be match one inside `app/config/data_sources.yaml`.
+    """
+
+    data_sources = load_data_sources()
+
+    model_folder = data_sources[model_name]["folder"]
+    model_filename = data_sources[model_name]["filename"]
+    model_type = data_sources[model_name]["type"]
+
+    model_or_model_path = load_model_or_model_path(
+        model_folder,
+        model_filename,
+        model_type,
+    )
+    return model_or_model_path
+
+
 def load_embeddings(name_of_model_in_data_source):
     """
     Load the correct embeddings
@@ -129,22 +151,10 @@ def create_faqt_model(config):
     Create a new instance of the faqt class.
     """
 
-    gensim_keyed_vector = load_embeddings(config["MATCHING_MODEL"])
-    custom_wvs = load_custom_wvs()
-    tags_guiding_typos = load_tags_guiding_typos()
-    hunspell = Hunspell()
-
+    model_path = load_embeddings(config["MATCHING_MODEL"])
     params = config["MODEL_PARAMS"]
 
-    return WMDScorer(
-        gensim_keyed_vector,
-        tokenizer=get_text_preprocessor(),
-        weighting_method=params["weighting_method"],
-        weighting_kwargs=params["weighting_kwargs"],
-        glossary=custom_wvs,
-        hunspell=hunspell,
-        tags_guiding_typos=tags_guiding_typos,
-    )
+    return QuestionAnswerBERTScorer(model_path, **params)
 
 
 def get_text_preprocessor():
@@ -186,6 +196,6 @@ def refresh_faqs(app):
     content = [faq.faq_content_to_send for faq in faqs]
     weights = [faq.faq_weight_share for faq in faqs]
 
-    app.faqt_model.set_contents(content, weights)
+    app.faqt_model.set_contents(content)
 
     return len(faqs)

@@ -27,7 +27,7 @@ def test_params(request):
 
 
 @pytest.fixture(scope="session")
-def embedding_bin(test_params):
+def model_or_model_path(test_params):
     return load_embeddings(test_params["matching_model"])
 
 
@@ -41,8 +41,8 @@ def monkeysession():
 
 
 @pytest.fixture(scope="session")
-def patchbinary(monkeysession, embedding_bin):
-    monkeysession.setattr(app, "load_embeddings", lambda *x: embedding_bin)
+def patchbinary(monkeysession, model_or_model_path):
+    monkeysession.setattr(app, "load_model", lambda *x: model_or_model_path)
 
 
 @pytest.fixture(scope="session")

@@ -18,6 +18,22 @@ faq_tags = [
     """{"draw", "sing", "exercise", "code"}""",
     """{"digest", "eat", "chew", "expel"}""",
 ]
+faq_content = [
+    """We can apply the concept of “chord melody” to the rock world.""",
+    """Tomato cheese sandwich recipe: spread 1 tsp mayonnaise over a bread slice.
+    Place 5 slices tomatoes, 3 tbsp grated mozzarella cheese and few lettuce 
+    leaves on another bread slice, spread 1 tsp mustard sauce. Grill the 
+    sandwich spreading butter. Serve the tomato cheese sandwich hot for 
+    breakfast.""",
+    """Download A Mountain Near the Lake Under the Blue Sky and White Clouds 
+    free stock image. Free Bird Perched on Rock Formation Near Body of Water 
+    Stock Photo.""",
+    """If one views any m × n real matrix as a vector of length mn then the 
+    trace of A transpose B coincides with the standard dot product.""",
+    """On weekends I like to draw, practice singing, go to the gym, and code 
+    for my personal project."""
+    """The mouth chews, the stomach digests, and the rectum expels.""",
+]
 faq_other_params = {
     "added_utc": "2022-04-14",
     "author": "Pytest author",
@@ -31,11 +47,11 @@ def faq_data(client, db_engine):
     headers = {"Authorization": "Bearer %s" % os.getenv("INBOUND_CHECK_TOKEN")}
     with db_engine.connect() as db_connection:
         inbound_sql = text(insert_faq)
-        for i, tags in enumerate(faq_tags):
+        for i, (tags, content) in enumerate(zip(faq_tags, faq_content)):
             db_connection.execute(
                 inbound_sql,
                 title=f"Pytest title #{i}",
-                content=f"Dummy content #{i}",
+                content=content,
                 faq_tags=tags,
                 **faq_other_params,
             )

@@ -102,9 +102,9 @@ class TestPerformance:
 
     insert_faq = (
         "INSERT INTO faqmatches ("
-        "faq_tags, faq_author, faq_title, faq_content_to_send, "
+        "faq_tags, :faq_questions,faq_author, faq_title, faq_content_to_send, "
         "faq_added_utc, faq_thresholds) "
-        "VALUES (:faq_tags, :author, :title, :content, :added_utc, :threshold)"
+        "VALUES (:faq_tags, faq_questions, :author, :title, :content, :added_utc, :threshold)"
     )
 
     def get_validation_data(self, test_params):
@@ -161,6 +161,7 @@ class TestPerformance:
                     "faq_tags": row["faq_tags"],
                     "added_utc": "2022-04-14",
                     "author": "Validation author",
+                    "faq_questions": """{"Dummmy question 1", "Dummmy question 2", "Dummmy question 3", "Dummmy question 4","Dummmy question 5","Dummy question 6"}""",
                     "content": row["faq_content_to_send"],
                     "threshold": "{0.1, 0.1, 0.1, 0.1}",
                 }

@@ -2,6 +2,7 @@
 General utility functions
 """
 import os
+import tarfile
 import tempfile
 from collections import UserDict
 from pathlib import Path
@@ -45,9 +46,15 @@ def load_w2v_binary(folder, filename):
     return model
 
 
+def load_bert_path(folder, filename):
+    path = Path(__file__).parents[3] / "data" / folder / filename.split(".")[0]
+    return path
+
+
 MODEL_LOADING_FUNCS = {
     "w2v": load_w2v_binary,
     "fasttext": load_fasttext,
+    "bert": load_bert_path,
 }
 
 
@@ -68,6 +75,40 @@ def load_word_embeddings_bin(folder, filename, model_type):
     model = load_function(folder, filename)
 
     return model
+
+
+def load_model_or_model_path(folder, filename, model_type):
+    """
+    Load pretrained word2vec or fasttext model from either local mount or S3
+    based on environment var.
+
+    TODO: make into a pure function and take ENV as input
+    TODO: Change env var to be VECTORS_BINARY_BUCKET since it is no longer just W2V
+    """
+    if model_type not in MODEL_LOADING_FUNCS:
+        raise ValueError(
+            f"Invalid `model_type`! Choose from {list(MODEL_LOADING_FUNCS.keys())}"
+        )
+
+    load_function = MODEL_LOADING_FUNCS[model_type]
+    model = load_function(folder, filename)
+
+    return model
+
+
+def download_bert_model(bucket, folder, filename):
+    """Download transformers bert model from S3 and extract its contents into
+    the specified folder."""
+    model_dir_path = load_bert_path(folder, filename)
+    s3 = boto3.resource("s3")
+    with tempfile.NamedTemporaryFile() as tf:
+        s3.Bucket(bucket).download_file(filename, tf.name)
+
+        # open file
+        with tarfile.open(tf.name) as f:
+            f.extractall(str(model_dir_path))
+
+    return model_dir_path
 
 
 def load_yaml_config(filename, config_subfolder=None):

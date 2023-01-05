@@ -93,7 +93,7 @@ class InboundCheck(Resource):
             return_tag_scores=True,
         )
         word_vector_scores = result["overall_scores"]
-        spell_corrected = result["spell_corrected"]
+        spell_corrected = result.get("spell_corrected", [])
         tag_scores = []  # result["tag_scores"]
 
         max_pages = ceil(
