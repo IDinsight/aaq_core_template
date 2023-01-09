@@ -9,16 +9,16 @@ class TestFaqWeights:
 
     insert_faq_no_weights = (
         "INSERT INTO faqmatches ("
-        "faq_tags, faq_author, faq_title, faq_content_to_send, "
+        "faq_tags,faq_questions, faq_author, faq_title, faq_content_to_send, "
         "faq_added_utc, faq_thresholds) "
-        "VALUES (:faq_tags, :author, :title, :content, :added_utc, :threshold)"
+        "VALUES (:faq_tags,:faq_questions, :author, :title, :content, :added_utc, :threshold)"
     )
 
     insert_faq_w_weights = (
         "INSERT INTO faqmatches ("
-        "faq_tags, faq_author, faq_title, faq_content_to_send, "
+        "faq_tags,faq_questions, faq_author, faq_title, faq_content_to_send, "
         "faq_added_utc, faq_thresholds, faq_weight) "
-        "VALUES (:faq_tags, :author, :title, :content, :added_utc, "
+        "VALUES (:faq_tags, :faq_questions,:author, :title, :content, :added_utc, "
         ":threshold, :faq_weight)"
     )
 
@@ -33,6 +33,7 @@ class TestFaqWeights:
     faq_other_params = {
         "added_utc": "2022-04-14",
         "author": "Pytest author",
+        "faq_questions": """{"Dummmy question 1", "Dummmy question 2", "Dummmy question 3", "Dummmy question 4","Dummmy question 5","Dummy question 6"}""",
         "threshold": "{0.1, 0.1, 0.1, 0.1}",
     }
 

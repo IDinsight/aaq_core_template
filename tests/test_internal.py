@@ -7,9 +7,9 @@ from sqlalchemy import text
 
 insert_faq = (
     "INSERT INTO faqmatches ("
-    "faq_tags, faq_author, faq_title, faq_content_to_send, "
+    "faq_tags,faq_questions, faq_author, faq_title, faq_content_to_send, "
     "faq_added_utc, faq_thresholds) "
-    "VALUES (:faq_tags, :faq_author, :faq_title, :faq_content_to_send, "
+    "VALUES (:faq_tags, :faq_questions,:faq_author, :faq_title, :faq_content_to_send, "
     ":faq_added_utc, :faq_threshold)"
 )
 
@@ -17,6 +17,7 @@ faq_other_params = {
     "faq_added_utc": "2022-04-14",
     "faq_author": "Pytest refresh",
     "faq_threshold": "{0.1, 0.1, 0.1, 0.1}",
+    "faq_questions": """{"Dummmy question 1", "Dummmy question 2", "Dummmy question 3", "Dummmy question 4","Dummmy question 5","Dummy question 6"}""",
 }
 
 
