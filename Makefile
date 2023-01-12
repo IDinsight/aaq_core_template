@@ -6,7 +6,7 @@ export
 
 $(eval NAME=$(PROJECT_NAME))
 $(eval PORT=9902)
-$(eval VERSION=dev)
+$(eval VERSION=bert)
 
 # Need to specify bash in order for conda activate to work.
 SHELL=/bin/bash
