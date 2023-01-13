@@ -9,7 +9,24 @@ ARG PORT
 ARG TOKEN_MACHINE_USER
 ARG HOME_DIR=/usr/src/${NAME}
 ENV DEBIAN_FRONTEND=noninteractive 
+ENV SYSTEM_VERSION_COMPAT=0
 
+# Install su_exec which is not installed by default on the image
+RUN  set -ex; \
+    \
+    curl -o /usr/local/bin/su-exec.c https://raw.githubusercontent.com/ncopa/su-exec/master/su-exec.c; \
+    \
+    fetch_deps='gcc libc-dev'; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends $fetch_deps; \
+    rm -rf /var/lib/apt/lists/*; \
+    gcc -Wall \
+    /usr/local/bin/su-exec.c -o/usr/local/bin/su-exec; \
+    chown root:root /usr/local/bin/su-exec; \
+    chmod 0755 /usr/local/bin/su-exec; \
+    rm /usr/local/bin/su-exec.c; \
+    \
+    apt-get purge -y --auto-remove $fetch_deps
 # Install psycopg2 dependencies
 # This is the proper way to do it; psycopg2-binary (Python package
 # that doesn't rely on dependencies) is practical for development
@@ -24,8 +41,9 @@ RUN apt update && \
 
 
 COPY requirements.txt /requirements.txt
-RUN pip3 install -r /requirements.txt
-RUN pip3 install "faqt[extended] @ git+https://${TOKEN_MACHINE_USER}@github.com/IDinsight/faqt.git@main"
+RUN pip install -r /requirements.txt
+RUN /usr/bin/python -m pip install --upgrade pip
+RUN pip install "faqt[extended] @ git+https://${TOKEN_MACHINE_USER}@github.com/IDinsight/faqt.git@main"
 RUN useradd -ms /bin/bash -d ${HOME_DIR} container_user
 RUN chown -R container_user: ${HOME_DIR}
 

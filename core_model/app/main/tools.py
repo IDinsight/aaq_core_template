@@ -9,7 +9,7 @@ from flask import abort, current_app, jsonify, request
 
 from ..data_models import TemporaryModel
 from ..prometheus_metrics import metrics
-from ..src import faq_weights
+from ..src import faq_weights, utils
 from . import main
 from .auth import auth
 
@@ -70,10 +70,16 @@ def check_new_tags():
     original_faqs = current_app.faqs
     with_temp_faqs = original_faqs + [temp_faq]
     with_temp_faqs = faq_weights.add_faq_weight_share(with_temp_faqs)
-    current_app.faqt_model.set_contents(
-        [faq.faq_content_to_send for faq in with_temp_faqs],
-        [faq.faq_weight_share for faq in with_temp_faqs],
-    )
+    model_name = utils.load_parameters("matching_model")
+    if model_name == "huggingface_model":
+        current_app.faqt_model.set_contents(
+            [faq.faq_content_to_send for faq in with_temp_faqs]
+        )
+    else:
+        current_app.faqt_model.set_contents(
+            [faq.faq_content_to_send for faq in original_faqs],
+            [faq.faq_weight_share for faq in original_faqs],
+        )
 
     json_return = {}
     json_return["top_matches_for_each_query"] = []
@@ -98,11 +104,16 @@ def check_new_tags():
                 break
 
         json_return["top_matches_for_each_query"].append(top_matches)
+    if model_name == "huggingface_model":
+        current_app.faqt_model.set_contents(
+            [faq.faq_content_to_send for faq in original_faqs]
+        )
 
-    current_app.faqt_model.set_contents(
-        [faq.faq_content_to_send for faq in original_faqs],
-        [faq.faq_weight_share for faq in original_faqs],
-    )
+    else:
+        current_app.faqt_model.set_contents(
+            [faq.faq_content_to_send for faq in original_faqs],
+            [faq.faq_weight_share for faq in original_faqs],
+        )
 
     # Flask automatically calls jsonify
     return json_return
@@ -132,14 +143,17 @@ def validate_tags():
     failed_tags = []
 
     for tag in req_json["tags_to_check"]:
-        if (
-            model_search_word(
-                tag,
-                current_app.faqt_model.word_embedding_model,
-                current_app.faqt_model.glossary,
-            )
-            is None
-        ):
-            failed_tags.append(tag)
+        model_name = utils.load_parameters("matching_model")
+        if model_name != "huggingface_model":
+
+            if (
+                model_search_word(
+                    tag,
+                    current_app.faqt_model.word_embedding_model,
+                    current_app.faqt_model.glossary,
+                )
+                is None
+            ):
+                failed_tags.append(tag)
 
     return jsonify(failed_tags)

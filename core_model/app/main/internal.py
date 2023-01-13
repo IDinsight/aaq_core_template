@@ -8,6 +8,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from .. import refresh_faqs
 from ..database_sqlalchemy import db
 from ..prometheus_metrics import metrics
+from ..src import utils
 from . import main
 from .auth import auth
 
@@ -39,7 +40,10 @@ def healthcheck():
 
     if not current_app.faqs:
         return "No FAQs in database", 500
-
+    model_name = utils.load_parameters("matching_model")
+    if model_name != "huggingface_model":
+        if "test" not in current_app.faqt_model.word_embedding_model:
+            return "Model failure - the word 'test' is not in the model", 500
     engine = sa.create_engine(current_app.config["SQLALCHEMY_DATABASE_URI"])
     insp = sa.inspect(engine)
     if not insp.has_table("inbounds"):
