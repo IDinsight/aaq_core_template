@@ -15,6 +15,22 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Configure AWS credentials
+        id: creds
+        uses: aws-actions/configure-aws-credentials@v1-node16
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: af-south-1 #${{ secrets.AWS_REGION }}
+      # --------------- Comment out if using Github Actions Secrets ----------------- #
+      - name: Get secrets by name and by ARN
+        uses: aws-actions/aws-secretsmanager-get-secrets@v1
+        with:
+          secret-ids: |
+            CORE, arn:aws:secretsmanager:af-south-1:678681925278:secret:aaq-template-core-secrets-F64A4Z
+            GLOBAL, arn:aws:secretsmanager:af-south-1:678681925278:secret:aaq-template-global-secrets-HEQCSO
+          parse-json-secrets: true
+
       - uses: actions/setup-python@v4
         with:
           python-version: '3.9'
@@ -31,26 +47,11 @@ jobs:
           python -c "$nltkdownload"
           pip install git+https://${{ secrets.TOKEN_MACHINE_USER }}@github.com/IDinsight/faqt.git@v1.0.2
 
-      - name: Configure AWS credentials
-        id: creds
-        uses: aws-actions/configure-aws-credentials@v1-node16
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
-      # --------------- Comment out if using Github Actions Secrets ----------------- #
-      - name: Get secrets by name and by ARN
-        uses: aws-actions/aws-secretsmanager-get-secrets@v1
-        with:
-          secret-ids: |
-            CORE, arn:aws:secretsmanager:af-south-1:678681925278:secret:aaq-template-core-secrets-F64A4Z
-            GLOBAL, arn:aws:secretsmanager:af-south-1:678681925278:secret:aaq-template-global-secrets-HEQCSO
-          parse-json-secrets: true
 
       - name: Run Unit Tests # Uses env variables loaded from AWS secrets
         env:
-          PG_ENDPOINT: ${{env.AAQ_TEMPLATE_GLOBAL_SECRETS_PG_ENDPOINT}}
-          PG_PASSWORD: ${{env.AAQ_TEMPLATE_GLOBAL_SECRETS_PG_PASSWORD}}
+          PG_ENDPOINT: ${{env.GLOBAL_PG_ENDPOINT}}
+          PG_PASSWORD: ${{env.GLOBAL_PG_PASSWORD}}
           INBOUND_CHECK_TOKEN: ${{env.CORE_INBOUND_CHECK_TOKEN}}
           WORD2VEC_BINARY_BUCKET: ${{env.CORE_WORD2VEC_BINARY_BUCKET}}
           PROMETHEUS_MULTIPROC_DIR: /tmp
@@ -68,8 +69,8 @@ jobs:
           HASH: ${{ github.sha }}
           REF: ${{ github.ref }}
           PROMETHEUS_MULTIPROC_DIR: /tmp
-          PG_ENDPOINT: ${{env.AAQ_TEMPLATE_GLOBAL_SECRETS_PG_ENDPOINT}}
-          PG_PASSWORD: ${{env.AAQ_TEMPLATE_GLOBAL_SECRETS_PG_PASSWORD}}
+          PG_ENDPOINT: ${{env.GLOBAL_PG_ENDPOINT}}
+          PG_PASSWORD: ${{env.GLOBAL_PG_PASSWORD}}
           INBOUND_CHECK_TOKEN: ${{env.CORE_INBOUND_CHECK_TOKEN}}
           WORD2VEC_BINARY_BUCKET: ${{env.CORE_WORD2VEC_BINARY_BUCKET}}
         if: "${{ (env.CORE_VALIDATION_BUCKET != '') && (env.CORE_VALIDATION_DATA_PREFIX != '') && (env.CORE_VALIDATION_FAQ_PREFIX != '')}}"
