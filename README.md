@@ -40,7 +40,7 @@ If you clone this, please setup a new repository for future commits and add this
 4. Add it as remote for local repo
 
     ```
-    git remote add origin git@github.com:IDinsight/<project_name>.git
+    git remote add origin git@github.com:<user_name>/<project_name>.git
     ```
 
 5. Set local to track that remote
