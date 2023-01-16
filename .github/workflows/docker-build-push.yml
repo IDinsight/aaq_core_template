@@ -1,8 +1,8 @@
 name: Docker Make and Push Release Image and Deploy to staging
-# on:
-  # push:
-  #   branches:
-  #     - "PNC-728-load-secrets"
+on:
+  push:
+    branches:
+      - "PNC-728-load-secrets"
   # release:
   #   # Only use the types keyword to narrow down the activity types that will trigger your workflow.
   #   types: [published]
@@ -28,15 +28,36 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
+      # ----------------- Comment out if using Github Actions Secrets --------------- #
+      - name: Get AWS secrets
+        uses: aws-actions/aws-secretsmanager-get-secrets@v1
+        with:
+          secret-ids: |  # Replace ARNs with your own
+            GH, arn:aws:secretsmanager:af-south-1:678681925278:secret:github_machine_user_token-YPuBjA
+          parse-json-secrets: true
+
       - name: Build Docker image
         run: |
           cp ./requirements.txt ./core_model/requirements.txt
           docker build --rm \
             --build-arg NAME=${{ github.event.repository.name }} \
             --build-arg PORT=9902 \
-            --build-arg TOKEN_MACHINE_USER=${{ secrets.TOKEN_MACHINE_USER }} \
+            --build-arg TOKEN_MACHINE_USER=${{ env.GH_TOKEN_MACHINE_USER }} \
             -t $IMAGE_NAME \
             ./core_model
+      # ----------------------------------------------------------------------------- #
+
+      # ----------------- Uncomment if using Github Actions Secrets ----------------- #
+      # - name: Build Docker image
+      #   run: |
+      #     cp ./requirements.txt ./core_model/requirements.txt
+      #     docker build --rm \
+      #       --build-arg NAME=${{ github.event.repository.name }} \
+      #       --build-arg PORT=9902 \
+      #       --build-arg TOKEN_MACHINE_USER=${{ secrets.TOKEN_MACHINE_USER }} \
+      #       -t $IMAGE_NAME \
+      #       ./core_model
+      # ----------------------------------------------------------------------------- #
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
@@ -110,16 +131,16 @@ jobs:
         run: sleep 300s
         shell: bash
 
-      - name: Get secrets by name and by ARN
+      # ----------------- Comment out if using Github Actions Secrets --------------- #
+      - name: Get AWS secrets
         uses: aws-actions/aws-secretsmanager-get-secrets@v1
         with:
-          secret-ids: |
-            CORE_, arn:aws:secretsmanager:af-south-1:678681925278:secret:aaq-template-core-secrets-F64A4Z
-            GLOBAL_, arn:aws:secretsmanager:af-south-1:678681925278:secret:aaq-template-global-secrets-HEQCSO
-            STG_DB_, arn:aws:secretsmanager:af-south-1:678681925278:secret:aaq-db-Vt5ojc
+          secret-ids: |  # Replace ARNs with your own
+            CORE, arn:aws:secretsmanager:af-south-1:678681925278:secret:aaq-template-core-secrets-F64A4Z
+            GLOBAL, arn:aws:secretsmanager:af-south-1:678681925278:secret:aaq-template-global-secrets-HEQCSO
+            STG_DB, arn:aws:secretsmanager:af-south-1:678681925278:secret:aaq-db-Vt5ojc
           parse-json-secrets: true
 
-      # ----------------- Comment out if using Github Actions Secrets --------------- #
       - name: Deploy using ECS CLI
         env:
           PORT: 9902
@@ -131,10 +152,10 @@ jobs:
           ENABLE_FAQ_REFRESH_CRON: ${{ env.CORE_ENABLE_FAQ_REFRESH_CRON}}
           PROMETHEUS_MULTIPROC_DIR: ${{ env.CORE_PROMETHEUS_MULTIPROC_DIR }}
           # database secrets
-          PG_ENDPOINT: ${{ env.STG_DB_PG_ENDPOINT }}
+          PG_ENDPOINT: ${{ env.STG_DB_DB_ENDPOINT }}
           PG_PORT: 5432
           PG_USERNAME: "flask"
-          PG_PASSWORD: ${{ env.STG_DB_PG_PASSWORD }}
+          PG_PASSWORD: ${{ env.STG_DB_DB_PASSWORD }}
           # sentry config
           SENTRY_DSN: ${{ env.GLOBAL_SENTRY_DSN }}
           SENTRY_ENVIRONMENT: "staging"
