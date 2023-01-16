@@ -3,15 +3,18 @@
 
 # Ask A Question (AAQ) Core Template Repository
 
-This is the readme for the AAQ Template Core App repository. To start development on a new AAQ solution, clone or fork this and follow the setup instructions below.
+This template provides a ready-to-use solution for an FAQ-matching application that can
+be used by an existing chat service. It uses FAQ-matching models from the 
+[FAQT](https://github.com/IDinsight/faqt) library.
+
+This module is the core application that receives inbound messages in json, matches them
+to FAQs in the database, and returns the top N matches as json.
+
+![AAQ Core app](docs/readme/images/aaq_template-core.png)
+
+To start development on a new AAQ solution, clone or fork this and follow the setup instructions below.
 
 Ensure to pull in new features from this repository regularly.
-
-## What is this?
-
-This module is the core application that receives inbound messages in json, matches them to FAQs in the database, and returns the the top N matches as json.
-
-![Message Stream Diagram](./docs/readme/images/nlp_stream.png)
 
 ## Setup
 
@@ -23,42 +26,43 @@ If you clone this, please setup a new repository for future commits and add this
 
 1. Clone this repo
 
-```
-git clone git@github.com:IDinsight/aaq_core_template.git <project_name>
-```
+    ```
+    git clone git@github.com:IDinsight/aaq_core_template.git <project_name>
+    ```
 
 2. Switch to <project_name> folder and change remote name to `template`
 
-```
-git remote rename origin template
-```
+    ```
+    git remote rename origin template
+    ```
 
 3. Create a new repo in Github
 4. Add it as remote for local repo
 
-```
-git remote add origin git@github.com:IDinsight/<project_name>.git
-```
+    ```
+    git remote add origin git@github.com:<user_name>/<project_name>.git
+    ```
 
 5. Set local to track that remote
 
-```
-git push -u origin main
-```
+    ```
+    git push -u origin main
+    ```
 
 6. You may also wish to [set your environment variables](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#setting-environment-variables) for the conda environment. This will allow you to run and test locally. Here are the variables you should set
 
-```
-export PG_ENDPOINT=
-export PG_PORT=
-export PG_DATABASE=
-export PG_USERNAME=
-export PG_PASSWORD=
+    ```
+    export PG_ENDPOINT=
+    export PG_PORT=
+    export PG_DATABASE=
+    export PG_USERNAME=
+    export PG_PASSWORD=
 
-export INBOUND_CHECK_TOKEN=
-export TOKEN_MACHINE_USER=
-export PROMETHEUS_MULTIPROC_DIR=
-```
+    export INBOUND_CHECK_TOKEN=
+    export TOKEN_MACHINE_USER=
+    export PROMETHEUS_MULTIPROC_DIR=
+    ```
+    See `docs/deployment_instructions.md` for more detailed explanations of each secret environment variable.
 
 ### Configure project details
 
@@ -73,13 +77,6 @@ The `project_config.cfg` in the root directory should be updated with your proje
 * `AWS_PROFILE_NAME`: Name of AWS profile (stored in `~/.aws/credentials`) with appropriate permissions to create the resources
 
 ### Initialise
-
-#### Create a Postgres Db instance
-
-In past projects, this has been Postgres on RDS. You don't need to create any databases at this point. We'll create that in one of the steps below.
-
-Note the connection details for the DB and the password for the `postgres` user. We'll need them in the [section](#enter_details_in_secrets_file) below.
-
 #### Run `make setup-dev`
 
 This command does the following:
@@ -89,26 +86,23 @@ This command does the following:
 3. Installs pre-commit hooks
 4. Creates secrets files in `./secrets/`
 
-#### Enter details in secrets file
+#### Set up infrastructure using terraform
 
-You should edit each of the files in `./secrets` and set the correct parameters.
+Follow the instructions in  [`infrastructure/README.md`](https://github.com/IDinsight/aaq_core_template/tree/main/infrastructure).
 
--   `database_secrets.env` is the most important one to complete right now as these details will be used to create tables in the next step. You can set whatever username (usually `flask`) and password you prefer. These details will be used to create the role.
+#### Set up secrets and test configs
+Edit each of the files in `./secrets` and set the correct parameters.
 
--   `tests/config.yaml` should be updated. This file is used by `pytest` and is required to run tests locally.
+Note the DB connection details and DB secrets, and save them in the following files:
 
--   `validation/config.yaml` should also be updated. This is used by the validation script.
+- Save the dev DB details in `secrets/database_secrets.env`
 
--   Other files should be updated before you can test the instance.
+- Save the test DB details in `tests/config.yaml`. This file is used by `pytest` and is required to run tests locally.
 
-#### Run `make setup-db-all`
+- Save the test DB details `validation/config.yaml`. This is used by the validation
+  script.
 
-This command does the following:
-
-1. Creates the dev and test user
-2. Creates the dev and test databases
-3. Creates a new schema (based on `$PROJECT_SHORT_NAME`) and sets as default
-4. Creates the tables needed for the app
+See `docs/deployment_instructions.md` for more detailed explanations on each secret environment variable.
 
 #### Run `make setup-ecr`
 
@@ -137,14 +131,12 @@ You only need to copy the binaries for the model you wish to use. The model can 
 1. Setup `coveralls`
 2. Setup auto deployment on EC2 (using webhooks or other)
 3. Update this file!
+    - Remove irrelevant content (all the template text)
+    - Update the badges at the top of this file
+4. Setup application monitoring
+5. Setup other apps as necessary
 
--   Remove irrelevant content (all the template text)
--   Update the badges at the top of this file
-
-6. Setup application monitoring
-7. Setup other apps as necessary,
-
-## Running Project
+## Running the project
 
 **Note: Ensure you have updated all the secrets in the files under `/secrets/`.**
 
