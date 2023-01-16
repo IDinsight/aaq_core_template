@@ -1,11 +1,8 @@
 name: Docker Make and Push Release Image and Deploy to staging
 on:
-  push:
-    branches:
-      - "PNC-728-load-secrets"
-  # release:
-  #   # Only use the types keyword to narrow down the activity types that will trigger your workflow.
-  #   types: [published]
+  release:
+    # Only use the types keyword to narrow down the activity types that will trigger your workflow.
+    types: [published]
 
 jobs:
   DockerMakeAndPushRelease:
