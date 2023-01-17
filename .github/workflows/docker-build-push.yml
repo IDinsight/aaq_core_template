@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-20.04
     environment: staging
     env:
-      IMAGE_NAME: ${{ github.event.repository.name }}:test
+      IMAGE_NAME: ${{ github.event.repository.name }}:${{ github.event.release.tag_name }}
     outputs:
       env-name: ${{ steps.env-name.outputs.environment }}
       EcrImagePath: ${{ steps.update-ecr.outputs.EcrImagePath }}
