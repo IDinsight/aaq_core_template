@@ -3,7 +3,7 @@
 
 # Note on root:
 # The Dockerfile is configured to launch this script as root, since we need to be root to run cron.
-# We switch to container_user when we run the process (gunicorn), in line with Praekelt's standards.
+# We switch to container_user when we run the process (gunicorn), in line with standards.
 # See https://github.com/praekeltfoundation/docker-py-base.
 
 # Setup cron job to refresh FAQs, every hour on 0th minute

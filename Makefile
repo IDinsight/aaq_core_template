@@ -185,7 +185,7 @@ down-stg:
 	--cluster-config ${NAME}-config service down
 
 push-image: image cmd-exists-aws guard-AWS_ACCOUNT_ID
-	aws ecr --profile=praekelt-user get-login-password --region af-south-1 \
+	aws ecr --profile=$(AWS_PROFILE_NAME) get-login-password --region af-south-1 \
 		| docker login --username AWS --password-stdin $(AWS_ACCOUNT_ID).dkr.ecr.af-south-1.amazonaws.com
 	docker tag $(NAME):$(VERSION) $(AWS_ACCOUNT_ID).dkr.ecr.af-south-1.amazonaws.com/aaq_solution/$(NAME):$(VERSION)
 	docker push $(AWS_ACCOUNT_ID).dkr.ecr.af-south-1.amazonaws.com/aaq_solution/$(NAME):$(VERSION)
