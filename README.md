@@ -144,3 +144,8 @@ To run this project:
 
 1. `make image` to create the docker image
 2. `make container` to create the docker container
+
+## Thank you
+
+This has been built for and in collaboration with Praekelt. We are grateful to
+Praekelt for the opportunity to use data science to contribute to their mission.
