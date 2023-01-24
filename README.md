@@ -1,5 +1,5 @@
-![Coverage Status](https://coveralls.io/repos/github/IDinsight/[your-project]/badge.svg?t=[code])](https://coveralls.io/github/IDinsight/[your-project])
-![Unit Tests](https://github.com/IDinsight/[your-project]/actions/workflows/validation-test.yml/badge.svg)
+[![Coverage Status](https://coveralls.io/repos/github/IDinsight/aaq_admin_template/badge.svg?branch=main&t=VLz2WX)](https://coveralls.io/github/IDinsight/aaq_admin_template?branch=main)
+![Unit Tests](https://github.com/IDinsight/aaq_core_template/actions/workflows/validation-test.yml/badge.svg)
 
 # Ask A Question (AAQ) Core Template Repository
 
@@ -144,3 +144,8 @@ To run this project:
 
 1. `make image` to create the docker image
 2. `make container` to create the docker container
+
+## Thank you
+
+This has been built for and in collaboration with Praekelt. We are grateful to
+Praekelt for the opportunity to use data science to contribute to their mission.

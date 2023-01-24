@@ -119,7 +119,7 @@ resource "aws_iam_user_policy_attachment" "amazon_docker_pushpull_permission" {
 }
 
 resource "aws_secretsmanager_secret" "gh_actions" {
-  description             = "Praekelt GitHub actions pipeline user credentials"
+  description             = "GitHub actions pipeline user credentials"
   name                    = "${var.project_name}-staging-ga-user-credentials"
   
   tags = {
