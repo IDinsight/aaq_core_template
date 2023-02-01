@@ -25,9 +25,6 @@ def upgrade():
         existing_type=postgresql.ARRAY(sa.VARCHAR()),
         nullable=True,
     )
-    op.execute(
-        "UPDATE faqmatches SET faq_questions = ARRAY ['Dummy question 1','Dummy question 2','Dummy question 3', 'Dummy question 4','Dummy question 5']"
-    )
     op.alter_column("faqmatches", "faq_questions", nullable=False)
     op.drop_column("faqmatches", "test_migration")
     # ### end Alembic commands ###
