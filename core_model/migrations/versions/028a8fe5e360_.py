@@ -20,7 +20,12 @@ def upgrade():
     op.add_column(
         "faqmatches", sa.Column("faq_questions", sa.ARRAY(sa.String()), nullable=True)
     )
-
+    op.execute(
+        "UPDATE inbounds SET inbound_secret_key = 'abc_123' WHERE inbound_secret_key is NULL"
+    )
+    op.execute(
+        "UPDATE faqmatches SET faq_questions = ARRAY ['Dummy question 1','Dummy question 2','Dummy question 3', 'Dummy question 4','Dummy question 5'] WHERE faq_questions is NULL"
+    )
     op.alter_column(
         "inbounds", "inbound_secret_key", existing_type=sa.TEXT(), nullable=False
     )
