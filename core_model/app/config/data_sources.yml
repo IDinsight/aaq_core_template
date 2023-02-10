@@ -5,7 +5,7 @@ google_news_pretrained:
 
 # The following models are custom word-embeddings trained 
 # on real world data.
-# To find Notebooks where the models was trained, check out
+# To find Notebooks where the models were trained, check out
 # the respective project repos.
 faqt_w2v_with_faq:
   filename: faqt_w2v_with_faq.bin
