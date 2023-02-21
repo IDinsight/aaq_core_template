@@ -33,4 +33,6 @@ model_params:
     weighting_method: add_weight
     weighting_kwargs:
       N: 5
-
+contextualization:
+  active: False 
+  context_list: ["design", "code", "test", "deploy","maintain"]
