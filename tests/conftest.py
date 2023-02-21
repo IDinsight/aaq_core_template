@@ -77,6 +77,19 @@ def client_weight(app_weight):
         yield client
 
 
+@pytest.fixture(scope="session")
+def app_context(test_params, patchbinary):
+    test_params["CONTEXT_ACTIVE"] = True
+    app = create_app(test_params)
+    return app
+
+
+@pytest.fixture(scope="session")
+def client_context(app_context):
+    with app_context.test_client() as client:
+        yield client
+
+
 @pytest.fixture(scope="class")
 def db_engine(test_params):
     config = get_config_data(test_params)

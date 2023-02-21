@@ -6,9 +6,9 @@ from sqlalchemy import text
 
 insert_faq = (
     "INSERT INTO faqmatches ("
-    "faq_tags,faq_questions, faq_author, faq_title, faq_content_to_send, "
+    "faq_tags,faq_questions,faq_contexts, faq_author, faq_title, faq_content_to_send, "
     "faq_added_utc, faq_thresholds) "
-    "VALUES (:faq_tags, :faq_questions, :author, :title, :content, :added_utc, :threshold)"
+    "VALUES (:faq_tags, :faq_questions,:faq_contexts, :author, :title, :content, :added_utc, :threshold)"
 )
 faq_tags = [
     """{"rock", "guitar", "melody", "chord"}""",
@@ -17,6 +17,14 @@ faq_tags = [
     """{"trace", "vector", "length", "angle"}""",
     """{"draw", "sing", "exercise", "code"}""",
     """{"digest", "eat", "chew", "expel"}""",
+]
+faq_contexts = [
+    """{"code", "deploy", "maintain"}""",
+    """{"design","code","maintain"}""",
+    """{ "test","deploy"}""",
+    """{"design", "test", "deploy","maintain"}""",
+    """{"design", "code","test"}""",
+    """{"test"}""",
 ]
 faq_other_params = {
     "added_utc": "2022-04-14",
@@ -27,7 +35,7 @@ faq_other_params = {
 
 
 @pytest.fixture
-def faq_data(client, db_engine):
+def faq_data(client, db_engine, refresh_end=False):
     headers = {"Authorization": "Bearer %s" % os.getenv("INBOUND_CHECK_TOKEN")}
     with db_engine.connect() as db_connection:
         inbound_sql = text(insert_faq)
@@ -37,6 +45,7 @@ def faq_data(client, db_engine):
                 title=f"Pytest title #{i}",
                 content=f"Dummy content #{i}",
                 faq_tags=tags,
+                faq_contexts=faq_contexts[i],
                 **faq_other_params,
             )
     client.get("/internal/refresh-faqs", headers=headers)
@@ -45,6 +54,28 @@ def faq_data(client, db_engine):
         t = text("DELETE FROM faqmatches " "WHERE faq_author='Pytest author'")
         db_connection.execute(t)
     client.get("/internal/refresh-faqs", headers=headers)
+
+
+@pytest.fixture
+def faq_data_contexts(client_context, db_engine, refresh_end=False):
+    headers = {"Authorization": "Bearer %s" % os.getenv("INBOUND_CHECK_TOKEN")}
+    with db_engine.connect() as db_connection:
+        inbound_sql = text(insert_faq)
+        for i, tags in enumerate(faq_tags):
+            db_connection.execute(
+                inbound_sql,
+                title=f"Pytest title #{i}",
+                content=f"Dummy content #{i}",
+                faq_tags=tags,
+                faq_contexts=faq_contexts[i],
+                **faq_other_params,
+            )
+    client_context.get("/internal/refresh-faqs", headers=headers)
+    yield
+    with db_engine.connect() as db_connection:
+        t = text("DELETE FROM faqmatches " "WHERE faq_author='Pytest author'")
+        db_connection.execute(t)
+    client_context.get("/internal/refresh-faqs", headers=headers)
 
 
 class TestInboundMessage:
@@ -87,6 +118,52 @@ class TestInboundMessage:
         json_data = response.get_json()
         assert "inbound_id" in json_data
         assert "scoring" in json_data
+        assert "top_responses" in json_data
+        assert "feedback_secret_key" in json_data
+
+    @pytest.mark.filterwarnings("ignore::UserWarning")
+    def test_contextualization_active_without_context_works(
+        self, faq_data_contexts, client_context
+    ):
+        request_data = {
+            "text_to_match": "Can I enjoy movies while deploying the new version?",
+        }
+        headers = {"Authorization": "Bearer %s" % os.getenv("INBOUND_CHECK_TOKEN")}
+        response = client_context.post(
+            "/inbound/check", json=request_data, headers=headers
+        )
+        json_data = response.get_json()
+        assert "inbound_id" in json_data
+        assert "top_responses" in json_data
+        assert "feedback_secret_key" in json_data
+
+    @pytest.mark.filterwarnings("ignore::UserWarning")
+    def test_contextualization_active_with_context_works(
+        self, faq_data_contexts, client_context
+    ):
+        request_data = {
+            "text_to_match": "Can I enjoy movies while deploying the new version?",
+            "context": ["deploy", "maintain"],
+        }
+        headers = {"Authorization": "Bearer %s" % os.getenv("INBOUND_CHECK_TOKEN")}
+        response = client_context.post(
+            "/inbound/check", json=request_data, headers=headers
+        )
+        json_data = response.get_json()
+        assert "inbound_id" in json_data
+        assert "top_responses" in json_data
+        assert "feedback_secret_key" in json_data
+
+    @pytest.mark.filterwarnings("ignore::UserWarning")
+    def test_contextualization_inactive_with_contexts_works(self, faq_data, client):
+        request_data = {
+            "text_to_match": "Can I enjoy movies while deploying the new version?",
+            "context": ["deploy", "maintain"],
+        }
+        headers = {"Authorization": "Bearer %s" % os.getenv("INBOUND_CHECK_TOKEN")}
+        response = client.post("/inbound/check", json=request_data, headers=headers)
+        json_data = response.get_json()
+        assert "inbound_id" in json_data
         assert "top_responses" in json_data
         assert "feedback_secret_key" in json_data
 
