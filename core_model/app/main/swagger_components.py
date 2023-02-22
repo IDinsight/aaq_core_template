@@ -27,7 +27,7 @@ inbound_check_fields = api.model(
             required=True,
             example="is it normal to crave anchovies for breakfast",
         ),
-        "contexts": fields.List(
+        "context": fields.List(
             fields.String,
             description=("List of message contexts. Each contect is a string "),
             required=False,
