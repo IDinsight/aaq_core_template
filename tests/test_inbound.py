@@ -35,7 +35,7 @@ faq_other_params = {
 
 
 @pytest.fixture
-def faq_data(client, db_engine, refresh_end=False):
+def faq_data(client, db_engine):
     headers = {"Authorization": "Bearer %s" % os.getenv("INBOUND_CHECK_TOKEN")}
     with db_engine.connect() as db_connection:
         inbound_sql = text(insert_faq)
@@ -57,7 +57,7 @@ def faq_data(client, db_engine, refresh_end=False):
 
 
 @pytest.fixture
-def faq_data_contexts(client_context, db_engine, refresh_end=False):
+def faq_data_contexts(client_context, db_engine):
     headers = {"Authorization": "Bearer %s" % os.getenv("INBOUND_CHECK_TOKEN")}
     with db_engine.connect() as db_connection:
         inbound_sql = text(insert_faq)
