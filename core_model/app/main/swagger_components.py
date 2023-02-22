@@ -27,10 +27,11 @@ inbound_check_fields = api.model(
             required=True,
             example="is it normal to crave anchovies for breakfast",
         ),
-        "top_responses": fields.List(
+        "contexts": fields.List(
             fields.String,
             description=("List of message contexts. Each contect is a string "),
             required=False,
+            example=["test", "deploy"],
         ),
         "metadata": fields.Raw(
             description=(
