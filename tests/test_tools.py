@@ -1,4 +1,12 @@
 import os
+import pytest
+
+
+@pytest.fixture
+def refresh(client_context):
+    headers = {"Authorization": "Bearer %s" % os.getenv("INBOUND_CHECK_TOKEN")}
+    client_context.get("/internal/refresh-faqs", headers=headers)
+    yield
 
 
 class TestNewTagTool:
@@ -34,3 +42,32 @@ class TestNewTagTool:
         )
         json_data = response.get_json()
         assert len(json_data) == 0
+
+    @pytest.mark.filterwarnings("ignore::UserWarning")
+    @pytest.mark.parametrize(
+        "contexts,is_context_valid",
+        [
+            (["maintain"], True),
+            (["test", "deploy"], True),
+            ([], True),
+            (["eat"], False),
+            (["eat", "maintain"], False),
+        ],
+    )
+    def test_check_contexts_works(
+        self,
+        contexts,
+        is_context_valid,
+        refresh,
+        client_context,
+    ):
+        request_data = {"contexts_to_check": contexts}
+        headers = {"Authorization": "Bearer %s" % os.getenv("INBOUND_CHECK_TOKEN")}
+        response = client_context.post(
+            "/tools/check-contexts", json=request_data, headers=headers
+        )
+        json_data = response.get_json()
+        if is_context_valid:
+            assert len(json_data) == 0
+        else:
+            assert len(json_data) > 0

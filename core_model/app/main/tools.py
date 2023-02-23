@@ -143,3 +143,29 @@ def validate_tags():
             failed_tags.append(tag)
 
     return jsonify(failed_tags)
+
+
+@main.route("/tools/check-contexts", methods=["POST"])
+@auth.login_required
+@metrics.do_not_track()
+def check_faq_contexts():
+    """
+    Check  the validity of the contexts by checking whether
+    all the input contexts are in the app contexts list
+
+    Parameters
+    ----------
+    request (request proxy; see https://flask.palletsprojects.com/en/1.1.x/reqcontext/)
+        The request should be sent as JSON with fields:
+        - contexts_to_check (required, list[str])
+
+    Returns
+    -------
+    JSON
+        List of invalid contexts (may be empty)
+    """
+    incoming = request.json
+    to_check = set(incoming["contexts_to_check"])
+    invalid_contexts = to_check - set(current_app.contextualizer.contexts)
+
+    return jsonify(list(invalid_contexts))

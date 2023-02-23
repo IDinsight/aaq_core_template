@@ -2,7 +2,7 @@
 # INTERNAL ENDPOINTS
 ##############################################################################
 import sqlalchemy as sa
-from flask import current_app
+from flask import current_app, jsonify
 from sqlalchemy.exc import SQLAlchemyError
 
 from .. import refresh_faqs

@@ -116,6 +116,7 @@ def create_contextualization(app, context_list):
     app.contextualizer = Contextualization(
         contents_dict=faq_contexts, distance_matrix=distance_matrix
     )
+    app.context_list = contexts
 
 
 def load_embeddings(name_of_model_in_data_source):
@@ -200,7 +201,6 @@ def refresh_faqs(app):
     app.faqs = add_faq_weight_share(faqs)
     content = [faq.faq_content_to_send for faq in faqs]
     weights = [faq.faq_weight_share for faq in faqs]
-
     app.faqt_model.set_contents(content, weights)
     if app.is_context_active:
         create_contextualization(app, "context_list")
