@@ -34,5 +34,5 @@ model_params:
     weighting_kwargs:
       N: 5
 contextualization:
-  active: False 
+  active: True 
   context_list: ["design", "code", "test", "deploy","maintain"]

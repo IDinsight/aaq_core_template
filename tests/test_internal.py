@@ -7,9 +7,9 @@ from sqlalchemy import text
 
 insert_faq = (
     "INSERT INTO faqmatches ("
-    "faq_tags,faq_questions, faq_author, faq_title, faq_content_to_send, "
+    "faq_tags,faq_questions,faq_contexts, faq_author, faq_title, faq_content_to_send, "
     "faq_added_utc, faq_thresholds) "
-    "VALUES (:faq_tags, :faq_questions,:faq_author, :faq_title, :faq_content_to_send, "
+    "VALUES (:faq_tags, :faq_questions,:faq_contexts,:faq_author, :faq_title, :faq_content_to_send, "
     ":faq_added_utc, :faq_threshold)"
 )
 
@@ -52,8 +52,10 @@ class TestHealthCheck:
         response = client.get("/healthcheck")
         assert response.status_code == 500
 
+    @pytest.mark.filterwarnings("ignore::UserWarning")
     def test_health_check_fails_with_no_faqs_message(self, client):
         page = client.get("/healthcheck")
+        print(page.data)
         assert page.data == b"No FAQs in database"
 
     def test_can_access_health_check(self, client, load_faq_data):

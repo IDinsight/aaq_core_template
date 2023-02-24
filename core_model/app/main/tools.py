@@ -166,6 +166,10 @@ def check_faq_contexts():
     """
     incoming = request.json
     to_check = set(incoming["contexts_to_check"])
-    invalid_contexts = to_check - set(current_app.contextualizer.contexts)
 
+    invalid_contexts = (
+        to_check - set(current_app.contextualizer.contexts)
+        if current_app.is_context_active
+        else to_check
+    )
     return jsonify(list(invalid_contexts))

@@ -9,18 +9,26 @@ class TestFaqWeights:
 
     insert_faq_no_weights = (
         "INSERT INTO faqmatches ("
-        "faq_tags,faq_questions, faq_author, faq_title, faq_content_to_send, "
+        "faq_tags,faq_questions,faq_contexts, faq_author, faq_title, faq_content_to_send, "
         "faq_added_utc, faq_thresholds) "
-        "VALUES (:faq_tags,:faq_questions, :author, :title, :content, :added_utc, :threshold)"
+        "VALUES (:faq_tags,:faq_questions,:faq_contexts,  :author, :title, :content, :added_utc, :threshold)"
     )
 
     insert_faq_w_weights = (
         "INSERT INTO faqmatches ("
-        "faq_tags,faq_questions, faq_author, faq_title, faq_content_to_send, "
+        "faq_tags,faq_questions,faq_contexts, faq_author, faq_title, faq_content_to_send, "
         "faq_added_utc, faq_thresholds, faq_weight) "
-        "VALUES (:faq_tags, :faq_questions,:author, :title, :content, :added_utc, "
+        "VALUES (:faq_tags, :faq_questions,:faq_contexts,:author, :title, :content, :added_utc, "
         ":threshold, :faq_weight)"
     )
+    faq_contexts = [
+        """{"code", "deploy", "maintain"}""",
+        """{"design","code","maintain"}""",
+        """{ "test","deploy"}""",
+        """{"design", "test", "deploy","maintain"}""",
+        """{"design", "code","test"}""",
+        """{"test"}""",
+    ]
 
     faq_tags = [
         """{"rock", "guitar", "melody", "chord"}""",
@@ -50,6 +58,7 @@ class TestFaqWeights:
                     inbound_sql,
                     title=f"Pytest title #{i}",
                     faq_tags=tags,
+                    faq_contexts=self.faq_contexts[i],
                     content=" ".join(tags),
                     **self.faq_other_params,
                 )
@@ -78,6 +87,7 @@ class TestFaqWeights:
                     title=f"Pytest title #{i}",
                     faq_tags=tags,
                     content=" ".join(tags),
+                    faq_contexts=self.faq_contexts[i],
                     faq_weight=weight,
                     **self.faq_other_params,
                 )
