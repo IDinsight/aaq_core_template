@@ -86,7 +86,11 @@ class InboundCheck(Resource):
             return_scoring = (return_scoring is True) or (return_scoring == "true")
         else:
             return_scoring = False
-        if "context" in incoming and current_app.is_context_active:
+        if (
+            "context" in incoming
+            and len(incoming["context"]) > 0
+            and current_app.is_context_active
+        ):
             contexts = incoming["context"]
             weights_dic = current_app.contextualizer.get_context_weights(contexts)
             weights = list(weights_dic.values())

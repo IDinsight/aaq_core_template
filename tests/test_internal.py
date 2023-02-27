@@ -55,7 +55,6 @@ class TestHealthCheck:
     @pytest.mark.filterwarnings("ignore::UserWarning")
     def test_health_check_fails_with_no_faqs_message(self, client):
         page = client.get("/healthcheck")
-        print(page.data)
         assert page.data == b"No FAQs in database"
 
     def test_can_access_health_check(self, client, load_faq_data):

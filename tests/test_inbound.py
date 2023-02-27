@@ -155,6 +155,23 @@ class TestInboundMessage:
         assert "feedback_secret_key" in json_data
 
     @pytest.mark.filterwarnings("ignore::UserWarning")
+    def test_contextualization_active_with_empty_context_works(
+        self, faq_data_contexts, client_context
+    ):
+        request_data = {
+            "text_to_match": "Can I enjoy movies while deploying the new version?",
+            "context": [],
+        }
+        headers = {"Authorization": "Bearer %s" % os.getenv("INBOUND_CHECK_TOKEN")}
+        response = client_context.post(
+            "/inbound/check", json=request_data, headers=headers
+        )
+        json_data = response.get_json()
+        assert "inbound_id" in json_data
+        assert "top_responses" in json_data
+        assert "feedback_secret_key" in json_data
+
+    @pytest.mark.filterwarnings("ignore::UserWarning")
     def test_contextualization_inactive_with_contexts_works(self, faq_data, client):
         request_data = {
             "text_to_match": "Can I enjoy movies while deploying the new version?",

@@ -49,7 +49,7 @@ class TestFaqWeights:
     def faq_data_no_weights(self, client, db_engine):
         headers = {"Authorization": "Bearer %s" % os.getenv("INBOUND_CHECK_TOKEN")}
         with db_engine.connect() as db_connection:
-            t = text("DELETE FROM faqmatches " "WHERE faq_author='Pytest author'")
+            t = text("DELETE FROM faqmatches " " WHERE faq_author='Pytest author'")
             db_connection.execute(t)
         with db_engine.connect() as db_connection:
             inbound_sql = text(self.insert_faq_no_weights)
@@ -103,7 +103,6 @@ class TestFaqWeights:
     ):
         weight_shares = [f.faq_weight_share for f in app_main.faqs]
         weights = [f.faq_weight for f in app_main.faqs]
-
         assert len(weights) == sum(weights)
         assert np.isclose(sum(weight_shares), 1)
 
