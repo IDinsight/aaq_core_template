@@ -156,6 +156,7 @@ container:
 		--env-file ./secrets/app_secrets.env \
 		--env-file ./secrets/database_secrets.env \
 		--env-file ./secrets/sentry_config.env \
+		--gpus all --ipc=host --ulimit memlock=-1 --ulimit stack=67108864 \
 		--mount type=bind,source="$(PWD)/data",target="/usr/src/data" \
 		$(NAME):$(VERSION)
 

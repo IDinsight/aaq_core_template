@@ -8,8 +8,7 @@ ARG NAME
 ARG PORT
 ARG TOKEN_MACHINE_USER
 ARG HOME_DIR=/usr/src/${NAME}
-ENV DEBIAN_FRONTEND=noninteractive 
-ENV SYSTEM_VERSION_COMPAT=0
+ENV DEBIAN_FRONTEND=noninteractive
 
 # Install su_exec which is not installed by default on the image
 RUN  set -ex; \
@@ -27,10 +26,7 @@ RUN  set -ex; \
     rm /usr/local/bin/su-exec.c; \
     \
     apt-get purge -y --auto-remove $fetch_deps
-# Install psycopg2 dependencies
-# This is the proper way to do it; psycopg2-binary (Python package
-# that doesn't rely on dependencies) is practical for development
-# and testing but not suitable for production
+
 
 RUN apt update && \
     apt install --no-install-recommends -y build-essential software-properties-common && \
@@ -38,7 +34,10 @@ RUN apt update && \
     apt install --no-install-recommends -y python3.8 python3-pip python3-setuptools python3-distutils && \
     apt clean && rm -rf /var/lib/apt/lists/*
 
-
+# Install psycopg2 dependencies
+# This is the proper way to do it; psycopg2-binary (Python package
+# that doesn't rely on dependencies) is practical for development
+# and testing but not suitable for production
 
 COPY requirements.txt /requirements.txt
 RUN pip install -r /requirements.txt
