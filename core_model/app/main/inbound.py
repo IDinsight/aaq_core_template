@@ -10,7 +10,6 @@ from math import ceil
 from flask import current_app, request, url_for
 from flask_restx import Resource
 from sqlalchemy.orm.attributes import flag_modified
-
 from ..data_models import Inbound
 from ..database_sqlalchemy import db
 from ..prometheus_metrics import metrics
@@ -40,6 +39,7 @@ class InboundCheck(Resource):
     request (request proxy; see https://flask.palletsprojects.com/en/1.1.x/reqcontext/)
         The request should be sent as JSON with fields:
         - text_to_match (required, string)
+        -context (optional,List[string])
         - metadata (optional, list/string/dict/etc.)
             - Any custom metadata
         - return_scoring (optional, string)
@@ -86,12 +86,24 @@ class InboundCheck(Resource):
             return_scoring = (return_scoring is True) or (return_scoring == "true")
         else:
             return_scoring = False
+        if (
+            "context" in incoming
+            and len(incoming["context"]) > 0
+            and current_app.is_context_active
+        ):
+            contexts = incoming["context"]
+            weights_dic = current_app.contextualizer.get_context_weights(contexts)
+            weights = list(weights_dic.values())
+        else:
+            weights = None
 
         result = current_app.faqt_model.score_contents(
             incoming["text_to_match"],
             return_spell_corrected=True,
             return_tag_scores=True,
+            weights=weights,
         )
+
         word_vector_scores = result["overall_scores"]
         spell_corrected = result["spell_corrected"]
         tag_scores = []  # result["tag_scores"]

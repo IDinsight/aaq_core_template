@@ -5,6 +5,10 @@ import os
 from functools import partial
 
 from faqt import WMDScorer, preprocess_text_for_word_embedding
+from faqt.model.faq_matching.contextualization import (
+    Contextualization,
+    get_ordered_distance_matrix,
+)
 from flask import Flask
 from hunspell import Hunspell
 
@@ -72,6 +76,7 @@ def setup(app, params):
     migrate.init_app(app, db)
 
     app.faqt_model = create_faqt_model(config)
+    app.is_context_active = config["CONTEXT_ACTIVE"]
 
 
 def get_config_data(params):
@@ -86,7 +91,7 @@ def get_config_data(params):
     model_name = load_parameters("matching_model")
     config["MODEL_PARAMS"] = load_parameters("model_params")[model_name]
     config["MATCHING_MODEL"] = model_name
-
+    config["CONTEXT_ACTIVE"] = load_parameters("contextualization")["active"]
     faq_matching_config = load_parameters("faq_match")
     config.update(faq_matching_config)
     config.update(params)
@@ -100,6 +105,18 @@ def get_config_data(params):
     )
 
     return config
+
+
+def create_contextualization(app, context_list):
+    contexts = load_parameters("contextualization")[context_list]
+    distance_matrix = get_ordered_distance_matrix(contexts)
+    faq_contexts = {
+        faq.faq_id: faq.faq_contexts for faq in app.faqs if faq.faq_contexts is not None
+    }
+    app.contextualizer = Contextualization(
+        contents_dict=faq_contexts, distance_matrix=distance_matrix
+    )
+    app.context_list = contexts
 
 
 def load_embeddings(name_of_model_in_data_source):
@@ -182,10 +199,9 @@ def refresh_faqs(app):
         faqs = FAQModel.query.all()
     faqs.sort(key=lambda x: x.faq_id)
     app.faqs = add_faq_weight_share(faqs)
-
     content = [faq.faq_content_to_send for faq in faqs]
     weights = [faq.faq_weight_share for faq in faqs]
-
     app.faqt_model.set_contents(content, weights)
-
+    if app.is_context_active:
+        create_contextualization(app, "context_list")
     return len(faqs)

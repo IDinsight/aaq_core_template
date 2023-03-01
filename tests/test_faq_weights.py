@@ -9,18 +9,26 @@ class TestFaqWeights:
 
     insert_faq_no_weights = (
         "INSERT INTO faqmatches ("
-        "faq_tags,faq_questions, faq_author, faq_title, faq_content_to_send, "
+        "faq_tags,faq_questions,faq_contexts, faq_author, faq_title, faq_content_to_send, "
         "faq_added_utc, faq_thresholds) "
-        "VALUES (:faq_tags,:faq_questions, :author, :title, :content, :added_utc, :threshold)"
+        "VALUES (:faq_tags,:faq_questions,:faq_contexts,  :author, :title, :content, :added_utc, :threshold)"
     )
 
     insert_faq_w_weights = (
         "INSERT INTO faqmatches ("
-        "faq_tags,faq_questions, faq_author, faq_title, faq_content_to_send, "
+        "faq_tags,faq_questions,faq_contexts, faq_author, faq_title, faq_content_to_send, "
         "faq_added_utc, faq_thresholds, faq_weight) "
-        "VALUES (:faq_tags, :faq_questions,:author, :title, :content, :added_utc, "
+        "VALUES (:faq_tags, :faq_questions,:faq_contexts,:author, :title, :content, :added_utc, "
         ":threshold, :faq_weight)"
     )
+    faq_contexts = [
+        """{"code", "deploy", "maintain"}""",
+        """{"design","code","maintain"}""",
+        """{ "test","deploy"}""",
+        """{"design", "test", "deploy","maintain"}""",
+        """{"design", "code","test"}""",
+        """{"test"}""",
+    ]
 
     faq_tags = [
         """{"rock", "guitar", "melody", "chord"}""",
@@ -41,7 +49,7 @@ class TestFaqWeights:
     def faq_data_no_weights(self, client, db_engine):
         headers = {"Authorization": "Bearer %s" % os.getenv("INBOUND_CHECK_TOKEN")}
         with db_engine.connect() as db_connection:
-            t = text("DELETE FROM faqmatches " "WHERE faq_author='Pytest author'")
+            t = text("DELETE FROM faqmatches WHERE faq_author='Pytest author'")
             db_connection.execute(t)
         with db_engine.connect() as db_connection:
             inbound_sql = text(self.insert_faq_no_weights)
@@ -50,13 +58,14 @@ class TestFaqWeights:
                     inbound_sql,
                     title=f"Pytest title #{i}",
                     faq_tags=tags,
+                    faq_contexts=self.faq_contexts[i],
                     content=" ".join(tags),
                     **self.faq_other_params,
                 )
         client.get("/internal/refresh-faqs", headers=headers)
         yield
         with db_engine.connect() as db_connection:
-            t = text("DELETE FROM faqmatches " "WHERE faq_author='Pytest author'")
+            t = text("DELETE FROM faqmatches WHERE faq_author='Pytest author'")
             db_connection.execute(t)
         client.get("/internal/refresh-faqs", headers=headers)
 
@@ -78,6 +87,7 @@ class TestFaqWeights:
                     title=f"Pytest title #{i}",
                     faq_tags=tags,
                     content=" ".join(tags),
+                    faq_contexts=self.faq_contexts[i],
                     faq_weight=weight,
                     **self.faq_other_params,
                 )
@@ -93,7 +103,6 @@ class TestFaqWeights:
     ):
         weight_shares = [f.faq_weight_share for f in app_main.faqs]
         weights = [f.faq_weight for f in app_main.faqs]
-
         assert len(weights) == sum(weights)
         assert np.isclose(sum(weight_shares), 1)
 

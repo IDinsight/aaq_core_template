@@ -47,6 +47,7 @@ class FAQModel(db.Model):
     faq_questions = db.Column(db.ARRAY(db.String()), nullable=False)
     faq_thresholds = db.Column(db.ARRAY(db.Float()))
     faq_weight = db.Column(db.Integer(), nullable=False)
+    faq_contexts = db.Column(db.ARRAY(db.String()))
 
     def __repr__(self):
         """Pretty print"""
