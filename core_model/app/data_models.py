@@ -92,7 +92,7 @@ class AppConfigModel(db.Model):
     parameters = db.Column(JSONB)
 
 
-class ContextualizationConfigModel(db.Model):
+class ContextualizationModel(db.Model):
     """
     SQLAlchemy data model for FAQ
     """
