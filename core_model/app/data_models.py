@@ -56,53 +56,20 @@ class FAQModel(db.Model):
         return "<FAQ %r>" % self.faq_id
 
 
-class ConfigModel(db.Model):
-    """
-    SQLAlchemy data model for FAQ
-    """
-
-    __tablename__ = "config"
-
-    config_id = db.Column(db.Integer, primary_key=True, nullable=False)
-    version_number = db.Column(db.String(), nullable=False)
-    alias = db.Column(db.String(), nullable=False)
-    config_added_utc = db.Column(db.DateTime(), nullable=False)
-    config_updated_utc = db.Column(db.DateTime())
-    app_config_id = db.Column(db.Integer, db.ForeignKey("appconfig.app_config_id"))
-    app_config = db.relationship(
-        "AppConfigModel", backref=db.backref("config", uselist=False)
-    )
-
-    contextualization_id = db.Column(
-        db.Integer, db.ForeignKey("contextualization.contextualization_id")
-    )
-    contextualization = db.relationship(
-        "ContextualizationModel", backref=db.backref("config", uselist=False)
-    )
-
-
-class AppConfigModel(db.Model):
-    """
-    SQLAlchemy data model for FAQ
-    """
-
-    __tablename__ = "appconfig"
-
-    app_config_id = db.Column(db.Integer, primary_key=True, nullable=False)
-    parameters = db.Column(JSONB)
-
-
 class ContextualizationModel(db.Model):
     """
-    SQLAlchemy data model for FAQ
+    SQLAlchemy data model for contextualization configurations
     """
 
     __tablename__ = "contextualization"
-
     contextualization_id = db.Column(db.Integer, primary_key=True, nullable=False)
+    version_number = db.Column(db.String(), nullable=False)
+    config_added_utc = db.Column(db.DateTime(), nullable=False)
+    config_updated_utc = db.Column(db.DateTime())
     custom_wvs = db.Column(JSONB, nullable=False)
     pairwise_triplewise_entities = db.Column(JSONB, nullable=False)
     tag_guiding_typos = db.Column(JSONB, nullable=False)
+    active = db.Column(db.Boolean, default=1)
 
 
 class TemporaryModel:
