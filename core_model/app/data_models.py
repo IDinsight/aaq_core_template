@@ -63,7 +63,7 @@ class ContextualizationModel(db.Model):
 
     __tablename__ = "contextualization"
     contextualization_id = db.Column(db.Integer, primary_key=True, nullable=False)
-    version_number = db.Column(db.String(), nullable=False)
+    version_id = db.Column(db.String(), nullable=False)
     config_added_utc = db.Column(db.DateTime(), nullable=False)
     config_updated_utc = db.Column(db.DateTime())
     custom_wvs = db.Column(JSONB, nullable=False)
