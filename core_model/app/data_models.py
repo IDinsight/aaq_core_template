@@ -2,6 +2,8 @@
 Datamodels used in the app
 """
 
+from sqlalchemy.dialects.postgresql import JSONB
+
 from .database_sqlalchemy import db
 
 
@@ -52,6 +54,22 @@ class FAQModel(db.Model):
     def __repr__(self):
         """Pretty print"""
         return "<FAQ %r>" % self.faq_id
+
+
+class ContextualizationModel(db.Model):
+    """
+    SQLAlchemy data model for contextualization configurations
+    """
+
+    __tablename__ = "contextualization"
+    contextualization_id = db.Column(db.Integer, primary_key=True, nullable=False)
+    version_id = db.Column(db.String(), nullable=False)
+    config_added_utc = db.Column(db.DateTime(), nullable=False)
+    config_updated_utc = db.Column(db.DateTime())
+    custom_wvs = db.Column(JSONB, nullable=False)
+    pairwise_triplewise_entities = db.Column(JSONB, nullable=False)
+    tag_guiding_typos = db.Column(JSONB, nullable=False)
+    active = db.Column(db.Boolean, default=1)
 
 
 class TemporaryModel:
