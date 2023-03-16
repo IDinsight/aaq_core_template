@@ -102,9 +102,9 @@ class TestPerformance:
 
     insert_faq = (
         "INSERT INTO faqmatches ("
-        "faq_tags,faq_questions, faq_author, faq_title, faq_content_to_send, "
+        "faq_tags,faq_questions,faq_contexts, faq_author, faq_title, faq_content_to_send, "
         "faq_added_utc, faq_thresholds) "
-        "VALUES (:faq_tags, :faq_questions,:author, :title, :content, :added_utc, :threshold)"
+        "VALUES (:faq_tags, :faq_questions,:faq_contexts,:author, :title, :content, :added_utc, :threshold)"
     )
 
     def get_validation_data(self, test_params):
@@ -127,20 +127,30 @@ class TestPerformance:
 
         return faq_df
 
-    def submit_one_inbound(self, row, client, test_params):
+    def submit_one_inbound(self, row, client, test_params, contexts=False):
         """
         Single request to /inbound/check
         """
-        request_data = {
-            "text_to_match": str(row[test_params["QUERY_COL"]]),
-            "return_scoring": "true",
-        }
+        row["contexts"] = eval(row["contexts"]) if row["contexts"] != "[None]" else []
+        if contexts:
+            request_data = {
+                "text_to_match": str(row[test_params["QUERY_COL"]]),
+                "context": row["contexts"],
+                "return_scoring": "true",
+            }
+        else:
+            request_data = {
+                "text_to_match": str(row[test_params["QUERY_COL"]]),
+                "return_scoring": "true",
+            }
+
         headers = {"Authorization": "Bearer %s" % os.getenv("INBOUND_CHECK_TOKEN")}
         response = client.post("/inbound/check", json=request_data, headers=headers)
         top_responses = response.get_json()["top_responses"]
         top_faq_names = set(x[1] for x in top_responses)
         return row[test_params["TRUE_FAQ_COL"]] in top_faq_names
 
+    @pytest.mark.filterwarnings("ignore::UserWarning")
     @pytest.fixture(scope="class")
     def faq_data(self, client, db_engine, test_params):
 
@@ -163,6 +173,7 @@ class TestPerformance:
                     "added_utc": "2022-04-14",
                     "author": "Validation author",
                     "content": row["faq_content_to_send"],
+                    "faq_contexts": row["faq_contexts"],
                     "threshold": "{0.1, 0.1, 0.1, 0.1}",
                 }
                 for idx, row in self.faq_df.iterrows()
@@ -189,21 +200,83 @@ class TestPerformance:
         """
 
         validation_df = self.get_validation_data(test_params)
+        validation_df_addressed = validation_df.query("is_concern_addressed=='Yes'")
+        validation_df_non_addressed = validation_df.query("is_concern_addressed=='No'")
 
         def submit_one_inbound(x):
             return self.submit_one_inbound(x, client, test_params)
 
-        results = validation_df.apply(submit_one_inbound, axis=1).tolist()
-        top_k_accuracy = sum(results) / len(results)
+        results_addressed = validation_df_addressed.apply(
+            submit_one_inbound, axis=1
+        ).tolist()
+        top_k_accuracy_addressed = sum(results_addressed) / len(results_addressed)
+        content_addressed = generate_message(top_k_accuracy_addressed, test_params)
 
-        content = generate_message(top_k_accuracy, test_params)
+        results_non_addressed = validation_df_non_addressed.apply(
+            submit_one_inbound, axis=1
+        ).tolist()
+        top_k_accuracy_non_addressed = sum(results_non_addressed) / len(
+            results_non_addressed
+        )
+        content_non_addressed = generate_message(
+            top_k_accuracy_non_addressed, test_params
+        )
 
         if (os.environ.get("GITHUB_ACTIONS") == "true") & (
-            top_k_accuracy < test_params["THRESHOLD_CRITERIA"]
+            top_k_accuracy_addressed < test_params["THRESHOLD_CRITERIA"]
         ):
-            send_notification(content)
-            print(content)
-        else:
-            print(content)
+            send_notification(content_addressed)
+        print(
+            "-------------------Results for questions that were addressed ----------------"
+        )
+        print(content_addressed)
+        print(
+            "-------------------Results for questions that were NOT addressed ----------------"
+        )
+        print(content_non_addressed)
 
-        return top_k_accuracy
+        return top_k_accuracy_addressed
+
+    @pytest.mark.filterwarnings("ignore::UserWarning")
+    def test_top_k_performance_contexts(self, client, faq_data, test_params):
+        """
+        Test if top k faqs contain the true FAQ
+        """
+
+        validation_df = self.get_validation_data(test_params)
+        validation_df_addressed = validation_df.query("is_concern_addressed=='Yes'")
+        validation_df_non_addressed = validation_df.query("is_concern_addressed=='No'")
+
+        def submit_one_inbound(x):
+            return self.submit_one_inbound(x, client, test_params, True)
+
+        results_addressed = validation_df_addressed.apply(
+            submit_one_inbound, axis=1
+        ).tolist()
+        top_k_accuracy_addressed = sum(results_addressed) / len(results_addressed)
+        content_addressed = generate_message(top_k_accuracy_addressed, test_params)
+
+        results_non_addressed = validation_df_non_addressed.apply(
+            submit_one_inbound, axis=1
+        ).tolist()
+        top_k_accuracy_non_addressed = sum(results_non_addressed) / len(
+            results_non_addressed
+        )
+        content_non_addressed = generate_message(
+            top_k_accuracy_non_addressed, test_params
+        )
+
+        if (os.environ.get("GITHUB_ACTIONS") == "true") & (
+            top_k_accuracy_addressed < test_params["THRESHOLD_CRITERIA"]
+        ):
+            send_notification(content_addressed)
+        print(
+            "-------------------Results for questions that were addressed ----------------"
+        )
+        print(content_addressed)
+        print(
+            "-------------------Results for questions that were NOT addressed ----------------"
+        )
+        print(content_non_addressed)
+
+        return top_k_accuracy_addressed

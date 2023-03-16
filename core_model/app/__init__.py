@@ -202,6 +202,6 @@ def refresh_faqs(app):
     content = [faq.faq_content_to_send for faq in faqs]
     weights = [faq.faq_weight_share for faq in faqs]
     app.faqt_model.set_contents(content, weights)
-    if app.is_context_active:
-        create_contextualization(app, "context_list")
+
+    create_contextualization(app, "context_list")
     return len(faqs)

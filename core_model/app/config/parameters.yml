@@ -35,4 +35,5 @@ model_params:
       N: 5
 contextualization:
   active: True 
-  context_list: ["design", "code", "test", "deploy","maintain"]
+  context_list: ['trimester1', 'trimester2', 'trimester3', 'birth', 'newborn', '4weeks-6months', '6months-2years']
+  

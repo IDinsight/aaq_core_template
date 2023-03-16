@@ -6,6 +6,8 @@ MODEL_PROTOCOL: http
 THRESHOLD_CRITERIA: 0.5
 TRUE_FAQ_COL: "FAQ Name"
 QUERY_COL: "Question"
-VALIDATION_DATA_PREFIX: mc_validation/validation_khumo_labelled_aaq.csv
-VALIDATION_FAQ_PREFIX: mc_validation/praekelt_mc_faqs.csv
-# MATCHING_MODEL: simple_fasttext_with_faq # commented out to use matching_model from app config
+VALIDATION_DATA_PREFIX: validation_aaq/validation_khumo_labelled_phase1and2_with_dem_context_clean.csv
+VALIDATION_FAQ_PREFIX: mc_validation/praekelt_mc_faqs_trimester_tag.csv
+MATCHING_MODEL: simple_fasttext_with_faq
+CONTEXT_ACTIVE: True
+# MATCHING_MODEL: simple_fasttext_with_faq google_news_pretrained # commented out to use matching_model from app config
