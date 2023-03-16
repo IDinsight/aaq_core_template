@@ -5,6 +5,7 @@ import os
 from datetime import datetime
 
 import boto3
+import numpy as np
 import pandas as pd
 import pytest
 from nltk.corpus import stopwords
@@ -19,8 +20,8 @@ def generate_message(result, test_params):
     Warning is set to threshold criteria
     Parameters
     ----------
-    result : List[dict]
-        List of commit validation results
+    result : Dict
+        Dictionary of top k accuracies, with k as keys
     threshold_criteria : float, 0-1
         Accuracy cut-off for warnings
     """
@@ -29,7 +30,12 @@ def generate_message(result, test_params):
     dataset = test_params["VALIDATION_DATA_PREFIX"]
     model = test_params.get("MATCHING_MODEL", "same as app config")
 
-    if (os.environ.get("GITHUB_ACTIONS") == "true") & (result < threshold_criteria):
+    top_k_accuracy = result[max(result.keys())]
+    accuracy_str = "\n".join([f"Top {k}: {acc:.3f}" for k, acc in result.items()])
+
+    if (os.environ.get("GITHUB_ACTIONS") == "true") & (
+        top_k_accuracy < threshold_criteria
+    ):
 
         current_branch = os.environ.get("BRANCH_NAME")
         repo_name = os.environ.get("REPO")
@@ -37,14 +43,14 @@ def generate_message(result, test_params):
 
         val_message = (
             "[Alert] Accuracy using dataset {dataset} was:\n\n"
-            "{accuracy:.2f}\n\n"
+            "{accuracy}\n\n"
             "For commit tag = {commit_tag}\n"
             "Using model {model}\n"
             "On branch {branch}\n"
             "Repo {repo_name}\n\n"
             "The threshold criteria was {threshold_criteria}"
         ).format(
-            accuracy=result,
+            accuracy=accuracy_str,
             dataset=dataset,
             commit_tag=commit,
             model=model,
@@ -55,11 +61,11 @@ def generate_message(result, test_params):
     else:
         val_message = (
             "[Alert] Accuracy using dataset {dataset} was:\n\n"
-            "{accuracy:.2f}\n\n"
+            "{accuracy}\n\n"
             "Using model {model}\n"
             "The test threshold was {threshold_criteria}"
         ).format(
-            accuracy=result,
+            accuracy=accuracy_str,
             dataset=dataset,
             model=model,
             threshold_criteria=threshold_criteria,
@@ -114,8 +120,17 @@ class TestPerformance:
 
         prefix = test_params["VALIDATION_DATA_PREFIX"]
         validation_data = pd.read_csv("s3://" + os.path.join(self.bucket, prefix))
+        validation_data = validation_data.iloc[:3]  # TODO: delete this line
+        valid_mask = (
+            validation_data[[test_params["QUERY_COL"], test_params["TRUE_FAQ_COL"]]]
+            .notnull()
+            .all(axis=1)
+        )
 
-        return validation_data
+        for col, val in test_params["FILTER_CONDITIONS"].items():
+            valid_mask = valid_mask & (validation_data[col] == val)
+
+        return validation_data[valid_mask]
 
     def get_validation_faqs(self, test_params):
         """
@@ -138,8 +153,12 @@ class TestPerformance:
         headers = {"Authorization": "Bearer %s" % os.getenv("INBOUND_CHECK_TOKEN")}
         response = client.post("/inbound/check", json=request_data, headers=headers)
         top_responses = response.get_json()["top_responses"]
-        top_faq_names = set(x[1] for x in top_responses)
-        return row[test_params["TRUE_FAQ_COL"]] in top_faq_names
+
+        for i, res in enumerate(top_responses):
+            if row[test_params["TRUE_FAQ_COL"]] == res[1]:
+                return i + 1
+
+        return np.inf
 
     @pytest.fixture(scope="class")
     def faq_data(self, client, db_engine, test_params):
@@ -157,7 +176,7 @@ class TestPerformance:
             inbound_sql = text(self.insert_faq)
             inserts = [
                 {
-                    "title": row["faq_title"],
+                    "title": row[test_params["TRUE_FAQ_COL"]],
                     "faq_tags": row["faq_tags"],
                     "faq_questions": """{"Dummmy question 1", "Dummmy question 2", "Dummmy question 3", "Dummmy question 4","Dummmy question 5","Dummy question 6"}""",
                     "added_utc": "2022-04-14",
@@ -193,13 +212,20 @@ class TestPerformance:
         def submit_one_inbound(x):
             return self.submit_one_inbound(x, client, test_params)
 
-        results = validation_df.apply(submit_one_inbound, axis=1).tolist()
-        top_k_accuracy = sum(results) / len(results)
+        true_faq_rank = validation_df.apply(submit_one_inbound, axis=1).tolist()
+
+        top_k_accuracy = {}
+        n_top_matches = client.application.config["N_TOP_MATCHES_PER_PAGE"]
+
+        ks = [1, 3, 5, 7, 10]
+        ks = [k for k in ks if k < n_top_matches] + [n_top_matches]
+        for k in ks:
+            top_k_accuracy[k] = sum(x < k for x in true_faq_rank) / len(true_faq_rank)
 
         content = generate_message(top_k_accuracy, test_params)
 
         if (os.environ.get("GITHUB_ACTIONS") == "true") & (
-            top_k_accuracy < test_params["THRESHOLD_CRITERIA"]
+            top_k_accuracy[n_top_matches] < test_params["THRESHOLD_CRITERIA"]
         ):
             send_notification(content)
             print(content)

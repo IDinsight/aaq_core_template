@@ -4,8 +4,10 @@ PG_USERNAME: flask_test
 MODEL_PORT: 9902
 MODEL_PROTOCOL: http
 THRESHOLD_CRITERIA: 0.5
-TRUE_FAQ_COL: "FAQ Name"
-QUERY_COL: "Question"
-VALIDATION_DATA_PREFIX: mc_validation/validation_khumo_labelled_aaq.csv
-VALIDATION_FAQ_PREFIX: mc_validation/praekelt_mc_faqs.csv
+TRUE_FAQ_COL: "faq_name"
+QUERY_COL: "question"
+FILTER_CONDITIONS:
+  correct_answer: "Yes"
+VALIDATION_DATA_PREFIX: experiment/data/mc/mc_openai_validation.csv
+VALIDATION_FAQ_PREFIX: experiment/data/mc/mc_openai_faqs.csv
 # MATCHING_MODEL: simple_fasttext_with_faq # commented out to use matching_model from app config
