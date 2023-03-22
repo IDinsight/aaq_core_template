@@ -5,7 +5,7 @@ import sqlalchemy
 import yaml
 from sqlalchemy.pool import NullPool
 
-from core_model.app import create_app, get_config_data
+from core_model.app import create_app, get_config_data, init_faqt_model
 from core_model.app.main import inbound
 
 
@@ -34,6 +34,7 @@ def test_params():
 @pytest.fixture(scope="session")
 def app_main(test_params, patch_inbound_db):
     app = create_app(test_params)
+    init_faqt_model(app)
     return app
 
 

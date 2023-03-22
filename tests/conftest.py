@@ -6,7 +6,7 @@ import yaml
 from sqlalchemy import text
 
 from core_model import app
-from core_model.app import create_app, get_config_data, load_embeddings
+from core_model.app import create_app, get_config_data, init_faqt_model, load_embeddings
 
 
 @pytest.fixture(
@@ -48,6 +48,7 @@ def patchbinary(monkeysession, embedding_bin):
 @pytest.fixture(scope="session")
 def app_main(test_params, patchbinary):
     app = create_app(test_params)
+    init_faqt_model(app)
     return app
 
 
@@ -67,6 +68,7 @@ def client(app_main):
 @pytest.fixture(scope="session")
 def app_weight(test_params, patchbinary):
     app = create_app(test_params)
+    init_faqt_model(app)
     return app
 
 
@@ -81,6 +83,7 @@ def client_weight(app_weight):
 def app_context(test_params, patchbinary):
     test_params["CONTEXT_ACTIVE"] = True
     app = create_app(test_params)
+    init_faqt_model(app)
     return app
 
 
