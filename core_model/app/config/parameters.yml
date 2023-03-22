@@ -10,7 +10,7 @@ preprocessing:
 faq_match:
   N_TOP_MATCHES_PER_PAGE: 5
 matching_model:
-  simple_fasttext_with_faq # google_news_pretrained # simple_fasttext_with_faq
+  google_news_pretrained # google_news_pretrained # simple_fasttext_with_faq
 model_params:
   # Params for model to be used. Each key should be a key in `data_sources.yml`
   google_news_pretrained:
