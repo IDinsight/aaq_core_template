@@ -130,7 +130,6 @@ def load_custom_wvs():
     """
     Load custom Word2vec embeddings
     """
-
     custom_wv_file = Path(__file__).parents[1] / "contextualization/custom_wvs.yml"
 
     with open(custom_wv_file) as file:
