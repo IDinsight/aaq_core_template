@@ -12,6 +12,8 @@ import yaml
 from gensim.models import KeyedVectors
 from gensim.models.fasttext import load_facebook_vectors
 
+from ..data_models import ContextualizationModel
+
 
 def load_fasttext(folder, filename):
     """Load fasttext word embedding"""
@@ -111,45 +113,6 @@ def load_parameters(key=None):
     return params
 
 
-def load_pairwise_entities():
-    """
-    Load pairwise entities to conform to Google News model n-grams
-    E.g., (african, union) => "African_Union"
-    """
-    entities_file = (
-        Path(__file__).parents[1] / "contextualization/pairwise_triplewise_entities.yml"
-    )
-
-    with open(entities_file) as file:
-        entities = yaml.full_load(file)
-
-    return entities
-
-
-def load_custom_wvs():
-    """
-    Load custom Word2vec embeddings
-    """
-    custom_wv_file = Path(__file__).parents[1] / "contextualization/custom_wvs.yml"
-
-    with open(custom_wv_file) as file:
-        custom_wv = yaml.full_load(file)
-
-    return custom_wv
-
-
-def load_tags_guiding_typos():
-    """
-    Load tags that guide Hunspell correction
-    """
-    tags_file = Path(__file__).parents[1] / "contextualization/tags_guiding_typos.yml"
-
-    with open(tags_file) as file:
-        tags_guiding_typos = yaml.full_load(file)
-
-    return tags_guiding_typos
-
-
 def load_generic_dataset(data_source_name):
     """
     Load any dataset using the data_sources.yml name
@@ -217,3 +180,11 @@ class DefaultEnvDict(UserDict):
         if value is None:
             raise KeyError(f"{key} not found in dict or environment variables")
         return os.getenv(key)
+
+
+def load_lang_ctx(app):
+    """Get language contextualization config from database"""
+    with app.app_context():
+        lang_ctx = ContextualizationModel.query.filter_by(active=True).first()
+
+    return lang_ctx

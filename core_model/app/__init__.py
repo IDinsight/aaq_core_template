@@ -12,18 +12,16 @@ from faqt.model.faq_matching.contextualization import (
 from flask import Flask
 from hunspell import Hunspell
 
-from .data_models import ContextualizationModel, FAQModel
+from .data_models import FAQModel
 from .database_sqlalchemy import db, migrate
 from .prometheus_metrics import metrics
 from .src.faq_weights import add_faq_weight_share
 from .src.utils import (
     DefaultEnvDict,
     get_postgres_uri,
-    load_custom_wvs,
     load_data_sources,
-    load_pairwise_entities,
+    load_lang_ctx,
     load_parameters,
-    load_tags_guiding_typos,
     load_word_embeddings_bin,
 )
 
@@ -75,7 +73,7 @@ def setup(app, params):
     metrics.init_app(app)
     migrate.init_app(app, db)
 
-    app.is_context_active = config["CONTEXT_ACTIVE"]
+    app.is_context_active = app.config["CONTEXT_ACTIVE"]
 
 
 def get_config_data(params):
@@ -207,11 +205,3 @@ def refresh_faqs(app):
     if app.is_context_active:
         create_contextualization(app, "context_list")
     return len(faqs)
-
-
-def load_lang_ctx(app):
-    """Get language contextualization config from database"""
-    with app.app_context():
-        lang_ctx = ContextualizationModel.query.filter_by(active=True).first()
-
-    return lang_ctx
