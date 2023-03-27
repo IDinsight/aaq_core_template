@@ -164,14 +164,13 @@ def init_faqt_model(app):
     return lang_ctx.version_id
 
 
-def get_text_preprocessor(pairwise_triplewise_entities):
+def get_text_preprocessor(pairwise_entities):
     """
     Return a partial function that takes one argument - the raw function
     to be processed.
     """
 
     pp_params = load_parameters("preprocessing")
-    pairwise_entities = pairwise_triplewise_entities
     n_min_dashed_words_url = pp_params["min_dashed_words_to_parse_text_from_url"]
     reincluded_stop_words = pp_params["reincluded_stop_words"]
 
