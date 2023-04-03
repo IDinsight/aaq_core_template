@@ -19,11 +19,9 @@ from .src.faq_weights import add_faq_weight_share
 from .src.utils import (
     DefaultEnvDict,
     get_postgres_uri,
-    load_custom_wvs,
     load_data_sources,
-    load_pairwise_entities,
+    load_lang_ctx,
     load_parameters,
-    load_tags_guiding_typos,
     load_word_embeddings_bin,
 )
 
@@ -75,8 +73,7 @@ def setup(app, params):
     metrics.init_app(app)
     migrate.init_app(app, db)
 
-    app.faqt_model = create_faqt_model(config)
-    app.is_context_active = config["CONTEXT_ACTIVE"]
+    app.is_context_active = app.config["CONTEXT_ACTIVE"]
 
 
 def get_config_data(params):
@@ -108,6 +105,7 @@ def get_config_data(params):
 
 
 def create_contextualization(app, context_list):
+    """Create demographic contextualization object"""
     contexts = load_parameters("contextualization")[context_list]
     distance_matrix = get_ordered_distance_matrix(contexts)
     faq_contexts = {
@@ -141,37 +139,38 @@ def load_embeddings(name_of_model_in_data_source):
     return word_embedding_model
 
 
-def create_faqt_model(config):
+def init_faqt_model(app):
     """
-    Create a new instance of the faqt class.
+    Create a new instance of the faqt model.
     """
 
-    gensim_keyed_vector = load_embeddings(config["MATCHING_MODEL"])
-    custom_wvs = load_custom_wvs()
-    tags_guiding_typos = load_tags_guiding_typos()
+    gensim_keyed_vector = load_embeddings(app.config["MATCHING_MODEL"])
+    lang_ctx = load_lang_ctx(app)
+    custom_wvs = lang_ctx.custom_wvs
+    tags_guiding_typos = lang_ctx.tag_guiding_typos
     hunspell = Hunspell()
 
-    params = config["MODEL_PARAMS"]
+    params = app.config["MODEL_PARAMS"]
 
-    return WMDScorer(
+    app.faqt_model = WMDScorer(
         gensim_keyed_vector,
-        tokenizer=get_text_preprocessor(),
+        tokenizer=get_text_preprocessor(lang_ctx.pairwise_triplewise_entities),
         weighting_method=params["weighting_method"],
         weighting_kwargs=params["weighting_kwargs"],
         glossary=custom_wvs,
         hunspell=hunspell,
         tags_guiding_typos=tags_guiding_typos,
     )
+    return lang_ctx.version_id
 
 
-def get_text_preprocessor():
+def get_text_preprocessor(pairwise_entities):
     """
     Return a partial function that takes one argument - the raw function
     to be processed.
     """
 
     pp_params = load_parameters("preprocessing")
-    pairwise_entities = load_pairwise_entities()
     n_min_dashed_words_url = pp_params["min_dashed_words_to_parse_text_from_url"]
     reincluded_stop_words = pp_params["reincluded_stop_words"]
 
