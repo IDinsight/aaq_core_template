@@ -440,7 +440,9 @@ def get_top_n_matches(scoring, n_top_matches, start_idx=0):
 
     for faq_id in sorted_scoring[start_idx : start_idx + n_top_matches]:
         content = [
-            faq.faq_content_to_send for faq in current_app.faqs if faq.faq_id == faq_id
+            faq.faq_content_to_send
+            for faq in current_app.faqs
+            if faq.faq_id == int(faq_id)
         ][0]
 
         top_matches_list.append(
