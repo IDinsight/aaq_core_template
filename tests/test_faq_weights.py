@@ -127,7 +127,7 @@ class TestFaqWeights:
         json_data = response.get_json()
 
         scores = []
-        for faq_id, details in json_data["scoring"].items():
+        for _, details in json_data["scoring"].items():
             if isinstance(details, dict):
                 scores.append(float(details["overall_score"]))
         score_ranks = np.argsort(scores)
@@ -146,7 +146,7 @@ class TestFaqWeights:
         json_data = response.get_json()
 
         scores = []
-        for faq_id, details in json_data["scoring"].items():
+        for _, details in json_data["scoring"].items():
             if isinstance(details, dict):
                 scores.append(float(details["overall_score"]))
         score_ranks = np.argsort(scores)

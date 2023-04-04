@@ -88,6 +88,7 @@ class InboundCheck(Resource):
             return_scoring = (return_scoring is True) or (return_scoring == "true")
         else:
             return_scoring = False
+
         if (
             "context" in incoming
             and len(incoming["context"]) > 0
@@ -323,6 +324,7 @@ def prepare_scoring_as_json(faqs, overall_scores, tag_scores):
     for i, faq in enumerate(faqs):
         scoring_output[faq.faq_id]["overall_score"] = str(overall_scores[i])
         scoring_output[faq.faq_id]["faq_title"] = faq.faq_title
+        scoring_output[faq.faq_id]["faq_content_to_send"] = faq.content_to_send
         scoring_output[faq.faq_id]["rank"] = str(ranks[i])
         # Convert scoring[faq.faq_id] to have string values (to save in DB as JSON)
 
@@ -385,7 +387,7 @@ def prepare_return_json(scoring_output, keys, return_scoring, page_number):
     keys: Dict
         A dictionary of secret keys
     return_scoring: bool
-        If scoring should be send back in the JSON response
+        If scoring should be sent back in the JSON response
     page_number: Int
         The page number to return
 
@@ -395,6 +397,7 @@ def prepare_return_json(scoring_output, keys, return_scoring, page_number):
         With spell_correct
     """
     items_per_page = current_app.config["N_TOP_MATCHES_PER_PAGE"]
+
     if page_number < 1:
         top_matches_list = []
     else:
@@ -432,26 +435,23 @@ def get_top_n_matches(scoring, n_top_matches, start_idx=0):
     List[Tuple(str, str, str)]
         A list of tuples of (faq_id, faq_content_to_send, faq_title).
     """
-    matched_faq_ids = set()
     # Sort and copy over top matches
     top_matches_list = []
-    sorted_scoring = sorted(
-        scoring, key=lambda x: float(scoring[x]["overall_score"]), reverse=True
-    )
+    sorted_scoring = sorted(scoring, key=lambda x: int(scoring[x]["rank"]))
 
-    for faq_id in sorted_scoring[start_idx:]:
-        if faq_id not in matched_faq_ids:
-            top_matches_list.append(
-                (
-                    str(faq_id),
-                    scoring[faq_id]["faq_title"],
-                    scoring[faq_id]["faq_content_to_send"],
-                )
+    for faq_id in sorted_scoring[start_idx : start_idx + n_top_matches]:
+        content = [
+            faq.content_to_send for faq in current_app.faqs if faq.faq_id == faq_id
+        ][0]
+
+        top_matches_list.append(
+            (
+                str(faq_id),
+                scoring[faq_id]["faq_title"],
+                content,
             )
-            matched_faq_ids.add(faq_id)
+        )
 
-        if len(matched_faq_ids) == n_top_matches:
-            break
     return top_matches_list
 
 
