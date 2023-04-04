@@ -324,7 +324,6 @@ def prepare_scoring_as_json(faqs, overall_scores, tag_scores):
     for i, faq in enumerate(faqs):
         scoring_output[faq.faq_id]["overall_score"] = str(overall_scores[i])
         scoring_output[faq.faq_id]["faq_title"] = faq.faq_title
-        scoring_output[faq.faq_id]["faq_content_to_send"] = faq.content_to_send
         scoring_output[faq.faq_id]["rank"] = str(ranks[i])
         # Convert scoring[faq.faq_id] to have string values (to save in DB as JSON)
 
