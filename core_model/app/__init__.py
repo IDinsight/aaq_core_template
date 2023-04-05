@@ -109,7 +109,8 @@ def create_contextualization(app, context_list):
     contexts = load_parameters("contextualization")[context_list]
     distance_matrix = get_ordered_distance_matrix(contexts)
     faq_contexts = {
-        faq.faq_id: faq.faq_contexts for faq in app.faqs if faq.faq_contexts is not None
+        faq.faq_id: faq.faq_contexts if faq.faq_contexts is not None else contexts
+        for faq in app.faqs
     }
     app.contextualizer = Contextualization(
         contents_dict=faq_contexts, distance_matrix=distance_matrix
