@@ -20,7 +20,7 @@ from .src.utils import (
     DefaultEnvDict,
     get_postgres_uri,
     load_data_sources,
-    load_lang_ctx,
+    load_language_context,
     load_parameters,
     load_word_embeddings_bin,
 )
@@ -145,23 +145,23 @@ def init_faqt_model(app):
     """
 
     gensim_keyed_vector = load_embeddings(app.config["MATCHING_MODEL"])
-    lang_ctx = load_lang_ctx(app)
-    custom_wvs = lang_ctx.custom_wvs
-    tags_guiding_typos = lang_ctx.tag_guiding_typos
+    language_context = load_language_context(app)
+    custom_wvs = language_context.custom_wvs
+    tags_guiding_typos = language_context.tag_guiding_typos
     hunspell = Hunspell()
 
     params = app.config["MODEL_PARAMS"]
 
     app.faqt_model = WMDScorer(
         gensim_keyed_vector,
-        tokenizer=get_text_preprocessor(lang_ctx.pairwise_triplewise_entities),
+        tokenizer=get_text_preprocessor(language_context.pairwise_triplewise_entities),
         weighting_method=params["weighting_method"],
         weighting_kwargs=params["weighting_kwargs"],
         glossary=custom_wvs,
         hunspell=hunspell,
         tags_guiding_typos=tags_guiding_typos,
     )
-    return lang_ctx.version_id
+    return language_context.version_id
 
 
 def get_text_preprocessor(pairwise_entities):
