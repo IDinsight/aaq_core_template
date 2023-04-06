@@ -17,5 +17,7 @@ QUERY_COL: "question"
 VALIDATION_DATA_PREFIX: experiment/data/mc/mc_openai_validation.csv
 VALIDATION_FAQ_PREFIX: experiment/data/mc/mc_openai_faqs.csv
 MATCHING_MODEL: simple_fasttext_with_faq
-CONTEXT_ACTIVE: False
 # MATCHING_MODEL: simple_fasttext_with_faq google_news_pretrained # commented out to use matching_model from app config
+contextualization:
+  active: False 
+  context_list: ['trimester1', 'trimester2', 'trimester3', 'birth', 'newborn', '4weeks-6months', '6months-2years']
