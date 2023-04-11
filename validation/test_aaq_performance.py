@@ -142,7 +142,7 @@ class TestPerformance:
             "return_scoring": "true",
         }
 
-        if test_params["CONTEXT_ACTIVE"]:
+        if test_params["contextualization"]["active"]:
             user_contexts = eval(row["contexts"]) if row["contexts"] != "[None]" else []
             request_data["context"] = user_contexts
 
@@ -190,7 +190,7 @@ class TestPerformance:
                 faq_contexts="{" + ",".join(client.application.context_list) + "}",
             )
 
-            if test_params["CONTEXT_ACTIVE"]:
+            if test_params["contextualization"]["active"]:
                 rename_map[column_map["faq_contexts"]] = "faq_contexts"
                 del assign_map["faq_contexts"]
 
