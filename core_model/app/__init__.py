@@ -146,22 +146,22 @@ def init_faqt_model(app):
 
     gensim_keyed_vector = load_embeddings(app.config["MATCHING_MODEL"])
     language_context = load_language_context(app)
-    custom_wvs = language_context.custom_wvs
-    tags_guiding_typos = language_context.tag_guiding_typos
+    custom_wvs = language_context.custom_wvs if language_context else {}
+    pairwise = language_context.pairwise_triplewise_entities if language_context else {}
+    tags_guiding_typos = language_context.tag_guiding_typos if language_context else {}
     hunspell = Hunspell()
 
     params = app.config["MODEL_PARAMS"]
 
     app.faqt_model = WMDScorer(
         gensim_keyed_vector,
-        tokenizer=get_text_preprocessor(language_context.pairwise_triplewise_entities),
+        tokenizer=get_text_preprocessor(pairwise),
         weighting_method=params["weighting_method"],
         weighting_kwargs=params["weighting_kwargs"],
         glossary=custom_wvs,
         hunspell=hunspell,
         tags_guiding_typos=tags_guiding_typos,
     )
-    return language_context.version_id
 
 
 def get_text_preprocessor(pairwise_entities):
