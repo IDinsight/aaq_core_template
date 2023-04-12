@@ -56,7 +56,7 @@ class FAQModel(db.Model):
         return "<FAQ %r>" % self.faq_id
 
 
-class ContextualizationModel(db.Model):
+class LanguageContextModel(db.Model):
     """
     SQLAlchemy data model for contextualization configurations
     """

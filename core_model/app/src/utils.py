@@ -12,7 +12,7 @@ import yaml
 from gensim.models import KeyedVectors
 from gensim.models.fasttext import load_facebook_vectors
 
-from ..data_models import ContextualizationModel
+from ..data_models import LanguageContextModel
 
 
 def load_fasttext(folder, filename):
@@ -182,9 +182,9 @@ class DefaultEnvDict(UserDict):
         return os.getenv(key)
 
 
-def load_lang_ctx(app):
+def load_language_context(app):
     """Get language contextualization config from database"""
     with app.app_context():
-        lang_ctx = ContextualizationModel.query.filter_by(active=True).first()
+        language_context = LanguageContextModel.query.filter_by(active=True).first()
 
-    return lang_ctx
+    return language_context

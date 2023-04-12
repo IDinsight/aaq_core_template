@@ -47,7 +47,7 @@ jobs:
           nltk.download('punkt')
           EOF`
           python -c "$nltkdownload"
-          pip install git+https://${{ env.GH_TOKEN_MACHINE_USER }}@github.com/IDinsight/faqt.git@v1.1.0
+          pip install git+https://${{ env.GH_TOKEN_MACHINE_USER }}@github.com/IDinsight/faqt.git@v1.1.1
 
       - name: Run Unit Tests
         env:
