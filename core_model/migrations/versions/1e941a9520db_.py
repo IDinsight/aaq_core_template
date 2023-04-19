@@ -45,9 +45,15 @@ def upgrade():
         [
             {
                 "version_id": "f56ce629f5c4e81c",
-                "custom_wvs": {},
-                "pairwise_triplewise_entities": {},
-                "tag_guiding_typos": {},
+                "custom_wvs": {
+                    "coronavirus": {"virus": 0.8, "pandemic": 0.2},
+                    "covid": {"virus": 0.8, "pandemic": 0.2},
+                },
+                "pairwise_triplewise_entities": {
+                    "(second, dose)": "second_dose",
+                    "(side, effect)": "side_effects",
+                },
+                "tag_guiding_typos": ["immunity", "vaccination"],
                 "config_added_utc": datetime.now(),
                 "active": True,
             },
