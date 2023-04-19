@@ -26,4 +26,4 @@ def edit_language_context():
     )
     current_app.faqt_model.set_tags_guiding_typos(language_context.tag_guiding_typos)
 
-    return "Language context successfully edited"
+    return language_context.version_id
