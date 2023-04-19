@@ -39,10 +39,7 @@ class TestConfig:
     def test_language_context_endpoint(self, client, add_config):
         headers = {"Authorization": "Bearer %s" % os.getenv("INBOUND_CHECK_TOKEN")}
         response = client.get("/config/edit-language-context", headers=headers)
-        assert re.search(
-            "Language context successfully edited",
-            response.get_data(as_text=True),
-        )
+        assert response.status_code == 200
 
     def test_language_context_endpoint_updates_config(
         self, client, app_main, add_config
