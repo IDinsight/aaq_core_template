@@ -21,14 +21,14 @@ class TestConfig:
         "tags": """["side","sneeze","teeth","test", "vaccine"]""",
     }
 
-    @pytest.fixture(scope="class")
+    @pytest.fixture(scope="function")
     def add_config(self, db_engine):
         with db_engine.connect() as db_connection:
             inbound_sql = text(self.insert_query)
             db_connection.execute(
                 inbound_sql,
                 date_added=datetime.now(),
-                version_id=secrets.token_hex(8),
+                version_id="pytest_config",
                 active=True,
                 **self.config_params,
             )
@@ -39,10 +39,7 @@ class TestConfig:
     def test_language_context_endpoint(self, client, add_config):
         headers = {"Authorization": "Bearer %s" % os.getenv("INBOUND_CHECK_TOKEN")}
         response = client.get("/config/edit-language-context", headers=headers)
-        assert re.search(
-            "Language context successfully edited",
-            response.get_data(as_text=True),
-        )
+        assert response.get_data(as_text=True) == "pytest_config"
 
     def test_language_context_endpoint_updates_config(
         self, client, app_main, add_config
