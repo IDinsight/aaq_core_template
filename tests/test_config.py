@@ -21,7 +21,7 @@ class TestConfig:
         "tags": """["side","sneeze","teeth","test", "vaccine"]""",
     }
 
-    @pytest.fixture(scope="class")
+    @pytest.fixture(scope="function")
     def add_config(self, db_engine):
         with db_engine.connect() as db_connection:
             inbound_sql = text(self.insert_query)
