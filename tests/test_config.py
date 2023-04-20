@@ -22,7 +22,7 @@ class TestConfig:
     }
 
     @pytest.fixture(scope="function")
-    def add_config(self, db_engine):
+    def add_config(self, db_engine, client):
         with db_engine.connect() as db_connection:
             inbound_sql = text(self.insert_query)
             db_connection.execute(
@@ -35,6 +35,8 @@ class TestConfig:
         yield
         with db_engine.connect() as db_connection:
             db_connection.execute("DELETE FROM contextualization")
+            headers = {"Authorization": "Bearer %s" % os.getenv("INBOUND_CHECK_TOKEN")}
+            client.get("/config/edit-language-context", headers=headers)
 
     def test_language_context_endpoint(self, client, add_config):
         headers = {"Authorization": "Bearer %s" % os.getenv("INBOUND_CHECK_TOKEN")}
