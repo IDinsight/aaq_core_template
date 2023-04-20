@@ -149,7 +149,7 @@ def init_faqt_model(app):
     language_context = load_language_context(app)
     custom_wvs = language_context.custom_wvs if language_context else {}
     pairwise = language_context.pairwise_triplewise_entities if language_context else {}
-    tags_guiding_typos = language_context.tag_guiding_typos if language_context else {}
+    tags_guiding_typos = language_context.tag_guiding_typos if language_context else []
     hunspell = Hunspell()
 
     params = app.config["MODEL_PARAMS"]
