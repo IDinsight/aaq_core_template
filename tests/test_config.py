@@ -49,9 +49,12 @@ class TestConfig:
     ):
         custom_wvs = eval(self.config_params["custom_wvs"])
         tags = eval(self.config_params["tags"])
+
+        assert custom_wvs != app_main.faqt_model.glossary
+        assert tags != app_main.faqt_model.tags_guiding_typos
+
         headers = {"Authorization": "Bearer %s" % os.getenv("INBOUND_CHECK_TOKEN")}
-        response = client.get("/config/edit-language-context", headers=headers)
+        client.get("/config/edit-language-context", headers=headers)
 
         assert custom_wvs == app_main.faqt_model.glossary
-
         assert tags == app_main.faqt_model.tags_guiding_typos
