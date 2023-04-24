@@ -19,8 +19,7 @@ TRUE_FAQ_FILTER_CONDITIONS:
 QUERY_COL: "Question"
 VALIDATION_DATA_PREFIX: validation_aaq/validation_khumo_labelled_phase1and2_with_dem_context_clean.csv
 VALIDATION_FAQ_PREFIX: mc_validation/praekelt_mc_faqs_trimester_tag.csv
-MATCHING_MODEL: simple_fasttext_with_faq
-# MATCHING_MODEL: simple_fasttext_with_faq google_news_pretrained # commented out to use matching_model from app config
+MATCHING_MODEL: simple_fasttext_with_faq  # google_news_pretrained
 contextualization:
   active: false
   context_list: ['trimester1', 'trimester2', 'trimester3', 'birth', 'newborn', '4weeks-6months', '6months-2years']
