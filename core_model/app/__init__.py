@@ -18,6 +18,7 @@ from .prometheus_metrics import metrics
 from .src.faq_weights import add_faq_weight_share
 from .src.utils import (
     DefaultEnvDict,
+    deep_update,
     get_postgres_uri,
     load_data_sources,
     load_language_context,
@@ -26,12 +27,12 @@ from .src.utils import (
 )
 
 
-def create_app(params=None):
+def create_app(override_params=None):
     """
     Factory to create a new flask app instance
     """
     app = Flask(__name__)
-    setup(app, params)
+    setup(app, override_params)
 
     from .main import main as main_blueprint
 
@@ -40,7 +41,7 @@ def create_app(params=None):
     return app
 
 
-def setup(app, params):
+def setup(app, override_params):
     """
     Add config to app and initialise extensions.
 
@@ -48,14 +49,14 @@ def setup(app, params):
     ----------
     app : Flask app
         A newly created flask app
-    params : Dict
+    override_params : Dict
         A dictionary with config parameters
     """
 
-    if params is None:
-        params = {}
+    if override_params is None:
+        override_params = {}
 
-    config = get_config_data(params)
+    config = get_config_data(override_params)
 
     app.config.from_mapping(
         JSON_SORT_KEYS=False,
@@ -76,22 +77,28 @@ def setup(app, params):
     app.is_context_active = app.config["CONTEXT_ACTIVE"]
 
 
-def get_config_data(params):
+def get_config_data(override_params):
     """
-    If parameter exists in `params` use that else use env variables.
+    Loads parameters from `parameters.yaml` and updates with values
+    in `override_params` if any.
+
+    Returns a `DefaultEnvDict` which looks for the key in environment variables
+    if not found in the dictionary.
     """
+
+    parameters = load_parameters()
+    parameters = deep_update(parameters, override_params)
 
     config = DefaultEnvDict()
 
-    config["PREPROCESSING_PARAMS"] = load_parameters("preprocessing")
+    config["PREPROCESSING_PARAMS"] = parameters["preprocessing"]
     # saved for reference
-    model_name = load_parameters("matching_model")
-    config["MODEL_PARAMS"] = load_parameters("model_params")[model_name]
+    model_name = parameters["matching_model"]
+    config["MODEL_PARAMS"] = parameters["model_params"][model_name]
     config["MATCHING_MODEL"] = model_name
-    config["CONTEXT_ACTIVE"] = load_parameters("contextualization")["active"]
-    faq_matching_config = load_parameters("faq_match")
+    config["CONTEXT_ACTIVE"] = parameters["contextualization"]["active"]
+    faq_matching_config = parameters["faq_match"]
     config.update(faq_matching_config)
-    config.update(params)
 
     config["SQLALCHEMY_DATABASE_URI"] = get_postgres_uri(
         config["PG_ENDPOINT"],

@@ -3,6 +3,7 @@ flake8==3.9.0
 isort==5.8.0
 pre-commit==2.11.1
 pytest==6.2.2
+pytest-dotenv==0.5.2
 boto3==1.24.25
 coverage==6.3.2
 fsspec[s3]==2022.3.0

@@ -16,3 +16,4 @@ filterwarnings = [
     "ignore::DeprecationWarning",
     "ignore::ResourceWarning"
 ]
+env_files = ["tests/configs/env.vars"]
