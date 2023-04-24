@@ -75,6 +75,7 @@ def setup(app, override_params):
     migrate.init_app(app, db)
 
     app.is_context_active = app.config["CONTEXT_ACTIVE"]
+    app.context_list = app.config["CONTEXT_LIST"]
 
 
 def get_config_data(override_params):
@@ -97,6 +98,8 @@ def get_config_data(override_params):
     config["MODEL_PARAMS"] = parameters["model_params"][model_name]
     config["MATCHING_MODEL"] = model_name
     config["CONTEXT_ACTIVE"] = parameters["contextualization"]["active"]
+    config["CONTEXT_LIST"] = parameters["contextualization"]["context_list"]
+
     faq_matching_config = parameters["faq_match"]
     config.update(faq_matching_config)
 
@@ -111,9 +114,9 @@ def get_config_data(override_params):
     return config
 
 
-def create_contextualization(app, context_list):
+def create_contextualization(app):
     """Create demographic contextualization object"""
-    contexts = load_parameters("contextualization")[context_list]
+    contexts = app.context_list
     distance_matrix = get_ordered_distance_matrix(contexts)
     faq_contexts = {
         faq.faq_id: faq.faq_contexts if faq.faq_contexts is not None else contexts
@@ -122,7 +125,6 @@ def create_contextualization(app, context_list):
     app.contextualizer = Contextualization(
         contents_dict=faq_contexts, distance_matrix=distance_matrix
     )
-    app.context_list = contexts
 
 
 def load_embeddings(name_of_model_in_data_source):
@@ -210,5 +212,5 @@ def refresh_faqs(app):
     weights = [faq.faq_weight_share for faq in faqs]
     app.faqt_model.set_contents(content, weights)
     if app.is_context_active:
-        create_contextualization(app, "context_list")
+        create_contextualization(app)
     return len(faqs)
