@@ -6,7 +6,13 @@ import yaml
 from sqlalchemy import text
 
 from core_model import app
-from core_model.app import create_app, get_config_data, init_faqt_model, load_embeddings
+from core_model.app import (
+    create_app,
+    get_config_data,
+    init_faqt_model,
+    load_embeddings,
+    refresh_faqs,
+)
 
 
 @pytest.fixture(
@@ -49,6 +55,7 @@ def patchbinary(monkeysession, embedding_bin):
 def app_main(test_params, patchbinary):
     app = create_app(test_params)
     init_faqt_model(app)
+    refresh_faqs(app)
     return app
 
 

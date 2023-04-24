@@ -5,19 +5,22 @@ MODEL_PORT: 9902
 MODEL_PROTOCOL: http
 THRESHOLD_CRITERIA: 0.5
 FAQ_COLUMN_MAP:
-  faq_title: faq_name
+  faq_title: faq_title
   faq_tags: faq_tags
   faq_content_to_send: faq_content_to_send
   faq_contexts: faq_contexts
+VALIDATION_DATA_COLUMN_MAP:
+  faq_title: FAQ Name
+  question: Question
 TRUE_FAQ_FILTER_CONDITIONS:  
   # Column values to filter validation rows with FAQs that answered user questions
   correct_answer: "Yes"
   # "is_concern_addressed": "Yes"
-QUERY_COL: "question"
-VALIDATION_DATA_PREFIX: experiment/data/mc/mc_openai_validation.csv
-VALIDATION_FAQ_PREFIX: experiment/data/mc/mc_openai_faqs.csv
+QUERY_COL: "Question"
+VALIDATION_DATA_PREFIX: validation_aaq/validation_khumo_labelled_phase1and2_with_dem_context_clean.csv
+VALIDATION_FAQ_PREFIX: mc_validation/praekelt_mc_faqs_trimester_tag.csv
 MATCHING_MODEL: simple_fasttext_with_faq
 # MATCHING_MODEL: simple_fasttext_with_faq google_news_pretrained # commented out to use matching_model from app config
 contextualization:
-  active: False 
+  active: false
   context_list: ['trimester1', 'trimester2', 'trimester3', 'birth', 'newborn', '4weeks-6months', '6months-2years']

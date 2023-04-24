@@ -27,7 +27,6 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
       
-      # --------------- Comment out if using Github Actions Secrets ----------------- #
       - name: Get AWS secrets
         uses: aws-actions/aws-secretsmanager-get-secrets@v1
         with:
@@ -78,51 +77,7 @@ jobs:
         run: |
           # for testing
           python -m pytest validation
-      # ----------------------------------------------------------------------------- #
 
-      # ----------------- Uncomment if using Github Actions Secrets ----------------- #
-      # - name: Install Python libraries
-      #   run: |
-      #     pip install -r requirements.txt
-      #     pip install -r requirements_github_actions.txt
-      #     nltkdownload=`cat <<EOF
-      #     import nltk
-      #     nltk.download('stopwords')
-      #     nltk.download('punkt')
-      #     EOF`
-      #     python -c "$nltkdownload"
-      #     pip install git+https://${{ secrets.TOKEN_MACHINE_USER }}@github.com/IDinsight/faqt.git@v1.0.2
-      #
-      # - name: Run Unit Tests
-      #   env:
-      #     PG_ENDPOINT: ${{secrets.PG_ENDPOINT}}
-      #     PG_PASSWORD: ${{secrets.PG_PASSWORD}}
-      #     INBOUND_CHECK_TOKEN: ${{secrets.INBOUND_CHECK_TOKEN}}
-      #     WORD2VEC_BINARY_BUCKET: ${{secrets.WORD2VEC_BINARY_BUCKET}}
-      #     PROMETHEUS_MULTIPROC_DIR: /tmp
-      #   run: |
-      #     coverage run -m pytest tests -m "not extended" --durations=0
-      #     coverage lcov --include="core_model/*"
-      # - name: Run Validation Tests
-      #   env:
-      #     VALIDATION_BUCKET: ${{secrets.VALIDATION_BUCKET}}
-      #     VALIDATION_DATA_PREFIX: ${{secrets.VALIDATION_DATA_PREFIX}}
-      #     VALIDATION_FAQ_PREFIX: ${{secrets.VALIDATION_FAQ_PREFIX}}
-      #     REPO: ${{ github.repository }}
-      #     BRANCH_NAME: ${{ github.head_ref || github.ref_name }} 
-      #     HASH: ${{ github.sha }}
-      #     REF: ${{ github.ref }}
-      #     PROMETHEUS_MULTIPROC_DIR: /tmp
-      #     PG_ENDPOINT: ${{secrets.PG_ENDPOINT}}
-      #     PG_PASSWORD: ${{secrets.PG_PASSWORD}}
-      #     INBOUND_CHECK_TOKEN: ${{secrets.INBOUND_CHECK_TOKEN}}
-      #     WORD2VEC_BINARY_BUCKET: ${{secrets.WORD2VEC_BINARY_BUCKET}}
-      #   if: "${{ (env.VALIDATION_BUCKET != '') && (env.VALIDATION_DATA_PREFIX != '') && (env.VALIDATION_FAQ_PREFIX != '')}}"
-      #   run: |
-      #     # for testing
-      #     python -m pytest validation
-      # ----------------------------------------------------------------------------- #
-      
       - name: Coveralls Test Coverage
         uses: coverallsapp/github-action@master
         with:

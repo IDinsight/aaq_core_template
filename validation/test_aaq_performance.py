@@ -115,7 +115,10 @@ class TestPerformance:
 
         valid_mask = (
             validation_data[
-                [test_params["QUERY_COL"], test_params["FAQ_COLUMN_MAP"]["faq_title"]]
+                [
+                    test_params["VALIDATION_DATA_COLUMN_MAP"]["faq_title"],
+                    test_params["VALIDATION_DATA_COLUMN_MAP"]["question"],
+                ]
             ]
             .notnull()
             .all(axis=1)
@@ -138,7 +141,9 @@ class TestPerformance:
         Single request to /inbound/check
         """
         request_data = {
-            "text_to_match": str(row[test_params["QUERY_COL"]]),
+            "text_to_match": str(
+                row[test_params["VALIDATION_DATA_COLUMN_MAP"]["question"]]
+            ),
             "return_scoring": "true",
         }
 
@@ -151,7 +156,7 @@ class TestPerformance:
         top_responses = response.get_json()["top_responses"]
 
         for i, res in enumerate(top_responses):
-            if row[test_params["FAQ_COLUMN_MAP"]["faq_title"]] == res[1]:
+            if row[test_params["VALIDATION_DATA_COLUMN_MAP"]["faq_title"]] == res[1]:
                 return i + 1
 
         return np.inf
@@ -192,7 +197,7 @@ class TestPerformance:
 
             if test_params["contextualization"]["active"]:
                 rename_map[column_map["faq_contexts"]] = "faq_contexts"
-                del assign_map["faq_contexts"]
+                assign_map.pop("faq_contexts")
 
             faqs_to_insert = (
                 self.faq_df[rename_map.keys()]
