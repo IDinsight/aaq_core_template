@@ -75,7 +75,8 @@ def setup(app, override_params):
     migrate.init_app(app, db)
 
     app.is_context_active = app.config["CONTEXT_ACTIVE"]
-    app.context_list = app.config["CONTEXT_LIST"]
+    if app.config["CONTEXT_ACTIVE"]:
+        app.context_list = app.config["CONTEXT_LIST"]
 
 
 def get_config_data(override_params):
@@ -98,7 +99,8 @@ def get_config_data(override_params):
     config["MODEL_PARAMS"] = parameters["model_params"][model_name]
     config["MATCHING_MODEL"] = model_name
     config["CONTEXT_ACTIVE"] = parameters["contextualization"]["active"]
-    config["CONTEXT_LIST"] = parameters["contextualization"]["context_list"]
+    if config["CONTEXT_ACTIVE"]:
+        config["CONTEXT_LIST"] = parameters["contextualization"]["context_list"]
 
     faq_matching_config = parameters["faq_match"]
     config.update(faq_matching_config)

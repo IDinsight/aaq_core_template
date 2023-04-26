@@ -17,3 +17,4 @@ filterwarnings = [
     "ignore::ResourceWarning"
 ]
 env_files = ["tests/configs/env.vars"]
+env_override_existing_values = 1
