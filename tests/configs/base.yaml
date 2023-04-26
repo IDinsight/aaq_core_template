@@ -1,7 +1,11 @@
-PG_PORT: 5432
-PG_DATABASE: aaq-template-db-test
-PG_USERNAME: flask_test
-MODEL_PORT: 9902
-MODEL_PROTOCOL: http
-N_TOP_MATCHES_PER_PAGE: 3
-CONTEXT_ACTIVE: False
+faq_match:
+  N_TOP_MATCHES_PER_PAGE: 3
+contextualization:
+  active: false
+  context_list: ["design", "code", "test", "deploy","maintain"]
+model_params:
+  google_news_pretrained:
+    score_reduction_method: simple_mean
+  simple_fasttext_with_faq:
+    score_reduction_method: simple_mean
+

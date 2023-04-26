@@ -67,6 +67,11 @@ def client(app_main):
 
 @pytest.fixture(scope="session")
 def app_weight(test_params, patchbinary):
+    matching_model = test_params["matching_model"]
+    test_params["model_params"][matching_model][
+        "score_reduction_method"
+    ] = "mean_plus_weight"
+
     app = create_app(test_params)
     init_faqt_model(app)
     return app
@@ -74,14 +79,20 @@ def app_weight(test_params, patchbinary):
 
 @pytest.fixture(scope="session")
 def client_weight(app_weight):
-    app_weight.config["REDUCTION_FUNCTION"] = "mean_plus_weight"
     with app_weight.test_client() as client:
         yield client
 
 
 @pytest.fixture(scope="session")
 def app_context(test_params, patchbinary):
-    test_params["CONTEXT_ACTIVE"] = True
+    test_params["contextualization"]["active"] = True
+    test_params["contextualization"]["context_list"] = [
+        "design",
+        "code",
+        "test",
+        "deploy",
+        "maintain",
+    ]
     app = create_app(test_params)
     init_faqt_model(app)
     return app
