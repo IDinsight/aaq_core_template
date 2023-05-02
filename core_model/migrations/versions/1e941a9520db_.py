@@ -30,7 +30,7 @@ class MyJSONBType(sa.TypeDecorator):
     impl = postgresql.JSONB
 
     def process_literal_param(self, value, dialect):
-        return json.dumps(value)
+        return "'" + str(json.dumps(value)) + "'"
 
 
 def upgrade():
