@@ -191,6 +191,7 @@ def get_text_preprocessor(pairwise_entities):
         entities_dict=pairwise_entities,
         n_min_dashed_words_url=n_min_dashed_words_url,
         reincluded_stop_words=reincluded_stop_words,
+        spell_check_for_gibberish=True,
     )
 
     return text_preprocessor
