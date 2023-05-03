@@ -2,7 +2,8 @@
 Create and initialise the app. Uses Blueprints to define view.
 """
 import os
-from functools import partial
+import time
+from functools import lru_cache, partial
 
 from faqt import WMDScorer, preprocess_text_for_word_embedding
 from faqt.model.faq_matching.contextualization import (
@@ -217,3 +218,23 @@ def refresh_faqs(app):
     if app.is_context_active:
         create_contextualization(app)
     return len(faqs)
+
+
+def refresh_faqs_cached(app):
+    """
+    Refresh FAQs every hour, and cache the result
+    """
+
+    @lru_cache(maxsize=1)
+    def cached_faqs(ttl_hash):
+        """
+        Wrapper to cache `refresh_faqs`
+        """
+        n_faqs = refresh_faqs(app)
+        return n_faqs
+
+    def get_ttl_hash(seconds=3600):
+        """Return the same value within `seconds` time period"""
+        return round(time.time() // seconds)
+
+    return cached_faqs(ttl_hash=get_ttl_hash())
