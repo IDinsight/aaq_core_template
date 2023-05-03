@@ -12,8 +12,6 @@ import yaml
 from gensim.models import KeyedVectors
 from gensim.models.fasttext import load_facebook_vectors
 
-from ..data_models import LanguageContextModel
-
 
 def load_fasttext(folder, filename):
     """Load fasttext word embedding"""
@@ -180,14 +178,6 @@ class DefaultEnvDict(UserDict):
         if value is None:
             raise KeyError(f"{key} not found in dict or environment variables")
         return os.getenv(key)
-
-
-def load_language_context(app):
-    """Get language contextualization config from database"""
-    with app.app_context():
-        language_context = LanguageContextModel.query.filter_by(active=True).first()
-
-    return language_context
 
 
 def deep_update(dict_to_update, update_values):
