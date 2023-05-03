@@ -1,0 +1,54 @@
+name: Update dev container on EC2
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - hotifx-autodeploy  # TODO: remove this line
+
+jobs:
+  UpdateDevContainer:
+    runs-on: ubuntu-latest
+    env:
+      IMAGE_NAME: aaq_core_template
+      VERSION: dev
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Configure AWS credentials
+        id: creds
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+      - name: Get AWS secrets
+        uses: aws-actions/aws-secretsmanager-get-secrets@v1
+        with:
+          secret-ids: |  # Replace ARNs with your own
+            CORE, arn:aws:secretsmanager:af-south-1:678681925278:secret:aaq-template-core-secrets-F64A4Z
+          parse-json-secrets: true
+        
+      - name: Build Docker image
+        run: |
+          cp ./requirements.txt ./core_model/requirements.txt
+          docker build --rm \
+            --build-arg NAME=${IMAGE_NAME} \
+            --build-arg PORT=9902 \
+            -t ${IMAGE_NAME}:${VERSION} \
+            ./core_model
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+      - name: Docker tag and push image to ECR 
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: |
+          docker image tag ${IMAGE_NAME}:$VERSION $ECR_REGISTRY/aaq_solution/${IMAGE_NAME}:$VERSION
+          docker push $ECR_REGISTRY/aaq_solution/${IMAGE_NAME}:$VERSION
+      - name: Trigger webhook to redeploy container
+        uses: distributhor/workflow-webhook@v2
+        env:
+          webhook_url: ${{ env.CORE_WEBHOOK_URL }}
+          webhook_secret: ${{ env.CORE_WEBHOOK_SECRET }}

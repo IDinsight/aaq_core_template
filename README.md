@@ -59,7 +59,6 @@ If you clone this, please setup a new repository for future commits and add this
     export PG_PASSWORD=
 
     export INBOUND_CHECK_TOKEN=
-    export TOKEN_MACHINE_USER=
     export PROMETHEUS_MULTIPROC_DIR=
     ```
     See `docs/deployment_instructions.md` for more detailed explanations of each secret environment variable.
@@ -217,10 +216,6 @@ following secrets stored on AWS:
     db_username
     ```
 
-4. Github machine user token secret
-    ```bash
-    TOKEN_MACHINE_USER
-    ```
 
 Make sure to modify the secrets ARNs in `.github/validation-test.yml` and
 `.github/docker-build-push.yml` to your own ARNs.

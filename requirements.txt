@@ -18,4 +18,4 @@ itsdangerous==2.0.1
 prometheus-flask-exporter==0.20.1
 boto3==1.24.25
 SQLAlchemy==1.4.37
-faqt @ git+https://github.com/IDinsight/faqt.git@v1.1.1
+faqt @ git+https://github.com/IDinsight/faqt.git@v1.1.2
