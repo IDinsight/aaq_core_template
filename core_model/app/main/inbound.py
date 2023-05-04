@@ -12,6 +12,7 @@ from flask import current_app, request, url_for
 from flask_restx import Resource
 from sqlalchemy.orm.attributes import flag_modified
 
+from .. import refresh_faqs_cached
 from ..data_models import Inbound
 from ..database_sqlalchemy import db
 from ..prometheus_metrics import metrics
@@ -82,6 +83,7 @@ class InboundCheck(Resource):
         """
         See class docstring for details.
         """
+        refresh_faqs_cached(current_app)
         incoming = request.json
         if "return_scoring" in incoming:
             return_scoring = incoming["return_scoring"]

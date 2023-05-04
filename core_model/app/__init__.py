@@ -176,6 +176,8 @@ def init_faqt_model(app):
         tags_guiding_typos=tags_guiding_typos,
     )
 
+    app.cached_faq_func = cached_faqs_wrapper(app)
+
 
 def get_text_preprocessor(pairwise_entities):
     """
@@ -220,21 +222,27 @@ def refresh_faqs(app):
     return len(faqs)
 
 
-def refresh_faqs_cached(app):
-    """
-    Refresh FAQs every hour, and cache the result
-    """
+def cached_faqs_wrapper(app):
+    """Wrapper to cached faqs func"""
 
     @lru_cache(maxsize=1)
     def cached_faqs(ttl_hash):
         """
-        Wrapper to cache `refresh_faqs`
+        Caches `refresh_faqs` results
         """
         n_faqs = refresh_faqs(app)
         return n_faqs
 
-    def get_ttl_hash(seconds=3600):
-        """Return the same value within `seconds` time period"""
-        return round(time.time() // seconds)
+    return cached_faqs
 
-    return cached_faqs(ttl_hash=get_ttl_hash())
+
+def get_ttl_hash(seconds=3600):
+    """Return the same value within `seconds` time period"""
+    return time.time() // seconds
+
+
+def refresh_faqs_cached(app):
+    """
+    Refresh FAQs every hour, and cache the result
+    """
+    return app.cached_faq_func(ttl_hash=get_ttl_hash())
