@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - cached_refresh_take2  # TODO: remove this line
 
 jobs:
   UpdateDevContainer:
