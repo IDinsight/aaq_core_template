@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - hotifx-autodeploy  # TODO: remove this line
 
 jobs:
   UpdateDevContainer:
