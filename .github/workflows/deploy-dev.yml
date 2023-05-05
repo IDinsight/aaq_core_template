@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - hotifx-autodeploy  # TODO: remove this line
+      - cached_refresh_take2  # TODO: remove this line
 
 jobs:
   UpdateDevContainer:

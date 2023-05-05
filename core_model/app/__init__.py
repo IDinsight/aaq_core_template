@@ -13,7 +13,7 @@ from faqt.model.faq_matching.contextualization import (
 from flask import Flask
 from hunspell import Hunspell
 
-from .data_models import FAQModel
+from .data_models import FAQModel, LanguageContextModel
 from .database_sqlalchemy import db, migrate
 from .prometheus_metrics import metrics
 from .src.faq_weights import add_faq_weight_share
@@ -22,7 +22,6 @@ from .src.utils import (
     deep_update,
     get_postgres_uri,
     load_data_sources,
-    load_language_context,
     load_parameters,
     load_word_embeddings_bin,
 )
@@ -177,6 +176,7 @@ def init_faqt_model(app):
     )
 
     app.cached_faq_func = cached_faqs_wrapper(app)
+    app.cached_language_context_func = cached_language_context_wrapper(app)
 
 
 def get_text_preprocessor(pairwise_entities):
@@ -246,3 +246,58 @@ def refresh_faqs_cached(app):
     Refresh FAQs every hour, and cache the result
     """
     return app.cached_faq_func(ttl_hash=get_ttl_hash())
+
+
+def load_language_context(app):
+    """
+    Load language contextualization config from database
+    """
+    with app.app_context():
+        language_context = LanguageContextModel.query.filter_by(active=True).first()
+
+    return language_context
+
+
+def refresh_language_context(app):
+    """
+    Update faqt model language contexts with the current configuration in the database
+    """
+    language_context = load_language_context(app)
+
+    app.faqt_model.set_glossary(language_context.custom_wvs if language_context else {})
+
+    app.faqt_model.set_tokenizer(
+        get_text_preprocessor(
+            language_context.pairwise_triplewise_entities if language_context else {}
+        )
+    )
+
+    app.faqt_model.set_tags_guiding_typos(
+        language_context.tag_guiding_typos if language_context else []
+    )
+
+    if language_context is None:
+        return "Empty"
+    else:
+        return language_context.version_id
+
+
+def cached_language_context_wrapper(app):
+    """Wrapper to cached language context func"""
+
+    @lru_cache(maxsize=1)
+    def cached_language_context(ttl_hash):
+        """
+        Caches `refresh_language_context` results
+        """
+        version_id = refresh_language_context(app)
+        return version_id
+
+    return cached_language_context
+
+
+def refresh_language_context_cached(app):
+    """
+    Refresh Language context every hour, and cache the result
+    """
+    return app.cached_language_context_func(ttl_hash=get_ttl_hash())
