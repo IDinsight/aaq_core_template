@@ -12,6 +12,7 @@ from flask import current_app, request, url_for
 from flask_restx import Resource
 from sqlalchemy.orm.attributes import flag_modified
 
+from .. import refresh_faqs_cached, refresh_language_context_cached
 from ..data_models import Inbound
 from ..database_sqlalchemy import db
 from ..prometheus_metrics import metrics
