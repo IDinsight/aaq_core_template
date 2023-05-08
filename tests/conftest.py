@@ -6,7 +6,13 @@ import yaml
 from sqlalchemy import text
 
 from core_model import app
-from core_model.app import create_app, get_config_data, init_faqt_model, load_embeddings
+from core_model.app import (
+    create_app,
+    get_config_data,
+    init_faqt_model,
+    load_embeddings,
+    refresh_faqs,
+)
 
 
 @pytest.fixture(
@@ -52,6 +58,12 @@ def app_main(test_params, patchbinary):
     return app
 
 
+@pytest.fixture(scope="session")
+def client(app_main):
+    with app_main.test_client() as client:
+        yield client
+
+
 @pytest.fixture(scope="class", autouse=True)
 def clean_start(db_engine):
     with db_engine.connect() as db_connection:
@@ -60,8 +72,18 @@ def clean_start(db_engine):
 
 
 @pytest.fixture(scope="session")
-def client(app_main):
-    with app_main.test_client() as client:
+def app_no_refresh(test_params, patchbinary):
+    app = create_app(test_params)
+    app.config["LANGUAGE_CONTEXT_REFRESH_FREQ"] = 0
+    app.config["FAQ_REFRESH_FREQ"] = 0
+    init_faqt_model(app)
+    refresh_faqs(app)
+    return app
+
+
+@pytest.fixture(scope="session")
+def client_no_refresh(app_no_refresh):
+    with app_no_refresh.test_client() as client:
         yield client
 
 

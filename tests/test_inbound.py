@@ -408,15 +408,21 @@ class TestInboundPagination:
 
 class TestInboundCachedRefreshes:
     @pytest.mark.parametrize(
-        "refresh_func", ["refresh_language_context", "refresh_faqs"]
+        "refresh_func, hash_value",
+        [("refresh_language_context", 20), ("refresh_faqs", 22)],
     )
     def test_refreshes_are_run(
-        self, monkeypatch, capsys, faq_data, client, refresh_func
+        self, monkeypatch, capsys, faq_data, client, refresh_func, hash_value
     ):
         def _fake_refresh(*args, **kwargs):
             print("Refreshed")
 
         monkeypatch.setattr(app, refresh_func, _fake_refresh)
+        monkeypatch.setattr(
+            app.main.inbound,
+            "get_ttl_hash",
+            lambda *x, **y: hash_value,
+        )
 
         request_data = {
             "text_to_match": "I love going hiking. What should I pack for lunch?",

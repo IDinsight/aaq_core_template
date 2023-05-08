@@ -17,7 +17,8 @@ faq_other_params = {
     "faq_added_utc": "2022-04-14",
     "faq_author": "Pytest refresh",
     "faq_threshold": "{0.1, 0.1, 0.1, 0.1}",
-    "faq_questions": """{"Dummmy question 1", "Dummmy question 2", "Dummmy question 3", "Dummmy question 4","Dummmy question 5","Dummy question 6"}""",
+    "faq_questions": """{"Dummmy question 1", "Dummmy question 2", "Dummmy question 3",
+    "Dummmy question 4","Dummmy question 5","Dummy question 6"}""",
 }
 
 
@@ -67,17 +68,19 @@ class TestHealthCheck:
 
 
 class TestRefresh:
-    def test_refresh_of_six_faqs(self, load_faq_data, client):
+    def test_refresh_of_six_faqs(self, load_faq_data, client_no_refresh):
         request_data = {
             "text_to_match": "I love going hiking. What should I pack for lunch?",
             "return_scoring": "true",
         }
         headers = {"Authorization": "Bearer %s" % os.getenv("INBOUND_CHECK_TOKEN")}
-        response = client.post("/inbound/check", json=request_data, headers=headers)
+        response = client_no_refresh.post(
+            "/inbound/check", json=request_data, headers=headers
+        )
         json_data = response.get_json()
 
         assert len(json_data["top_responses"]) == 0
 
-        response = client.get("/internal/refresh-faqs", headers=headers)
+        response = client_no_refresh.get("/internal/refresh-faqs", headers=headers)
         assert response.status_code == 200
         assert response.get_data() == b"Successfully refreshed 6 FAQs"
