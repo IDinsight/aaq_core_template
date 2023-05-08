@@ -1,14 +1,18 @@
 import os
 import re
+from time import sleep
 
 import pytest
 from sqlalchemy import text
+
+from core_model import app
 
 insert_faq = (
     "INSERT INTO faqmatches ("
     "faq_tags,faq_questions,faq_contexts, faq_author, faq_title, faq_content_to_send, "
     "faq_added_utc, faq_thresholds) "
-    "VALUES (:faq_tags, :faq_questions,:faq_contexts, :author, :title, :content, :added_utc, :threshold)"
+    "VALUES (:faq_tags, :faq_questions,:faq_contexts, :author, :title, :content, "
+    ":added_utc, :threshold)"
 )
 faq_tags = [
     """{"rock", "guitar", "melody", "chord"}""",
@@ -30,7 +34,8 @@ faq_other_params = {
     "added_utc": "2022-04-14",
     "author": "Pytest author",
     "threshold": "{0.1, 0.1, 0.1, 0.1}",
-    "faq_questions": """{"Dummmy question 1", "Dummmy question 2", "Dummmy question 3", "Dummmy question 4","Dummmy question 5","Dummy question 6"}""",
+    "faq_questions": """{"Dummmy question 1", "Dummmy question 2", "Dummmy question 3",
+    "Dummmy question 4","Dummmy question 5","Dummy question 6"}""",
 }
 
 
@@ -399,3 +404,106 @@ class TestInboundPagination:
         )
 
         assert nonexistent_page_response.status_code == 404
+
+
+class TestInboundCachedRefreshes:
+    @pytest.mark.parametrize(
+        "refresh_func", ["refresh_language_context", "refresh_faqs"]
+    )
+    def test_refreshes_are_run(
+        self, monkeypatch, capsys, faq_data, client, refresh_func
+    ):
+        def _fake_refresh(*args, **kwargs):
+            print("Refreshed")
+
+        monkeypatch.setattr(app, refresh_func, _fake_refresh)
+
+        request_data = {
+            "text_to_match": "I love going hiking. What should I pack for lunch?",
+            "return_scoring": "true",
+        }
+        headers = {"Authorization": "Bearer %s" % os.getenv("INBOUND_CHECK_TOKEN")}
+        client.post("/inbound/check", json=request_data, headers=headers)
+        captured = capsys.readouterr()
+
+        assert captured.out == "Refreshed\n"
+
+        sleep(5)
+
+    @pytest.mark.parametrize(
+        "hash_value,expected_output",
+        [
+            (1, "Refreshed"),
+            (1, ""),
+            (3, "Refreshed"),
+            (3, ""),
+            (1, "Refreshed"),
+            (1, ""),
+        ],
+    )
+    def test_faqs_refreshed_only_on_new_hash(
+        self,
+        monkeypatch,
+        capsys,
+        faq_data,
+        client,
+        hash_value,
+        expected_output,
+    ):
+        def _fake_refresh(*args, **kwargs):
+            print("Refreshed")
+
+        monkeypatch.setattr(app, "refresh_faqs", _fake_refresh)
+        monkeypatch.setattr(
+            app.main.inbound,
+            "get_ttl_hash",
+            lambda *x, **y: hash_value,
+        )
+        request_data = {
+            "text_to_match": "I love going hiking. What should I pack for lunch?",
+            "return_scoring": "true",
+        }
+        headers = {"Authorization": "Bearer %s" % os.getenv("INBOUND_CHECK_TOKEN")}
+        client.post("/inbound/check", json=request_data, headers=headers)
+        captured = capsys.readouterr()
+
+        assert captured.out.strip() == expected_output
+
+    @pytest.mark.parametrize(
+        "hash_value,expected_output",
+        [
+            (10, "Refreshed"),
+            (10, ""),
+            (30, "Refreshed"),
+            (30, ""),
+            (10, "Refreshed"),
+            (10, ""),
+        ],
+    )
+    def test_lang_contexts_refreshed_only_on_new_hash(
+        self,
+        monkeypatch,
+        capsys,
+        faq_data,
+        client,
+        hash_value,
+        expected_output,
+    ):
+        def _fake_refresh(*args, **kwargs):
+            print("Refreshed")
+
+        monkeypatch.setattr(app, "refresh_language_context", _fake_refresh)
+        monkeypatch.setattr(
+            app.main.inbound,
+            "get_ttl_hash",
+            lambda *x, **y: hash_value,
+        )
+        request_data = {
+            "text_to_match": "I love going hiking. What should I pack for lunch?",
+            "return_scoring": "true",
+        }
+        headers = {"Authorization": "Bearer %s" % os.getenv("INBOUND_CHECK_TOKEN")}
+        client.post("/inbound/check", json=request_data, headers=headers)
+        captured = capsys.readouterr()
+
+        assert captured.out.strip() == expected_output
