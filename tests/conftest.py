@@ -1,3 +1,4 @@
+from copy import deepcopy
 from pathlib import Path
 
 import pytest
@@ -89,6 +90,7 @@ def client_no_refresh(app_no_refresh):
 
 @pytest.fixture(scope="session")
 def app_weight(test_params, patchbinary):
+    test_params = deepcopy(test_params)
     matching_model = test_params["matching_model"]
     test_params["model_params"][matching_model][
         "score_reduction_method"
@@ -107,6 +109,7 @@ def client_weight(app_weight):
 
 @pytest.fixture(scope="session")
 def app_context(test_params, patchbinary):
+    test_params = deepcopy(test_params)
     test_params["contextualization"]["active"] = True
     test_params["contextualization"]["context_list"] = [
         "design",
