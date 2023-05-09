@@ -206,6 +206,6 @@ def deep_update(dict_to_update, update_values):
     return dict_to_update
 
 
-def get_ttl_hash(seconds=3600):
+def get_ttl_hash(seconds):
     """Return the same value within `seconds` time period"""
     return time.time() // seconds
