@@ -12,10 +12,10 @@ from flask import current_app, request, url_for
 from flask_restx import Resource
 from sqlalchemy.orm.attributes import flag_modified
 
-from .. import refresh_faqs_cached, refresh_language_context_cached
 from ..data_models import Inbound
 from ..database_sqlalchemy import db
 from ..prometheus_metrics import metrics
+from ..src.utils import get_ttl_hash
 from .auth import auth
 from .swagger_components import (
     api,
@@ -83,8 +83,15 @@ class InboundCheck(Resource):
         """
         See class docstring for details.
         """
-        n_faqs = refresh_faqs_cached(current_app)
-        language_context_version = refresh_language_context_cached(current_app)
+        if current_app.config["FAQ_REFRESH_FREQ"] > 0:
+            current_app.cached_faq_refresh(
+                get_ttl_hash(current_app.config["FAQ_REFRESH_FREQ"])
+            )
+        if current_app.config["LANGUAGE_CONTEXT_REFRESH_FREQ"] > 0:
+            current_app.cached_language_context_refresh(
+                get_ttl_hash(current_app.config["LANGUAGE_CONTEXT_REFRESH_FREQ"])
+            )
+
         incoming = request.json
         if "return_scoring" in incoming:
             return_scoring = incoming["return_scoring"]

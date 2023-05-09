@@ -2,7 +2,6 @@
 Create and initialise the app. Uses Blueprints to define view.
 """
 import os
-import time
 from functools import lru_cache, partial
 
 from faqt import WMDScorer, preprocess_text_for_word_embedding
@@ -67,6 +66,8 @@ def setup(app, override_params):
             "pool_pre_ping": True,
             "pool_recycle": 300,
         },
+        FAQ_REFRESH_FREQ=int(config["FAQ_REFRESH_FREQ"]),
+        LANGUAGE_CONTEXT_REFRESH_FREQ=int(config["LANGUAGE_CONTEXT_REFRESH_FREQ"]),
         **config,
     )
 
@@ -77,6 +78,9 @@ def setup(app, override_params):
     app.is_context_active = app.config["CONTEXT_ACTIVE"]
     if app.config["CONTEXT_ACTIVE"]:
         app.context_list = app.config["CONTEXT_LIST"]
+
+    app.cached_faq_refresh = cached_faqs_wrapper(app)
+    app.cached_language_context_refresh = cached_language_context_wrapper(app)
 
 
 def get_config_data(override_params):
@@ -175,9 +179,6 @@ def init_faqt_model(app):
         tags_guiding_typos=tags_guiding_typos,
     )
 
-    app.cached_faq_func = cached_faqs_wrapper(app)
-    app.cached_language_context_func = cached_language_context_wrapper(app)
-
 
 def get_text_preprocessor(pairwise_entities):
     """
@@ -236,18 +237,6 @@ def cached_faqs_wrapper(app):
     return cached_faqs
 
 
-def get_ttl_hash(seconds=3600):
-    """Return the same value within `seconds` time period"""
-    return time.time() // seconds
-
-
-def refresh_faqs_cached(app):
-    """
-    Refresh FAQs every hour, and cache the result
-    """
-    return app.cached_faq_func(ttl_hash=get_ttl_hash())
-
-
 def load_language_context(app):
     """
     Load language contextualization config from database
@@ -294,10 +283,3 @@ def cached_language_context_wrapper(app):
         return version_id
 
     return cached_language_context
-
-
-def refresh_language_context_cached(app):
-    """
-    Refresh Language context every hour, and cache the result
-    """
-    return app.cached_language_context_func(ttl_hash=get_ttl_hash())
