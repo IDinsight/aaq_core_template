@@ -5,6 +5,7 @@ import os
 from datetime import datetime
 
 import boto3
+import numpy as np
 import pandas as pd
 import pytest
 from nltk.corpus import stopwords
@@ -14,13 +15,13 @@ from sqlalchemy import text
 stopwords.ensure_loaded()
 
 
-def generate_message(result, test_params):
+def generate_message(top_k_accuracies, test_params):
     """Generate messages for validation results
     Warning is set to threshold criteria
     Parameters
     ----------
-    result : List[dict]
-        List of commit validation results
+    top_k_accuracies : Dict
+        Dictionary of top k accuracies, with k as keys
     threshold_criteria : float, 0-1
         Accuracy cut-off for warnings
     """
@@ -29,23 +30,30 @@ def generate_message(result, test_params):
     dataset = test_params["VALIDATION_DATA_PREFIX"]
     model = test_params.get("MATCHING_MODEL", "same as app config")
 
-    if (os.environ.get("GITHUB_ACTIONS") == "true") & (result < threshold_criteria):
+    top_k_accuracy = top_k_accuracies[max(top_k_accuracies.keys())]
+    accuracy_str = "\n".join(
+        [f"Top {k}: {acc:.3f}" for k, acc in top_k_accuracies.items()]
+    )
+
+    if (os.environ.get("GITHUB_ACTIONS") == "true") & (
+        top_k_accuracy < threshold_criteria
+    ):
 
         current_branch = os.environ.get("BRANCH_NAME")
         repo_name = os.environ.get("REPO")
         commit = os.environ.get("HASH")
 
         val_message = (
-            "[Alert] Accuracy using dataset {dataset} was:\n\n"
-            "{accuracy:.2f}\n\n"
+            "[Alert] Top K accuracies using dataset {dataset} was:\n\n"
+            "{accuracy}\n\n"
             "For commit tag = {commit_tag}\n"
             "Using model {model}\n"
             "On branch {branch}\n"
             "Repo {repo_name}\n\n"
             "The threshold criteria was {threshold_criteria}"
         ).format(
-            accuracy=result,
             dataset=dataset,
+            accuracy=accuracy_str,
             commit_tag=commit,
             model=model,
             branch=current_branch,
@@ -54,26 +62,23 @@ def generate_message(result, test_params):
         )
     else:
         val_message = (
-            "[Alert] Accuracy using dataset {dataset} was:\n\n"
-            "{accuracy:.2f}\n\n"
+            "[Alert] Top K accuracies using dataset {dataset} was:\n\n"
+            "{accuracy}\n\n"
             "Using model {model}\n"
             "The test threshold was {threshold_criteria}"
         ).format(
-            accuracy=result,
             dataset=dataset,
+            accuracy=accuracy_str,
             model=model,
             threshold_criteria=threshold_criteria,
         )
 
     message = """
+------------Model Validation Results-----------
 
-        ------Model Validation Results-----
+{}
 
-        {}
-
-        -----------------------------------
-
-        """.format(
+-----------------------------------------------""".format(
         val_message
     )
     return message
@@ -100,13 +105,6 @@ class TestPerformance:
     s3r = boto3.resource("s3")
     bucket = os.getenv("VALIDATION_BUCKET")
 
-    insert_faq = (
-        "INSERT INTO faqmatches ("
-        "faq_tags,faq_questions, faq_author, faq_title, faq_content_to_send, "
-        "faq_added_utc, faq_thresholds) "
-        "VALUES (:faq_tags, :faq_questions,:author, :title, :content, :added_utc, :threshold)"
-    )
-
     def get_validation_data(self, test_params):
         """
         Download validation data from s3
@@ -115,7 +113,18 @@ class TestPerformance:
         prefix = test_params["VALIDATION_DATA_PREFIX"]
         validation_data = pd.read_csv("s3://" + os.path.join(self.bucket, prefix))
 
-        return validation_data
+        valid_mask = (
+            validation_data[
+                [
+                    test_params["VALIDATION_DATA_COLUMN_MAP"]["faq_title"],
+                    test_params["VALIDATION_DATA_COLUMN_MAP"]["question"],
+                ]
+            ]
+            .notnull()
+            .all(axis=1)
+        )
+
+        return validation_data[valid_mask]
 
     def get_validation_faqs(self, test_params):
         """
@@ -132,21 +141,36 @@ class TestPerformance:
         Single request to /inbound/check
         """
         request_data = {
-            "text_to_match": str(row[test_params["QUERY_COL"]]),
+            "text_to_match": str(
+                row[test_params["VALIDATION_DATA_COLUMN_MAP"]["question"]]
+            ),
             "return_scoring": "true",
         }
+
+        if test_params["contextualization"]["active"]:
+            user_contexts = eval(row["contexts"]) if row["contexts"] != "[None]" else []
+            request_data["context"] = user_contexts
+
         headers = {"Authorization": "Bearer %s" % os.getenv("INBOUND_CHECK_TOKEN")}
         response = client.post("/inbound/check", json=request_data, headers=headers)
         top_responses = response.get_json()["top_responses"]
-        top_faq_names = set(x[1] for x in top_responses)
-        return row[test_params["TRUE_FAQ_COL"]] in top_faq_names
 
+        for i, res in enumerate(top_responses):
+            if row[test_params["VALIDATION_DATA_COLUMN_MAP"]["faq_title"]] == res[1]:
+                return i + 1
+
+        return np.inf
+
+    @pytest.mark.filterwarnings("ignore::UserWarning")
     @pytest.fixture(scope="class")
     def faq_data(self, client, db_engine, test_params):
 
         self.faq_df = self.get_validation_faqs(test_params)
 
+        column_map = test_params["FAQ_COLUMN_MAP"]
+
         headers = {"Authorization": "Bearer %s" % os.getenv("INBOUND_CHECK_TOKEN")}
+
         with db_engine.connect() as db_connection:
 
             # First, delete any stragglers in the DB from previous runs
@@ -154,23 +178,43 @@ class TestPerformance:
             with db_connection.begin():
                 db_connection.execute(t)
 
-            inbound_sql = text(self.insert_faq)
-            inserts = [
-                {
-                    "title": row["faq_title"],
-                    "faq_tags": row["faq_tags"],
-                    "faq_questions": """{"Dummmy question 1", "Dummmy question 2", "Dummmy question 3", "Dummmy question 4","Dummmy question 5","Dummy question 6"}""",
-                    "added_utc": "2022-04-14",
-                    "author": "Validation author",
-                    "content": row["faq_content_to_send"],
-                    "threshold": "{0.1, 0.1, 0.1, 0.1}",
-                }
-                for idx, row in self.faq_df.iterrows()
-            ]
+            # Map the relevant columns in the validation data to the faqmatches table columns
+            rename_map = {
+                column_map["faq_title"]: "faq_title",
+                column_map["faq_tags"]: "faq_tags",
+                column_map["faq_content_to_send"]: "faq_content_to_send",
+            }
 
-            # We do a bulk insert to be more efficient
-            with db_connection.begin():
-                db_connection.execute(inbound_sql, inserts)
+            assign_map = dict(
+                faq_questions="{"
+                + ", ".join([f'"Placeholder question {i}"' for i in range(1, 6)])
+                + "}",
+                faq_added_utc="2022-04-14",
+                faq_author="Validation author",
+                faq_thresholds="{0.1, 0.1, 0.1, 0.1}",
+                faq_contexts="{" + ",".join(client.application.context_list) + "}",
+            )
+
+            if test_params["contextualization"]["active"]:
+                rename_map[column_map["faq_contexts"]] = "faq_contexts"
+                assign_map.pop("faq_contexts")
+
+            faqs_to_insert = (
+                self.faq_df[rename_map.keys()]
+                .rename(
+                    columns=rename_map,
+                )
+                .copy()
+            )
+            faqs_to_insert = faqs_to_insert.assign(**assign_map)
+
+            faqs_to_insert.to_sql(
+                name="faqmatches",
+                con=db_connection,
+                if_exists="append",
+                index=False,
+            )
+
         client.get("/internal/refresh-faqs", headers=headers)
         yield
         with db_engine.connect() as db_connection:
@@ -183,6 +227,19 @@ class TestPerformance:
 
         client.get("/internal/refresh-faqs", headers=headers)
 
+    def _get_top_k_accuracies(self, ranks, max_k):
+        """Return a dictionary of top k accuracies for a given list of ranks"""
+
+        top_k_accuracies = {}
+
+        ks = [1, 3, 5, 7, 10]
+        ks = [k for k in ks if k < max_k] + [max_k]
+        for k in ks:
+            top_k_accuracies[k] = sum(x < k for x in ranks) / len(ranks)
+
+        return top_k_accuracies
+
+    @pytest.mark.filterwarnings("ignore::UserWarning")
     def test_top_k_performance(self, client, faq_data, test_params):
         """
         Test if top k faqs contain the true FAQ
@@ -193,17 +250,36 @@ class TestPerformance:
         def submit_one_inbound(x):
             return self.submit_one_inbound(x, client, test_params)
 
-        results = validation_df.apply(submit_one_inbound, axis=1).tolist()
-        top_k_accuracy = sum(results) / len(results)
+        n_top_matches = client.application.config["N_TOP_MATCHES_PER_PAGE"]
+        threshold = test_params["THRESHOLD_CRITERIA"]
 
-        content = generate_message(top_k_accuracy, test_params)
+        filter_mask = np.ones(len(validation_df), dtype=bool)
+        for col, val in test_params["TRUE_FAQ_FILTER_CONDITIONS"].items():
+            filter_mask = filter_mask & (validation_df[col] == val)
+        validation_df_filtered = validation_df[filter_mask].copy()
+
+        true_faqs_rank = validation_df_filtered.apply(
+            submit_one_inbound, axis=1
+        ).tolist()
+        top_k_accuracies_addressed = self._get_top_k_accuracies(
+            true_faqs_rank, max_k=n_top_matches
+        )
+        notification_msg_addressed = generate_message(
+            top_k_accuracies_addressed, test_params
+        )
+
+        all_faqs_rank = validation_df.apply(submit_one_inbound, axis=1).tolist()
+        top_k_accuracies_all = self._get_top_k_accuracies(
+            all_faqs_rank, max_k=n_top_matches
+        )
+        notification_msg_all = generate_message(top_k_accuracies_all, test_params)
 
         if (os.environ.get("GITHUB_ACTIONS") == "true") & (
-            top_k_accuracy < test_params["THRESHOLD_CRITERIA"]
+            top_k_accuracies_addressed[n_top_matches] < threshold
         ):
-            send_notification(content)
-            print(content)
-        else:
-            print(content)
+            send_notification(notification_msg_addressed)
 
-        return top_k_accuracy
+        msg_to_print = f"Results for true FAQs:\n\n{notification_msg_addressed}\n\n\nResults for all FAQs:\n\n{notification_msg_all}"
+        print(msg_to_print)
+
+        return top_k_accuracies_addressed

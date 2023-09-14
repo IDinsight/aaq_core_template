@@ -56,6 +56,7 @@ def patchbinary(monkeysession, embedding_bin):
 def app_main(test_params, patchbinary):
     app = create_app(test_params)
     init_faqt_model(app)
+    refresh_faqs(app)
     return app
 
 

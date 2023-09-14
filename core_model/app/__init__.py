@@ -213,11 +213,13 @@ def refresh_faqs(app):
 
     with app.app_context():
         faqs = FAQModel.query.all()
+
     faqs.sort(key=lambda x: x.faq_id)
     app.faqs = add_faq_weight_share(faqs)
     content = [faq.faq_content_to_send for faq in faqs]
     weights = [faq.faq_weight_share for faq in faqs]
     app.faqt_model.set_contents(content, weights)
+
     if app.is_context_active:
         create_contextualization(app)
     return len(faqs)

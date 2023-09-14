@@ -12,7 +12,7 @@ jobs:
       IMAGE_NAME: aaq_core_template
       VERSION: dev
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0
       - name: Configure AWS credentials
@@ -27,14 +27,15 @@ jobs:
         with:
           secret-ids: |  # Replace ARNs with your own
             CORE, arn:aws:secretsmanager:af-south-1:678681925278:secret:aaq-template-core-secrets-F64A4Z
+            GH, arn:aws:secretsmanager:af-south-1:678681925278:secret:github_machine_user_token-YPuBjA
           parse-json-secrets: true
-        
       - name: Build Docker image
         run: |
           cp ./requirements.txt ./core_model/requirements.txt
           docker build --rm \
             --build-arg NAME=${IMAGE_NAME} \
             --build-arg PORT=9902 \
+            --build-arg TOKEN_MACHINE_USER=${{ env.GH_TOKEN_MACHINE_USER }} \
             -t ${IMAGE_NAME}:${VERSION} \
             ./core_model
       - name: Login to Amazon ECR
