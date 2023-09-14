@@ -15,6 +15,7 @@ from sqlalchemy.orm.attributes import flag_modified
 from ..data_models import Inbound
 from ..database_sqlalchemy import db
 from ..prometheus_metrics import metrics
+from ..src.utils import get_ttl_hash
 from .auth import auth
 from .swagger_components import (
     api,
@@ -82,6 +83,15 @@ class InboundCheck(Resource):
         """
         See class docstring for details.
         """
+        if current_app.config["FAQ_REFRESH_FREQ"] > 0:
+            current_app.cached_faq_refresh(
+                get_ttl_hash(current_app.config["FAQ_REFRESH_FREQ"])
+            )
+        if current_app.config["LANGUAGE_CONTEXT_REFRESH_FREQ"] > 0:
+            current_app.cached_language_context_refresh(
+                get_ttl_hash(current_app.config["LANGUAGE_CONTEXT_REFRESH_FREQ"])
+            )
+
         incoming = request.json
         if "return_scoring" in incoming:
             return_scoring = incoming["return_scoring"]

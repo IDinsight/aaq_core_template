@@ -1,3 +1,4 @@
+from copy import deepcopy
 from pathlib import Path
 
 import pytest
@@ -59,6 +60,12 @@ def app_main(test_params, patchbinary):
     return app
 
 
+@pytest.fixture(scope="session")
+def client(app_main):
+    with app_main.test_client() as client:
+        yield client
+
+
 @pytest.fixture(scope="class", autouse=True)
 def clean_start(db_engine):
     with db_engine.connect() as db_connection:
@@ -67,13 +74,29 @@ def clean_start(db_engine):
 
 
 @pytest.fixture(scope="session")
-def client(app_main):
-    with app_main.test_client() as client:
+def app_no_refresh(test_params, patchbinary):
+    app = create_app(test_params)
+    app.config["LANGUAGE_CONTEXT_REFRESH_FREQ"] = 0
+    app.config["FAQ_REFRESH_FREQ"] = 0
+    init_faqt_model(app)
+    refresh_faqs(app)
+    return app
+
+
+@pytest.fixture(scope="session")
+def client_no_refresh(app_no_refresh):
+    with app_no_refresh.test_client() as client:
         yield client
 
 
 @pytest.fixture(scope="session")
 def app_weight(test_params, patchbinary):
+    test_params = deepcopy(test_params)
+    matching_model = test_params["matching_model"]
+    test_params["model_params"][matching_model][
+        "score_reduction_method"
+    ] = "mean_plus_weight"
+
     app = create_app(test_params)
     init_faqt_model(app)
     return app
@@ -81,14 +104,21 @@ def app_weight(test_params, patchbinary):
 
 @pytest.fixture(scope="session")
 def client_weight(app_weight):
-    app_weight.config["REDUCTION_FUNCTION"] = "mean_plus_weight"
     with app_weight.test_client() as client:
         yield client
 
 
 @pytest.fixture(scope="session")
 def app_context(test_params, patchbinary):
-    test_params["CONTEXT_ACTIVE"] = True
+    test_params = deepcopy(test_params)
+    test_params["contextualization"]["active"] = True
+    test_params["contextualization"]["context_list"] = [
+        "design",
+        "code",
+        "test",
+        "deploy",
+        "maintain",
+    ]
     app = create_app(test_params)
     init_faqt_model(app)
     return app

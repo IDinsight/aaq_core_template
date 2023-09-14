@@ -25,6 +25,7 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
+
       - name: Get AWS secrets
         uses: aws-actions/aws-secretsmanager-get-secrets@v1
         with:
@@ -41,6 +42,7 @@ jobs:
             --build-arg TOKEN_MACHINE_USER=${{ env.GH_TOKEN_MACHINE_USER }} \
             -t $IMAGE_NAME \
             ./core_model
+
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
@@ -133,6 +135,8 @@ jobs:
           INBOUND_CHECK_TOKEN: ${{ env.CORE_INBOUND_CHECK_TOKEN }}
           ENABLE_FAQ_REFRESH_CRON: ${{ env.CORE_ENABLE_FAQ_REFRESH_CRON}}
           PROMETHEUS_MULTIPROC_DIR: ${{ env.CORE_PROMETHEUS_MULTIPROC_DIR }}
+          FAQ_REFRESH_FREQ: $${{ env.FAQ_REFRESH_FREQ }}
+          LANGUAGE_CONTEXT_REFRESH_FRESH: $${ env.LANGUAGE_CONTEXT_REFRESH_FREQ }}
           # database secrets
           PG_ENDPOINT: ${{ env.STG_DB_DB_ENDPOINT }}
           PG_PORT: 5432
@@ -142,6 +146,7 @@ jobs:
           SENTRY_DSN: ${{ env.GLOBAL_SENTRY_DSN }}
           SENTRY_ENVIRONMENT: "staging"
           SENTRY_TRACES_SAMPLE_RATE: ${{ env.GLOBAL_SENTRY_TRACES_SAMPLE_RATE }}
+
         run: |
           ecs-cli configure \
           --cluster ${PROJECT_SHORT_NAME}-cluster \

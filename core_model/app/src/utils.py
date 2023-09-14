@@ -3,6 +3,7 @@ General utility functions
 """
 import os
 import tempfile
+import time
 from collections import UserDict
 from pathlib import Path
 
@@ -179,7 +180,7 @@ class DefaultEnvDict(UserDict):
         value = os.getenv(key)
         if value is None:
             raise KeyError(f"{key} not found in dict or environment variables")
-        return os.getenv(key)
+        return value
 
 
 def load_language_context(app):
@@ -188,3 +189,23 @@ def load_language_context(app):
         language_context = LanguageContextModel.query.filter_by(active=True).first()
 
     return language_context
+
+
+def deep_update(dict_to_update, update_values):
+    """
+    Deep update a dictionary
+    """
+    for key, value in update_values.items():
+        if isinstance(value, dict):
+            # get node or create one
+            node = dict_to_update.setdefault(key, {})
+            deep_update(node, value)
+        else:
+            dict_to_update[key] = value
+
+    return dict_to_update
+
+
+def get_ttl_hash(seconds):
+    """Return the same value within `seconds` time period"""
+    return time.time() // seconds
