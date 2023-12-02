@@ -43,6 +43,12 @@ faq_other_params = {
 def faq_data(client, db_engine):
     headers = {"Authorization": "Bearer %s" % os.getenv("INBOUND_CHECK_TOKEN")}
     with db_engine.connect() as db_connection:
+
+        # First, delete any stragglers in the DB from previous runs
+        t = text("DELETE FROM faqmatches WHERE faq_author='Pytest author'")
+        with db_connection.begin():
+            db_connection.execute(t)
+
         inbound_sql = text(insert_faq)
         for i, tags in enumerate(faq_tags):
             db_connection.execute(
@@ -212,6 +218,12 @@ class TestInboundFeedback:
     @pytest.fixture(scope="class")
     def inbounds(self, db_engine):
         with db_engine.connect() as db_connection:
+
+            # First, delete any stragglers in the DB from previous runs
+            t = text("DELETE FROM inbounds")
+            with db_connection.begin():
+                db_connection.execute(t)
+
             inbound_sql = text(self.insert_inbound)
             db_connection.execute(inbound_sql, **self.inbound_other_params)
 
@@ -336,6 +348,13 @@ class TestInboundFeedback:
 class TestInboundPagination:
     @pytest.fixture
     def inbound_response_json(self, client, db_engine, faq_data):
+
+        with db_engine.connect() as db_connection:
+            # First, delete any stragglers in the DB from previous runs
+            t = text("DELETE FROM inbounds")
+            with db_connection.begin():
+                db_connection.execute(t)
+
         request_data = {
             "text_to_match": "I love going hiking. What should I pack for lunch?",
             "return_scoring": "true",

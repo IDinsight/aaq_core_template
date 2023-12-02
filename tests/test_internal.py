@@ -34,6 +34,12 @@ def sample_faq_data():
 def load_faq_data(client, db_engine, sample_faq_data):
     headers = {"Authorization": "Bearer %s" % os.getenv("INBOUND_CHECK_TOKEN")}
     with db_engine.connect() as db_connection:
+
+        # First, delete any stragglers in the DB from previous runs
+        t = text("DELETE FROM faqmatches WHERE faq_author='Pytest refresh'")
+        with db_connection.begin():
+            db_connection.execute(t)
+
         inbound_sql = text(insert_faq)
         for i, sample_data in enumerate(sample_faq_data):
             db_connection.execute(
